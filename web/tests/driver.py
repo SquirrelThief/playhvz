@@ -114,6 +114,10 @@ class SimpleDriver:
   def Kill(self):
     os.system("kill %d" % self.process)
 
+  def ScrollToTop(self, path):
+    element = self.FindElement(path, check_visible=False)
+    self.selenium_driver.execute_script('arguments[0].scrollIntoView()', element);
+
 
 class RetryingDriver:
   def __init__(self, inner_driver):
@@ -152,6 +156,9 @@ class RetryingDriver:
 
   def Kill(self):
     self.inner_driver.Kill()
+
+  def ScrollToTop(self, path):
+    return self.Retry(lambda: self.inner_driver.ScrollToTop(path), wait_long=False)
 
   def Retry(self, callback, wait_long=False):
     sleep_durations = [.5, .5, .5, .5, 1, 1]
@@ -255,6 +262,9 @@ class RemoteDriver:
     for key in self.drivers_by_user:
       self.drivers_by_user[key].Kill()
 
+  def ScrollToTop(self, path, scoped=False):
+    self.drivers_by_user[self.current_user].ScrollToTop(path)
+
 
 class FakeDriver:
   def __init__(self, client_url, is_mobile, populate, user, page):
@@ -343,6 +353,12 @@ class FakeDriver:
 
   def Kill(self):
     self.inner_driver.Kill()
+
+  def ScrollToTop(self, path, scoped=True):
+    if scoped:
+      self.inner_driver.ScrollToTop([[By.ID, self.current_user + "App"]] + path)
+    else:
+      self.inner_driver.ScrollToTop(path)
 
 
 class WholeDriver:
@@ -439,3 +455,6 @@ class WholeDriver:
 
   def Kill(self):
     self.inner_driver.Kill()
+
+  def ScrollToTop(self, path, scoped=True):
+    return self.inner_driver.ScrollToTop(path, scoped)
