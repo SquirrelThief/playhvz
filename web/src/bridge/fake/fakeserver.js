@@ -234,7 +234,11 @@ class FakeServer {
     this.writer.insert(
         this.reader.getPlayerChatRoomMembershipPath(playerId, null),
         null,
-        new Model.PlayerChatRoomMembership(chatRoomId, {chatRoomId: chatRoomId, isVisible: true}));
+        new Model.PlayerChatRoomMembership(chatRoomId, {
+          chatRoomId: chatRoomId,
+          lastHiddenTime: null,
+          lastSeenTime: null,
+        }));
   }
 
   addPlayerToMission_(missionId, playerId) {
@@ -315,7 +319,12 @@ class FakeServer {
       let member = game.playersById[publicPlayerId];
       let chatRoomMembership = player.private.chatRoomMemberships.find(m => m.chatRoomId = chatRoomId);
       // Change the chat room to visible
-      this.updateChatRoomMembership({gameId: gameId, chatRoomId: chatRoomId, actingPlayerId: publicPlayerId, isVisible: true});
+      this.updateChatRoomMembership({
+        gameId: gameId,
+        chatRoomId: chatRoomId,
+        actingPlayerId: publicPlayerId,
+        lastHiddenTime: null,
+      });
     }
 
     if (group.playersById[player.id]) {
@@ -521,7 +530,7 @@ class FakeServer {
       }
     }
   }
-  queueNotification(args) {
+  addQueuedNotification(args) {
     let {queuedNotificationId} = args;
     args.sent = false;
     this.writer.insert(
@@ -648,8 +657,8 @@ class FakeServer {
     let player = this.reader.get(this.reader.getPublicPlayerPath(playerId));
     assert(player.allegiance == 'undeclared');
 
-    this.addLife(args);
     this.setPlayerAllegiance(playerId, "resistance", false);
+    this.addLife(args);
   }
   joinHorde(args) {
     let {playerId} = args;
@@ -732,11 +741,15 @@ class FakeServer {
   }
   infect(request) {
     let {infectionId, infectorPlayerId, victimLifeCode, victimPlayerId} = request;
-    let victimPlayer = this.findPlayerByIdOrLifeCode_(victimPlayerId, victimLifeCode);
-    victimPlayerId = victimPlayer.id;
 
     if (victimLifeCode)
       victimLifeCode = victimLifeCode.trim().replace(/\s+/g, "-").toLowerCase();
+
+    let victimPlayer = this.findPlayerByIdOrLifeCode_(victimPlayerId, victimLifeCode);
+    victimPlayerId = victimPlayer.id;
+
+    if (victimPlayer.allegiance == 'undeclared')
+      throw 'Cannot infect someone that is undeclared!';
 
     // Admin infection
     if (infectorPlayerId == null) {
@@ -765,11 +778,11 @@ class FakeServer {
       selfInfectedValidCode = true;
     }
 
-    if  (normalValidCode || selfInfectedValidCode) {
+    if (normalValidCode || selfInfectedValidCode) {
       // Give the infector points
       this.writer.set(
         infectorPlayerPath.concat(["points"]),
-        this.reader.get(infectorPlayerPath.concat(["points"])) + 100);
+        this.reader.get(infectorPlayerPath.concat(["points"])) + this.game.infectPoints);
       let victimPrivatePlayerPath = this.reader.getPrivatePlayerPath(victimPlayer.id);
 
       if (infectorPlayer.allegiance == 'resistance') { //Possessed human infection
@@ -778,7 +791,7 @@ class FakeServer {
         // Oddity: if the possessed human has some extra lives, they just become regular human. weird!
         // The victim can now infect
         this.writer.set(victimPrivatePlayerPath.concat(["canInfect"]), true);
-    } else { // Normal zombie infection
+      } else { // Normal zombie infection
         if (selfInfectedValidCode) {
           this.updateNullInfector_(victimPlayer.id, infectorPlayerId)
         } else {
@@ -787,7 +800,7 @@ class FakeServer {
         }
       }
     } else {
-     throw 'The player with this lifecode was already zombified.';
+     throw 'This lifecode was already zombified!';
     }
     return victimPlayer.id;
   }
@@ -837,6 +850,9 @@ class FakeServer {
     let time = this.getTime_(request);
     lifeCode = lifeCode || "codefor-" + player.name;
 
+    if (player.allegiance == 'undeclared')
+      throw 'Cannot add life to someone that is undeclared!';
+
     let latestTime = 0;
     assert(player.lives);
     assert(player.infections);
@@ -861,7 +877,8 @@ class FakeServer {
           code: lifeCode
         });
     this.writer.insert(this.reader.getPublicLifePath(playerId, null), null, publicLife);
-    if (player.lives.length > player.infections.length) {
+
+    if (player.lives.length > player.infections.length &&  player.allegiance != 'resistance') {
       this.setPlayerAllegiance(playerId, "resistance", false);
     }
   }

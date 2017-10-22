@@ -29,10 +29,6 @@ def main(argv):
 if __name__ == '__main__':
     main(sys.argv)
 
-def printAndRun(command):
-	print("Running %s" % command)
-	return subprocess.Popen(command, shell=True, stdout=PIPE)
-
 def generateTest(url, password, files, useRemote, useMobile):
 	args = "--url %s --password %s" % (url, password)
 
@@ -42,14 +38,16 @@ def generateTest(url, password, files, useRemote, useMobile):
 		args += " -m"
 
 	testFiles = [
-		"stuntimer", # out of alphabetical order b/c this is long, so we want to run it in parallel with others
+		"acks",
+		"ackrequests",
 		"adminchat",
 		"adminguns",
 		"adminplayers",
 		"changeallegiance",
 		"chat",
-		"chatownerleaves",
 		"chatlocation",
+		"chatnotifications",
+		"chatownerleaves",
 		"chatpage",
 		"creategame",
 		"deactivate",
@@ -63,12 +61,11 @@ def generateTest(url, password, files, useRemote, useMobile):
 		"notifications1",
 		"othersleavingresistance",
 		"possession",
-		"declareregularzombie",
-		"requests",
 		"rewardcategories",
 		"selfinfect",
+		"signout",
 		"startgame",
-		"signout"
+		"stuntimer",
 	]
 
 	if len(files) > 0:
@@ -109,14 +106,13 @@ def fakeAndRemoteTests(url, password, mobile, desktop, local, remote, files):
 def runAll(allTests, maxParallel=3):
 	finished = 0
 	processes = []
-	processIDs = {}
 	for test in allTests:
 		if len(processes) - finished >= maxParallel:
 			os.wait()
 			finished += 1
-		newProcess = printAndRun(test)
+		print("Running %s" % test)
+		newProcess = subprocess.Popen(test, shell=True, stdout=PIPE)
 		processes.append(newProcess)
-	#print([processes[i].communicate() for i in range(len(allTests))])
 	return [allTests[i] for i in range(len(allTests)) if not "done" in processes[i].communicate()[0]]
 
 

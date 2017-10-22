@@ -197,6 +197,7 @@ class FakeIdGenerator extends IdGenerator {
     faqHtml: 'String',
     summaryHtml: 'String',
     stunTimer: 'Number',
+    infectPoints: 'Number',
     isActive: 'Boolean',
     startTime: 'Timestamp',
     endTime: 'Timestamp',
@@ -211,6 +212,7 @@ class FakeIdGenerator extends IdGenerator {
     faqHtml: '|String',
     summaryHtml: '|String',
     stunTimer: '|Number',
+    infectPoints: '|Number',
     isActive: '|Boolean',
     startTime: '|Timestamp',
     endTime: '|Timestamp',
@@ -403,17 +405,12 @@ class FakeIdGenerator extends IdGenerator {
     name: '|String',
     withAdmins: '|Boolean',
   });
-  serverMethods.set('setLastSeenChatTime', {
-    gameId: 'GameId',
-    chatRoomId: 'ChatRoomId',
-    playerId: 'PublicPlayerId',
-    timestamp: 'Timestamp',
-  });
   serverMethods.set('updateChatRoomMembership', {
     gameId: 'GameId',
     chatRoomId: 'ChatRoomId',
     actingPlayerId: 'PublicPlayerId',
-    isVisible: '|Boolean',
+    lastHiddenTime: '|?Timestamp',
+    lastSeenTime: '|?Timestamp',
   });
 
   serverMethods.set('createMap', {

@@ -54,7 +54,7 @@ def enqueue_patch(firebase, data):
   patch_mutex.release()
   print "getting accessor_mutex:", str(accessor_mutex)
   accessor_mutex.acquire()
-  deferred.defer(compact_and_send, firebase=firebase, _queue="extra-requests")
+  deferred.defer(compact_and_send, firebase=firebase, _queue="send-firebase-requests")
   accessor_mutex.release()
 
 def compact_and_send(firebase):
@@ -124,6 +124,8 @@ class InMemoryStore:
           for chat_room_id, chat_room_membership in private_player['chatRoomMemberships'].iteritems():
             if 'lastSeenTime' in chat_room_membership:
               del chat_room_membership['lastSeenTime']
+            if 'lastHiddenTime' in chat_room_membership:
+              del chat_room_membership['lastHiddenTime']
     return contents
 
   def databaseContentsEqual(self, contentsA, contentsB):

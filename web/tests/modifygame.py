@@ -38,7 +38,7 @@ driver.ExpectContains(
     '60') # current stun timer
 
 # Go to the Rules page, change the rules
-driver.DrawerMenuClick('mobile-main-page', 'Rules')
+driver.DrawerMenuClick('Rules')
 driver.Click([[By.NAME, 'rules-card'], [By.NAME, 'rules-icon']]) # Flaked once on remote, another icon would have received click -verdagon
 driver.SendKeys(
     [[By.NAME, 'rules-card'], [By.TAG_NAME, 'textarea']], 'rules are cools')
@@ -69,12 +69,13 @@ driver.Click([[By.NAME, 'rules-card'], [By.NAME, 'collapsible-Details']])
 driver.FindElement([[By.NAME, 'rules-card'], [By.NAME, 'collapsible-text-Details']], should_exist=False)
 
 # Open game details
-driver.DrawerMenuClick('rules-card', 'Admin Game Details')
+driver.DrawerMenuClick('Admin Game Details')
 driver.Click([[By.NAME, 'game-icon'], [By.ID, 'icon']])
 
 driver.Clear([[By.ID, 'form-section-game-name'], [By.ID, 'input']])
 driver.SendKeys([[By.ID, 'form-section-game-name'], [By.ID, 'input']], 'Welcome to the Zombies-Have-Hunger Games')
 driver.SendKeys([[By.ID, 'form-section-game-stunTimer'], [By.TAG_NAME, 'input']], 42)
+driver.SendKeys([[By.ID, 'form-section-game-infectPoints'], [By.TAG_NAME, 'input']], 404)
 
 # Set game start time to sometime in the past
 driver.Clear([[By.ID, 'form-section-start-time'],[By.ID, 'year'],[By.TAG_NAME, 'input']])
@@ -119,10 +120,22 @@ driver.SendKeys([[By.ID, 'form-section-declare-horde-end-time'],[By.ID, 'time'],
 driver.Click([[By.TAG_NAME, 'ghvz-game-details'], [By.ID, 'gameForm'],[By.ID, 'done']])
 driver.ExpectContains([[By.NAME, 'game-name']], 'Welcome to the Zombies-Have-Hunger Games')
 driver.ExpectContains([[By.NAME, 'game-stunTimer']], "42")
+driver.ExpectContains([[By.NAME, 'game-infectPoints']], "404")
 driver.ExpectContains([[By.NAME, 'game-startTime']], "Jan 1 1:00am")
 driver.ExpectContains([[By.NAME, 'game-endTime']], "Dec 31 12:00am")
 driver.ExpectContains([[By.NAME, 'game-declareResistanceEndTime']], "Feb 29 4:15am")
 driver.ExpectContains([[By.NAME, 'game-declareHordeEndTime']], "Oct 12 12:34pm")
+
+# Check that zombies get the new number of points
+driver.SwitchUser('zeke')
+driver.DrawerMenuClick('Infect')
+driver.SendKeys([[By.NAME, 'infect-card'], [By.TAG_NAME, 'input']], 'grobble-forgbobbly') # Jack's code
+driver.Click([ [By.NAME, 'infect-card'], [By.ID, 'infect']])
+driver.ExpectContains(
+    [[By.NAME, 'infect-card'], [By.NAME, 'victimName']],
+    'JackSlayerTheBeanSlasher')
+driver.DrawerMenuClick('Leaderboard')
+
 
 # Have Deckerd try to declare and fail
 driver.SwitchUser('deckerd')
@@ -174,7 +187,7 @@ driver.ExpectContains([[By.NAME, 'game-registrationEndTime']], "Jan 1 8:00am")
 
 
 # Go to the FAQ page
-driver.DrawerMenuClick('game-details-card', 'FAQ')
+driver.DrawerMenuClick('FAQ')
 
 driver.Click([[By.NAME, 'faq-card'], [By.NAME, 'rules-icon']])
 driver.SendKeys(
@@ -189,7 +202,7 @@ driver.ExpectContains(
     'Here is how you find a possessed human.')
 
 # Go to the Admin Game Summary page
-driver.DrawerMenuClick('faq-card', 'Admin Game Summary')
+driver.DrawerMenuClick('Admin Game Summary')
 driver.Click([[By.NAME, 'summary-card'], [By.NAME, 'rules-icon']])
 driver.Clear([[By.NAME, 'summary-card'], [By.ID, 'summaryHtmlInput'], [By.TAG_NAME, 'textarea']])
 driver.SendKeys(

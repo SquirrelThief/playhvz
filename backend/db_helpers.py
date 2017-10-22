@@ -213,7 +213,7 @@ def RewardCodeToRewardCategoryId(game_state, game_id, reward_code, expect=True):
       if reward_category['shortName'] == reward_category_short_name:
         return reward_category_id
   if expect:
-    raise InvalidInputError('No reward category for shortName %s' % reward_category_short_name)
+    raise InvalidInputError('No reward with that code exists! %s' % reward_code)
   return None
 
 
@@ -231,7 +231,7 @@ def RewardCodeToRewardId(game_state, game_id, reward_code, expect=True):
       if reward['code'] == reward_code:
         return reward_id
   if expect:
-    raise InvalidInputError('No reward for code %s' % reward_code)
+    raise InvalidInputError('No reward with that code exists! %s' % reward_code)
   return None
 
 def GetNextPlayerNumber(game_state, game_id):
@@ -244,29 +244,6 @@ def GetNextPlayerNumber(game_state, game_id):
 
 def GetPrivatePlayerId(game_state, public_player_id):
   return game_state.get('/publicPlayers/%s' % public_player_id, 'privatePlayerId')
-
-def LifeCodeToPlayerId(game_state, game_id, life_code, expect=True):
-  public_players = GetValueWithPropertyEqualTo(
-      game_state,
-      'publicPlayers',
-      'gameId',
-      game_id)
-  if public_players is not None:
-    print 'lizard'
-    for public_player_id, public_player in public_players.iteritems():
-      print 'ostrich'
-      if 'lives' in public_player:
-        print 'lemur'
-        for public_life_id in public_player['lives'].keys():
-          print 'bizork' + public_life_id
-          public_life = game_state.get('/publicLives', public_life_id)
-          private_life = game_state.get('/privateLives', public_life['privateLifeId'])
-          if private_life['code'] == life_code:
-            print 'shrorp'
-            return public_player_id
-  if expect:
-    raise InvalidInputError('No player for life code %s' % life_code)
-  return None
 
 
 def GetIdSuffix(id):

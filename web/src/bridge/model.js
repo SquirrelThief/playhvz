@@ -31,6 +31,7 @@ var models = {
     summaryHtml: '',
     groups: [],
     guns: [],
+    infectPoints: 0,
     isActive: false,
     maps: [],
     missions: [],
@@ -200,7 +201,10 @@ var models = {
     publicPlayerId: '',
     privatePlayerId: '',
     gameId: '',
-    isVisible: false
+    a: [],
+    isVisible: false, // Leaving this in because it's in some of the prod data already
+    lastHiddenTime: 0,
+    lastSeenTime: 0,
   },
   playerMissionMembership: {
     link: ['privatePlayers', 'privatePlayerId', 'missionMemberships', 'missionId'],

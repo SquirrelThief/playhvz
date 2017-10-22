@@ -77,7 +77,7 @@
         for (let player of this.game.players) {
           if (player.allegiance == 'undeclared')
             continue;
-          for (let life of player.lives) {
+          for (let life of player.lives.slice().sort((a, b) => a.time - b.time)) {
             compareTimeToMinAndMax(life.time);
           }
           for (let infection of player.infections) {
@@ -160,11 +160,13 @@
         };
 
         DataForEachBin.prototype.arrayToDataTable = function() {
+          var days = ['Sun','Mon','Tues','Wed','Thurs','Fri','Sat'];
           var niceArray = [];
           for (var i = 0; i < this.typesForEachBin_.length; i++) {
-            niceArray.push(
-              [(new Date(
-                  this.typesForEachBin_[i][DataForEachBin.INDEX.TIME])).toString(),
+            // Format the date to just show the day
+            var date = new Date(this.typesForEachBin_[i][DataForEachBin.INDEX.TIME]);
+            niceArray.push([
+                days[date.getDay()],
                 this.typesForEachBin_[i][DataForEachBin.INDEX.HUMAN],
                 this.typesForEachBin_[i][DataForEachBin.INDEX.ZOMBIE]
               ]);
@@ -213,8 +215,8 @@
         for (let player of this.game.players) {
           if (player.allegiance == 'undeclared')
             continue;
-          var lives = player.lives;
-          var infections = player.infections;
+          var lives = player.lives.slice().sort((a, b) => a.time - b.time);
+          var infections = player.infections.slice().sort((a, b) => a.time - b.time);
           logger("\nPlayer: " + player.id);
 
           // Look for tricky error cases that I need more info to interpret
