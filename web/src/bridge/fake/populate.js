@@ -25,50 +25,26 @@ function populateUsers(bridge, config) {
   let zekeUserId = 'user-' + config.fakeUserIds.zeke;
   let jackUserId = 'user-' + config.fakeUserIds.jack;
 
-  bridge.register({userId: zellaUserId});
-  bridge.register({userId: reggieUserId});
-  bridge.register({userId: minnyUserId});
-  bridge.register({userId: drakeUserId});
-  bridge.register({userId: zekeUserId});
-  bridge.register({userId: moldaviUserId});
-  bridge.register({userId: jackUserId});
-  bridge.register({userId: deckerdUserId});
+  bridge.register({ userId: zellaUserId });
+  bridge.register({ userId: reggieUserId });
+  bridge.register({ userId: minnyUserId });
+  bridge.register({ userId: drakeUserId });
+  bridge.register({ userId: zekeUserId });
+  bridge.register({ userId: moldaviUserId });
+  bridge.register({ userId: jackUserId });
+  bridge.register({ userId: deckerdUserId });
 }
 
 function makePlayerProperties(id, userId, gameId, time, name) {
   return {
     playerId: id,
-    privatePlayerId: null,
-    isActive: true,
+    allegiance: "undeclared",
+    avatarUrl: PlayerUtils.getDefaultProfilePic(name),
     userId: userId,
     gameId: gameId,
     name: name,
-    canInfect: false,
-    needGun: false,
-    beInPhotos: true,
-    profileImageUrl: PlayerUtils.getDefaultProfilePic(name),
-    wantToBeSecretZombie: false,
-    volunteer: {
-      advertising: false,
-      logistics: false,
-      communications: true,
-      moderator: false,
-      cleric: false,
-      sorcerer: false,
-      admin: false,
-      photographer: false,
-      chronicler: true,
-      android: true,
-      ios: false,
-      server: false,
-      client: false,
-    },
-    notificationSettings: {
-      sound: false,
-      vibrate: true,
-    },
-    notes: '',
-    gotEquipment: false,
+    points: 0,
+    userId: userId
   };
 }
 
@@ -87,7 +63,7 @@ function populatePlayers(bridge, gameId, gameStartOffset, numPlayers, numStartin
   let playerIds = [];
   for (let i = 0; i < numPlayers; i++) {
     let userId = bridge.idGenerator.newUserId();
-    bridge.register({userId: userId});
+    bridge.register({ userId: userId });
     let playerId = bridge.idGenerator.newPublicPlayerId();
     bridge.createPlayer(makePlayerProperties(playerId, userId, gameId, gameStartOffset, 'Player' + i));
     playerIds.push(playerId);
@@ -181,19 +157,10 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
 
   bridge.createGame({
     gameId: gameId,
-    adminUserId: zellaUserId,
+    creatorUserId: zellaUserId,
     name: "Test game",
-    rulesHtml: RULES_HTML,
-    faqHtml: FAQ_HTML,
-    summaryHtml: SUMMARY_HTML,
-    stunTimer: 60,
-    infectPoints: 100,
-    isActive: true,
-    registrationEndTime: 1483286400000,
     startTime: 1483344000000,
     endTime: 1483689600000,
-    declareHordeEndTime: 1583286400000,
-    declareResistanceEndTime: 1583286400000,
   });
   bridge.addDefaultProfileImage({
     gameId: gameId,
@@ -321,7 +288,8 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
     gameId: gameId,
     userId: moldaviUserId
   });
-  bridge.createPlayer(makePlayerProperties(moldaviPlayerId, moldaviUserId, gameId, 1483257600000, 'MoldaviTheMoldavish'));
+  var moldaviPlayerProperties = makePlayerProperties(moldaviPlayerId, moldaviUserId, gameId, 1483257600000, 'MoldaviTheMoldavish');
+  bridge.createPlayer(moldaviPlayerProperties);
   bridge.setAdminContact({
     gameId: gameId,
     playerId: moldaviPlayerId
@@ -329,8 +297,8 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   bridge.updatePlayer({
     gameId: gameId,
     playerId: moldaviPlayerId,
-    gotEquipment: true,
-    notes: 'captain of stradivarius',
+    allegiance: moldaviPlayerProperties.allegiance,
+    avatarUrl: moldaviPlayerProperties.avatarUrl
   });
   bridge.joinResistance({
     gameId: gameId,
@@ -342,7 +310,6 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
 
   var jackPlayerId = bridge.idGenerator.newPublicPlayerId();
   let jackProperties = makePlayerProperties(jackPlayerId, jackUserId, gameId, 1483257600000, 'JackSlayerTheBeanSlasher');
-  jackProperties.wantToBeSecretZombie = true;
   bridge.createPlayer(jackProperties);
   bridge.joinResistance({
     gameId: gameId,
@@ -369,14 +336,14 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
     privateLifeId: null,
   });
 
-  bridge.sendChatMessage({gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: moldaviPlayerId, message: 'yee!'});
-  bridge.sendChatMessage({gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: moldaviPlayerId, message: 'man what i would do for some garlic rolls!'});
-  bridge.sendChatMessage({gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: moldaviPlayerId, message: 'https://www.youtube.com/watch?v=GrHPTWTSFgc'});
-  bridge.sendChatMessage({gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: jackPlayerId, message: 'yee!'});
+  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: moldaviPlayerId, message: 'yee!' });
+  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: moldaviPlayerId, message: 'man what i would do for some garlic rolls!' });
+  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: moldaviPlayerId, message: 'https://www.youtube.com/watch?v=GrHPTWTSFgc' });
+  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: jackPlayerId, message: 'yee!' });
 
-  bridge.sendChatMessage({gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: jackPlayerId, message: 'yee!'});
-  bridge.sendChatMessage({gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: moldaviPlayerId, message: 'yee!'});
-  bridge.sendChatMessage({gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: jackPlayerId, message: 'yee!'});
+  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: jackPlayerId, message: 'yee!' });
+  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: moldaviPlayerId, message: 'yee!' });
+  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: jackPlayerId, message: 'yee!' });
 
   bridge.infect({
     infectionId: bridge.idGenerator.newInfectionId(),
@@ -386,9 +353,9 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
     gameId: gameId,
   });
 
-  bridge.sendChatMessage({gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: zekePlayerId, message: 'zeds rule!'});
-  bridge.sendChatMessage({gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: drakePlayerId, message: 'hoomans drool!'});
-  bridge.sendChatMessage({gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: drakePlayerId, message: 'monkeys eat stool!'});
+  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: zekePlayerId, message: 'zeds rule!' });
+  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: drakePlayerId, message: 'hoomans drool!' });
+  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: drakePlayerId, message: 'monkeys eat stool!' });
 
   var zedSecondChatRoomGroupId = bridge.idGenerator.newGroupId();
   var zedSecondChatRoomId = bridge.idGenerator.newChatRoomId();
@@ -480,37 +447,37 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   bridge.updatePlayer({
     gameId: gameId,
     playerId: zellaPlayerId,
-    profileImageUrl: 'https://lh3.googleusercontent.com/GoKTAX0zAEt6PlzUkTn7tMeK-q1hwKDpzWsMJHBntuyR7ZKVtFXjRkbFOEMqrqxPWJ-7dbCXD7NbVgHd7VmkYD8bDzsjd23XYk0KyALC3BElIk65vKajjjRD_X2_VkLPOVejrZLpPpa2ebQVUHJF5UXVlkst0m6RRqs2SumRzC7EMmEeq9x_TurwKUJmj7PhNBPCeoDEh51jAIc-ZqvRfDegLgq-HtoyJAo91lbD6jqA2-TFufJfiPd4nOWnKhZkQmarxA8LQT0kOu7r3M5F-GH3pCbQqpH1zraha8CqvKxMGLW1i4CbDs1beXatKTdjYhb1D_MVnJ6h7O4WX3GULwNTRSIFVOrogNWm4jWLMKfKt3NfXYUsCOMhlpAI3Q8o1Qgbotfud4_HcRvvs6C6i17X-oQm8282rFu6aQiLXOv55FfiMnjnkbTokOA1OGDQrkBPbSVumz9ZE3Hr-J7w_G8itxqThsSzwtK6p5YR_9lnepWe0HRNKfUZ2x-a2ndT9m6aRXC_ymWHQGfdGPvTfHOPxUpY8mtX2vknmj_dn4dIuir1PpcN0DJVVuyuww3sOn-1YRFh80gBFvwFuMnKwz8GY8IX5gZmbrrBsy_FmwFDIvBcwNjZKd9fH2gkK5rk1AlWv12LsPBsrRIEaLvcSq7Iim9XSsiivzcNrLFG=w294-h488-no'
+    avatarUrl: 'https://lh3.googleusercontent.com/GoKTAX0zAEt6PlzUkTn7tMeK-q1hwKDpzWsMJHBntuyR7ZKVtFXjRkbFOEMqrqxPWJ-7dbCXD7NbVgHd7VmkYD8bDzsjd23XYk0KyALC3BElIk65vKajjjRD_X2_VkLPOVejrZLpPpa2ebQVUHJF5UXVlkst0m6RRqs2SumRzC7EMmEeq9x_TurwKUJmj7PhNBPCeoDEh51jAIc-ZqvRfDegLgq-HtoyJAo91lbD6jqA2-TFufJfiPd4nOWnKhZkQmarxA8LQT0kOu7r3M5F-GH3pCbQqpH1zraha8CqvKxMGLW1i4CbDs1beXatKTdjYhb1D_MVnJ6h7O4WX3GULwNTRSIFVOrogNWm4jWLMKfKt3NfXYUsCOMhlpAI3Q8o1Qgbotfud4_HcRvvs6C6i17X-oQm8282rFu6aQiLXOv55FfiMnjnkbTokOA1OGDQrkBPbSVumz9ZE3Hr-J7w_G8itxqThsSzwtK6p5YR_9lnepWe0HRNKfUZ2x-a2ndT9m6aRXC_ymWHQGfdGPvTfHOPxUpY8mtX2vknmj_dn4dIuir1PpcN0DJVVuyuww3sOn-1YRFh80gBFvwFuMnKwz8GY8IX5gZmbrrBsy_FmwFDIvBcwNjZKd9fH2gkK5rk1AlWv12LsPBsrRIEaLvcSq7Iim9XSsiivzcNrLFG=w294-h488-no'
   });
   bridge.updatePlayer({
     gameId: gameId,
     playerId: drakePlayerId,
-    profileImageUrl: 'https://lh3.googleusercontent.com/WP1fewVG0CvERcnQnmxjf84IjnEBoDQBgdaxbNAECRa433neObfAjv_xI35DN67WhcCL9y-mgXmfYrZEBeJ2PYrtIeCK3KSdJ4HiEDUqxaaGsJAtu5C5ZjcABUHoySueEwO0yJWfhWPVbGoAFdP-ZquoXSF3yz4gnlN76W-ltDBglclLxKs-hR9dTjf_DiX9yGmmb5y8mp1Jb8BEw9Q-zx_j9EFkgTI0EA6T10pogxsfAWkrwXO7t37D0vI2OxzHJA51EQ4LZw1oZsIN7Uyqnh06LAJ_ykYhW2xuSCpu7QY7UPm9IbDcsDqj1eap7xvV9JW_EW2Y8Km5nS0ZoAd-Eo3zUe-2YFTc0OAVDwgbhowzo1gUeqfCEtxVHuT36Aq2LWayB6DzOL9TqubcF7qmjtNy_UIr-RY1d69xN-KqjFBoWLtS6rDhQurrfJNd5x-MYOEjCMrbsGmSXE8L7PskM3e_3-ZhIqfMn2I-4zeEZIUG8U2iHRWK-blaqsSY8uhmzNG6sqF-liyINagQF4l35oy7tpobueWs7aDjRrcJrGiQDrGHYV1E67J64Ae9FqXPHmORRpYcihQc6pI0JAmaiWwMJoqD0QMJF9koaDYANPEGbWlnWc_lFzhCO_L8yCkVtJIIItQv-loypR6XqILK32eoGeatnp5Q0x0OEm3W=s240-no'
+    avatarUrl: 'https://lh3.googleusercontent.com/WP1fewVG0CvERcnQnmxjf84IjnEBoDQBgdaxbNAECRa433neObfAjv_xI35DN67WhcCL9y-mgXmfYrZEBeJ2PYrtIeCK3KSdJ4HiEDUqxaaGsJAtu5C5ZjcABUHoySueEwO0yJWfhWPVbGoAFdP-ZquoXSF3yz4gnlN76W-ltDBglclLxKs-hR9dTjf_DiX9yGmmb5y8mp1Jb8BEw9Q-zx_j9EFkgTI0EA6T10pogxsfAWkrwXO7t37D0vI2OxzHJA51EQ4LZw1oZsIN7Uyqnh06LAJ_ykYhW2xuSCpu7QY7UPm9IbDcsDqj1eap7xvV9JW_EW2Y8Km5nS0ZoAd-Eo3zUe-2YFTc0OAVDwgbhowzo1gUeqfCEtxVHuT36Aq2LWayB6DzOL9TqubcF7qmjtNy_UIr-RY1d69xN-KqjFBoWLtS6rDhQurrfJNd5x-MYOEjCMrbsGmSXE8L7PskM3e_3-ZhIqfMn2I-4zeEZIUG8U2iHRWK-blaqsSY8uhmzNG6sqF-liyINagQF4l35oy7tpobueWs7aDjRrcJrGiQDrGHYV1E67J64Ae9FqXPHmORRpYcihQc6pI0JAmaiWwMJoqD0QMJF9koaDYANPEGbWlnWc_lFzhCO_L8yCkVtJIIItQv-loypR6XqILK32eoGeatnp5Q0x0OEm3W=s240-no'
   });
   bridge.updatePlayer({
     gameId: gameId,
     playerId: zekePlayerId,
-    profileImageUrl: 'https://s-media-cache-ak0.pinimg.com/736x/31/92/2e/31922e8b045a7ada368f774ce34e20c0.jpg'
+    avatarUrl: 'https://s-media-cache-ak0.pinimg.com/736x/31/92/2e/31922e8b045a7ada368f774ce34e20c0.jpg'
   });
   bridge.updatePlayer({
     gameId: gameId,
     playerId: moldaviPlayerId,
-    profileImageUrl: 'https://katiekhau.files.wordpress.com/2012/05/scan-9.jpeg'
+    avatarUrl: 'https://katiekhau.files.wordpress.com/2012/05/scan-9.jpeg'
   });
   bridge.updatePlayer({
     gameId: gameId,
     playerId: jackPlayerId,
-    profileImageUrl: 'https://sdl-stickershop.line.naver.jp/products/0/0/1/1009925/android/main.png'
+    avatarUrl: 'https://sdl-stickershop.line.naver.jp/products/0/0/1/1009925/android/main.png'
   });
 
   var resistanceMapId = bridge.idGenerator.newMapId();
-  bridge.createMap({gameId: gameId, requestTrackingUntil: new Date().getTime() + gameStartOffset, mapId: resistanceMapId, accessGroupId: resistanceGroupId, name: "Resistance Players"});
-  bridge.addMarker({gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "First Tower", color: "FF00FF", playerId: null, mapId: resistanceMapId, latitude: 37.423734, longitude: -122.092054});
-  bridge.addMarker({gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Second Tower", color: "00FFFF", playerId: null, mapId: resistanceMapId, latitude: 37.422356, longitude: -122.088078});
-  bridge.addMarker({gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Third Tower", color: "FFFF00", playerId: null, mapId: resistanceMapId, latitude: 37.422757, longitude: -122.081984});
-  bridge.addMarker({gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Fourth Tower", color: "FF8000", playerId: null, mapId: resistanceMapId, latitude: 37.420382, longitude: -122.083884});
+  bridge.createMap({ gameId: gameId, requestTrackingUntil: new Date().getTime() + gameStartOffset, mapId: resistanceMapId, accessGroupId: resistanceGroupId, name: "Resistance Players" });
+  bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "First Tower", color: "FF00FF", playerId: null, mapId: resistanceMapId, latitude: 37.423734, longitude: -122.092054 });
+  bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Second Tower", color: "00FFFF", playerId: null, mapId: resistanceMapId, latitude: 37.422356, longitude: -122.088078 });
+  bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Third Tower", color: "FFFF00", playerId: null, mapId: resistanceMapId, latitude: 37.422757, longitude: -122.081984 });
+  bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Fourth Tower", color: "FF8000", playerId: null, mapId: resistanceMapId, latitude: 37.420382, longitude: -122.083884 });
 
-  bridge.sendChatMessage({gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: drakePlayerId, message: 'hi'});
+  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: drakePlayerId, message: 'hi' });
 
   if (populateLotsOfPlayers) {
     populatePlayersHeavy(bridge, gameId, gameStartOffset);
@@ -692,9 +659,9 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
     playerId: drakePlayerId,
     rewardCode: "knowgeno-flarklebark",
   });
-  for (let i = 0; i < 80; i++) {
-    bridge.addGun({gameId: gameId, gunId: bridge.idGenerator.newGunId(), label: "" + (1404 + i)});
-  }
+  /*for (let i = 0; i < 80; i++) {
+    bridge.addGun({ gameId: gameId, gunId: bridge.idGenerator.newGunId(), label: "" + (1404 + i) });
+  }*/
 
   bridge.queueNotification({
     gameId: gameId,
@@ -854,30 +821,35 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
 
 function populateQuiz(bridge, gameId) {
   let stunQuestionId = bridge.idGenerator.newQuizQuestionId();
-  bridge.addQuizQuestion({quizQuestionId: stunQuestionId, gameId: gameId,
+  bridge.addQuizQuestion({
+    quizQuestionId: stunQuestionId, gameId: gameId,
     text: "When you're a zombie, and a human shoots you with a nerf dart, what do you do?",
     type: 'order',
     number: 0,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: stunQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: stunQuestionId, gameId: gameId,
     text: "Crouch/sit down,",
     order: 0,
     isCorrect: true,
     number: 0,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: stunQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: stunQuestionId, gameId: gameId,
     text: "For 50 seconds, don't move from your spot (unless safety requires it),",
     order: 1,
     isCorrect: true,
     number: 1,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: stunQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: stunQuestionId, gameId: gameId,
     text: "Count aloud \"10, 9, 8, 7, 6, 5, 4, 3, 2, 1\",",
     order: 2,
     isCorrect: true,
     number: 2,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: stunQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: stunQuestionId, gameId: gameId,
     text: "Stand up, return to mauling humans,",
     order: 3,
     isCorrect: true,
@@ -885,36 +857,42 @@ function populateQuiz(bridge, gameId) {
   });
 
   let infectQuestionId = bridge.idGenerator.newQuizQuestionId();
-  bridge.addQuizQuestion({quizQuestionId: infectQuestionId, gameId: gameId,
+  bridge.addQuizQuestion({
+    quizQuestionId: infectQuestionId, gameId: gameId,
     text: "When you're a zombie, and you touch a human, what do you do?",
     type: 'order',
     number: 1,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: infectQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: infectQuestionId, gameId: gameId,
     text: "Crouch/sit down,",
     order: 0,
     isCorrect: true,
     number: 0,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: infectQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: infectQuestionId, gameId: gameId,
     text: "Ask the human for their life code,",
     order: 1,
     isCorrect: true,
     number: 1,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: infectQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: infectQuestionId, gameId: gameId,
     text: "For 50 seconds, don't move from your spot (unless safety requires it),",
     order: 2,
     isCorrect: true,
     number: 2,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: infectQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: infectQuestionId, gameId: gameId,
     text: "Count aloud \"10, 9, 8, 7, 6, 5, 4, 3, 2, 1\",",
     order: 3,
     isCorrect: true,
     number: 3,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: infectQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: infectQuestionId, gameId: gameId,
     text: "Stand up, return to mauling humans,",
     order: 4,
     isCorrect: true,
@@ -922,66 +900,77 @@ function populateQuiz(bridge, gameId) {
   });
 
   let crossQuestionId = bridge.idGenerator.newQuizQuestionId();
-  bridge.addQuizQuestion({quizQuestionId: crossQuestionId, gameId: gameId,
+  bridge.addQuizQuestion({
+    quizQuestionId: crossQuestionId, gameId: gameId,
     text: "When you want to cross the street, what do you do?",
     type: 'order',
     number: 2,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
     text: "Get within 15 feet of a crosswalk button (now you're out of play),",
     order: 0,
     isCorrect: true,
     number: 0,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
     text: "Press the crosswalk button,",
     order: 1,
     isCorrect: true,
     number: 1,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
     text: "When the walk signal appears, walk (not run) across the crosswalk,",
     order: 2,
     isCorrect: true,
     number: 2,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
     text: "Wait until there are no more players in the crosswalk,",
     order: 3,
     isCorrect: true,
     number: 3,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
     text: "Have a human count \"3 resistance, 2 resistance, 1 resistance, go!\" and the humans are in play,",
     order: 4,
     isCorrect: true,
     number: 4,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
     text: "When the humans go, have a zombie count \"3 zombie horde, 2 zombie horde, 1 zombie horde, go!\" and the zombies are in play,",
     order: 5,
     isCorrect: true,
     number: 5,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
     text: "Once you're across, count \"3 resistance, 2 resistance, 1 resistance!\" and go,",
     order: 0,
     isCorrect: false,
     number: 6,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
     text: "Count to 15, then take off your armband,",
     order: 0,
     isCorrect: false,
     number: 7,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
     text: "Raise your nerf gun in the air so you're visible,",
     order: 0,
     isCorrect: false,
     number: 8,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: crossQuestionId, gameId: gameId,
     text: "Start walking across the street, looking both ways for cars,",
     order: 0,
     isCorrect: false,
@@ -989,24 +978,28 @@ function populateQuiz(bridge, gameId) {
   });
 
   let lyingDownQuestionId = bridge.idGenerator.newQuizQuestionId();
-  bridge.addQuizQuestion({quizQuestionId: lyingDownQuestionId, gameId: gameId,
+  bridge.addQuizQuestion({
+    quizQuestionId: lyingDownQuestionId, gameId: gameId,
     text: "You see somebody lying down, not moving. What should you do?",
     type: 'multipleChoice',
     number: 3,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: lyingDownQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: lyingDownQuestionId, gameId: gameId,
     text: "Keep playing",
     order: 0,
     isCorrect: false,
     number: 0,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: lyingDownQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: lyingDownQuestionId, gameId: gameId,
     text: "Let an admin know",
     order: 0,
     isCorrect: false,
     number: 1,
   });
-  bridge.addQuizAnswer({quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: lyingDownQuestionId, gameId: gameId,
+  bridge.addQuizAnswer({
+    quizAnswerId: bridge.idGenerator.newQuizAnswerId(), quizQuestionId: lyingDownQuestionId, gameId: gameId,
     text: "Check that they’re ok, and call 911/GSOC if they’re unresponsive.",
     order: 0,
     isCorrect: true,

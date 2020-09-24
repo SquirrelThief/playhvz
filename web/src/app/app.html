@@ -93,12 +93,17 @@
         },
 
         onBridgeSet_() {
-          this.bridge.getSignedInPromise({ userId: this.userId })
+          this.bridge.getSignedInPromise()
             .then(({ userId, email }) => {
               this.showSignInButton = false;
-              this.showGameIdHint = true;
+              // TODO: remove game id hint
+              this.showGameIdHint = false;
               this.userId = userId;
               this.email = email;
+              // If there is no path set, default the user to the game list view.
+              if (this.path.length == 0) {
+                this.setPath_(this.path.slice().concat(['gameList']), true);
+              }
             });
         },
 
@@ -145,21 +150,15 @@
           // If we have no game ID, but there's one in the path, load it.
           if (this.userId && !this.gameId && this.path.length >= 2 && this.path[0] == 'game') {
             let trimmedGameId = this.path[1];
-            this.gameId = 'game-' + trimmedGameId;
-
-            let temporaryGameObjectWriter = new SimpleWriter(null);
-            let teeWriter = new TeeWriter(temporaryGameObjectWriter);
-            let [foundGamePromise, doneLoadingGamePromise] =
-              this.bridge.listenToGame(this.userId, this.gameId, teeWriter);
-            foundGamePromise.then(() => {
-              this.showGameIdHint = false;
-              this.showLoadingSpinner = true;
-            });
-            doneLoadingGamePromise.then(() => {
+            this.gameId = trimmedGameId;
+            this.showLoadingSpinner = true;
+            this.bridge.getGame(this.gameId).then(docSnapshot => {
               this.showLoadingSpinner = false;
-              teeWriter.removeDestination(temporaryGameObjectWriter);
-              this.set('game', temporaryGameObjectWriter.destination);
-              teeWriter.addDestination(new BatchedPolymerWriter(this, 'game'));
+              if (!docSnapshot.exists) {
+                // If the game doesn't exist then navigate to the user's game list.
+                this.setPath_(["gameList"], /* replace= */ true);
+              }
+              this.set('game', DataConverterUtils.convertSnapshotToGame(docSnapshot));
             });
           }
         },

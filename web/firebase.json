@@ -2,19 +2,42 @@
   "hosting": {
     "public": ".",
     "rewrites": [
-      { "source": "/game", "destination": "/index.html" },
-      { "source": "/game/**", "destination": "/index.html" },
-      { "source": "/createGame**", "destination": "/index.html" },
-      { "source": "/createPopulatedGame**", "destination": "/index.html" },
-      { "source": "/devTools**", "destination": "/index.html" }
+      {
+        "source": "/game",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/game/**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/createGame**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/createPopulatedGame**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/devTools**",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/gameList**",
+        "destination": "/index.html"
+      }
     ],
-    "headers": [{
-      "source" : "**",
-      "headers" : [{
-        "key" : "Cache-Control",
-        "value" : "max-age=3600"
-      }]
-    }]
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=3600"
+          }
+        ]
+      }
+    ]
   },
   "database": {
     "rules": "database.rules.json"

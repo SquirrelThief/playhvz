@@ -14,114 +14,109 @@
   limitations under the License.
 -->
 <dom-module id="ghvz-real-app">
-<script>
-  // Not sure why this HTMLImports.whenReady is really needed.
-  // Something about polymer initialization order.
-  // I think we're not supposed to need this.
-  HTMLImports.whenReady(() => {
-    Polymer({
-      is: 'ghvz-real-app',
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-real-app',
 
-      properties: {
-        config: Object,
-        
-        bridge: {
-          type: Object,
-          value: undefined,
+        properties: {
+          config: Object,
+
+          bridge: {
+            type: Object,
+            value: undefined,
+          },
+
+          // Exists to supply a null to app
+          userId: {
+            type: String,
+            value: null,
+          },
+
+          url: String,
+
+          config: {
+            type: Object,
+            value: undefined,
+          },
         },
 
-        // Exists to supply a null to app
-        userId: {
-          type: String,
-          value: null,
+        listeners: {
+          'ghvz-replace-url': 'replaceUrl_',
+          'ghvz-push-url': 'pushUrl_',
         },
 
-        url: String,
+        observers: [
+          'onConfigReceived_(config)',
+        ],
 
-        config: {
-          type: Object,
-          value: undefined,
+        pushUrl_(e) {
+          this.setUrl_(false);
         },
-      },
 
-      listeners: {
-        'ghvz-replace-url': 'replaceUrl_',
-        'ghvz-push-url': 'pushUrl_',
-      },
+        replaceUrl_(e) {
+          this.setUrl_(true);
+        },
 
-      observers: [
-        'onConfigReceived_(config)',
-      ],
+        setUrl_(replace) {
+          let queryParams = Utils.getUrlQueryParameters();
 
-      pushUrl_(e) {
-        this.setUrl_(false);
-      },
+          // Assemble new URL
+          let newUrl = '/' + this.$.app.path.join('/');
+          let queryString = '';
+          for (let key in queryParams) {
+            queryString += (queryString ? '&' : '?');
+            queryString += key + '=' + queryParams[key];
+          }
+          newUrl += queryString;
 
-      replaceUrl_(e) {
-        this.setUrl_(true);
-      },
+          if (replace)
+            window.history.replaceState({}, "", newUrl);
+          else
+            window.history.pushState({}, "", newUrl);
+        },
 
-      setUrl_(replace) {
-        let queryParams = Utils.getUrlQueryParameters();
+        attached() {
+          window.onpopstate = this.handlePopState_.bind(this);
+        },
 
-        // Assemble new URL
-        let newUrl = '/' + this.$.app.path.join('/');
-        let queryString = '';
-        for (let key in queryParams) {
-          queryString += (queryString ? '&' : '?');
-          queryString += key + '=' + queryParams[key];
-        }
-        newUrl += queryString;
+        handlePopState_(e) {
+          this.$.app.path = this.makePathFromUrl_();
+        },
 
-        if (replace)
-          window.history.replaceState({}, "", newUrl);
-        else
-          window.history.pushState({}, "", newUrl);
-      },
+        makePathFromUrl_() {
+          let pathString = window.location.pathname;
+          // Strip any slash at beginning or end
+          pathString = pathString.startsWith('/') ? pathString.slice(1) : pathString;
+          pathString = pathString.endsWith('/') ? pathString.slice(0, pathString.length - 1) : pathString;
+          return pathString ? pathString.split('/') : [];
+        },
 
-      attached() {
-        window.onpopstate = this.handlePopState_.bind(this);
-      },
-
-      handlePopState_(e) {
-        this.$.app.path = this.makePathFromUrl_();
-      },
-
-      makePathFromUrl_() {
-        let pathString = window.location.pathname;
-        // Strip any slash at beginning or end
-        pathString = pathString.startsWith('/') ? pathString.slice(1) : pathString;
-        pathString = pathString.endsWith('/') ? pathString.slice(0, pathString.length - 1) : pathString;
-        return pathString ? pathString.split('/') : [];
-      },
-
-      onConfigReceived_() {
-        this.bridge =
+        onConfigReceived_() {
+          this.bridge =
             new Bridge(
-                new IdGenerator(),
-                new RemoteBridge(this.config.backendUrl, this.config.firebaseConfig, (e) => this.fire('ghvz-alert', {message: e})));
-        this.bridge.getSignedInPromise().then(() => {
-          this.setAttribute('signed-in', true);
-        });
-      },
+              new IdGenerator(),
+              new RemoteBridge(this.config.backendUrl, this.config.firebaseConfig, (e) => this.fire('ghvz-alert', { message: e })));
+          this.bridge.getSignedInPromise().then(() => {
+            this.setAttribute('signed-in', true);
+          });
+        },
+      });
     });
-  });
-</script>
-<style>
-  :host {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-</style>
-<template>
-  <ghvz-app
-      id="app"
-      config="[[config]]"
-      bridge="[[bridge]]"
-      user-id="[[userId]]"
-      url="[[url]]"
+  </script>
+  <style>
+    :host {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+  </style>
+  <template>
+    <ghvz-app id="app" config="[[config]]" bridge="[[bridge]]" user-id="[[userId]]" url="[[url]]"
       path="[[makePathFromUrl_()]]">
-  </ghvz-app>
-</template>
+    </ghvz-app>
+  </template>
 </dom-module>

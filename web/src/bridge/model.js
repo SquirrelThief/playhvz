@@ -1,14 +1,14 @@
 'use strict';
 
 var models = {
-  gun: {
+  /*gun: {
     link: ['guns', 'gunId'], // How to find this object in firebase
     path: ['guns'], // How to find this object in the browser copy
     gameId: '',
     playerId: '', // Properties of this object (and potential parent linkages)
     label: '',
     a: []
-  },
+  },*/
   chatRoom: {
     link: ['chatRooms', 'chatRoomId'],
     path: ['chatRooms'],
@@ -351,7 +351,7 @@ class Model {
     assert(id !== undefined);
     this.id = id;
     // To fill in link, which always ends in the id
-    if(args === undefined)
+    if (args === undefined)
       args = {};
     args[model.link[model.link.length - 1]] = id;
     var newLink = [];
@@ -557,7 +557,7 @@ Model.Notification = class extends Model {
 
 /*********************************************
  * For the Fake Server
- */
+ *********************************************/
 
 const DEFAULT_PROFILE_IMAGE_PROPERTIES = ['gameId', 'defaultProfileImageId', 'allegianceFilter', 'profileImageUrl'];
 const DEFAULT_PROFILE_IMAGE_COLLECTIONS = [];

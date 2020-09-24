@@ -33,18 +33,18 @@ class FakeBridge {
     for (const funcName of Bridge.METHODS) {
       if (!this[funcName])
         this[funcName] = (...args) => this.server[funcName](...args)
-            .catch(function(error) {
-              console.error('failed in', funcName);
-              console.error(error);
-              console.error(arguments);
-              alertHandler(error)
-              throw error;
-            });
+          .catch(function (error) {
+            console.error('failed in', funcName);
+            console.error(error);
+            console.error(arguments);
+            alertHandler(error)
+            throw error;
+          });
     }
   }
-  signIn({userId}) {
+  signIn({ userId }) {
     assert(userId);
-    this.server.register({userId: userId});
+    this.server.register({ userId: userId });
     return userId;
   }
   signOut() {
@@ -52,16 +52,16 @@ class FakeBridge {
       setTimeout(resolve, 0);
     });
   }
-  getSignedInPromise({userId, email}) {
+  getSignedInPromise({ userId, email }) {
     assert(userId);
     return new Promise((resolve, reject) => {
-      this.server.register({userId: userId})
-          .then(
-              () => {
-                //TODO(verdagon): somehow retrieve the fake user's email here
-                resolve({userId: userId, email: "emailhere@somewebsite.lol"})
-              }, 
-              reject);
+      this.server.register({ userId: userId })
+        .then(
+          () => {
+            //TODO(verdagon): somehow retrieve the fake user's email here
+            resolve({ userId: userId, email: "emailhere@somewebsite.lol" })
+          },
+          reject);
     });
   }
   listenToGame(userId, gameId, destination) {
@@ -77,19 +77,19 @@ class FakeBridge {
     this.teeWriter.addDestination(cloningWriter);
 
     var interval =
-        setInterval(() => {
-          gatedWriter.openGate();
-          gatedWriter.closeGate();
-        }, 100);
+      setInterval(() => {
+        gatedWriter.openGate();
+        gatedWriter.closeGate();
+      }, 100);
 
     let foundGamePromise = new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve();
       }, 1000);
     });
-    let finishedLoadingGamePromise = new Promise ((resolve, reject) => {
+    let finishedLoadingGamePromise = new Promise((resolve, reject) => {
       setTimeout(() => {
-        resolve();        
+        resolve();
       }, 2000);
     });
     return [foundGamePromise, finishedLoadingGamePromise];
@@ -98,7 +98,7 @@ class FakeBridge {
 
 function CloningWrapper(inner, funcNames) {
   for (const funcName of funcNames) {
-    this[funcName] = function(...args) {
+    this[funcName] = function (...args) {
       // console.log('Calling', funcName, 'with args', ...args);
       return Utils.copyOf(inner[funcName](...args.map(Utils.copyOf)));
     }
@@ -110,21 +110,21 @@ function DelayingWrapper(inner, funcNames) {
   let synchronous = delay == 'synchronous';
 
   for (const funcName of funcNames) {
-    this[funcName] = function(...args) {
+    this[funcName] = function (...args) {
       // console.log('Making request', funcName, ...args);
       return new Promise((resolve, reject) => {
         let execute = () => {
           try {
-            // console.log('Recipient received request', funcName, ...args);
+            //console.log('Recipient received request', funcName, ...args);
             const result = inner[funcName](...args);
-            // console.log('Recipient responding with', result);
+            //console.log('Recipient responding with', result);
             if (synchronous)
               resolve(result);
             else
               setTimeout(() => resolve(result), delay);
 
           } catch (error) {
-
+            console.log('Error doing request', funcName, ...args);
             console.error(error);
 
             if (synchronous)

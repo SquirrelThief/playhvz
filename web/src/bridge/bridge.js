@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: High-level file comment.
+/**
+ * This is the parent class that defines the API for network/database calls. There 
+ * are two implementations, one for the fake server and one for the real server.
+ */
 
 // ? means this value is nullable
 // | means this value is optional
@@ -30,14 +33,14 @@ class Bridge {
 
     for (let [method, expectations] of Bridge.METHODS_MAP) {
       this[method] =
-          (args) => {
-            args = Utils.copyOf(args);
-            if (this.requestTimeOffset != null)
-              args.requestTimeOffset = this.requestTimeOffset;
-            new Utils.Validator(expectations, this.check_.bind(this)).validate(args);
-            assert(this.inner[method]);
-            return this.inner[method](args);
-          };
+        (args) => {
+          args = Utils.copyOf(args);
+          if (this.requestTimeOffset != null)
+            args.requestTimeOffset = this.requestTimeOffset;
+          new Utils.Validator(expectations, this.check_.bind(this)).validate(args);
+          assert(this.inner[method]);
+          return this.inner[method](args);
+        };
     }
 
     for (let methodName of Utils.getAllFuncNames(idGenerator)) {
@@ -74,6 +77,16 @@ class Bridge {
   setPlayerId(playerId) {
     return this.inner.setPlayerId(playerId);
   }
+
+  // Start of new Firestore supporting functions.
+  getGameList(userId) {
+    return this.inner.getGameList(userId);
+  }
+
+  getGame(gameId) {
+    return this.inner.getGame(gameId);
+  }
+  // End of new Firestore supporting functions.
 
   check_(typeName, value) {
     if (typeName.startsWith('!'))
@@ -161,7 +174,7 @@ class FakeIdGenerator extends IdGenerator {
 }
 
 // Sets Bridge.METHODS_MAP and Bridge.serverMethods
-(function() {
+(function () {
   let optional = Utils.Validator.optional;
 
   let serverMethods = new Map();
@@ -172,7 +185,7 @@ class FakeIdGenerator extends IdGenerator {
   });
 
   // Guns
-  serverMethods.set('addGun', {
+  /*serverMethods.set('addGun', {
     gameId: 'GameId',
     gunId: '!GunId',
     label: 'String',
@@ -186,39 +199,40 @@ class FakeIdGenerator extends IdGenerator {
     gameId: 'GameId',
     gunId: 'GunId',
     playerId: '?PublicPlayerId',
-  });
+  }); */
 
   // Games
   serverMethods.set('createGame', {
     gameId: '!GameId',
-    adminUserId: 'UserId',
+    creatorUserId: 'UserId',
     name: 'String',
-    rulesHtml: 'String',
+    /*rulesHtml: 'String',
     faqHtml: 'String',
     summaryHtml: 'String',
     stunTimer: 'Number',
     infectPoints: 'Number',
-    isActive: 'Boolean',
+    isActive: 'Boolean', */
     startTime: 'Timestamp',
     endTime: 'Timestamp',
-    registrationEndTime: 'Timestamp',
+    /*registrationEndTime: 'Timestamp',
     declareResistanceEndTime: 'Timestamp',
-    declareHordeEndTime: 'Timestamp',
+    declareHordeEndTime: 'Timestamp', */
   });
   serverMethods.set('updateGame', {
     gameId: 'GameId',
+    adminOnCallPlayerId: "String",
     name: '|String',
-    rulesHtml: '|String',
+    /*rulesHtml: '|String',
     faqHtml: '|String',
     summaryHtml: '|String',
     stunTimer: '|Number',
     infectPoints: '|Number',
-    isActive: '|Boolean',
+    isActive: '|Boolean', */
     startTime: '|Timestamp',
     endTime: '|Timestamp',
-    registrationEndTime: '|Timestamp',
+    /*registrationEndTime: '|Timestamp',
     declareResistanceEndTime: '|Timestamp',
-    declareHordeEndTime: '|Timestamp',
+    declareHordeEndTime: '|Timestamp', */
   });
   serverMethods.set('setAdminContact', {
     gameId: 'GameId',
@@ -234,11 +248,13 @@ class FakeIdGenerator extends IdGenerator {
   // Players
   serverMethods.set('createPlayer', {
     playerId: '!PublicPlayerId',
-    privatePlayerId: '?!PrivatePlayerId',
     userId: 'UserId',
     gameId: 'GameId',
     name: 'String',
-    needGun: 'Boolean',
+    allegiance: 'String',
+    avatarUrl: 'String',
+    points: 'Number',
+    /*needGun: 'Boolean',
     canInfect: 'Boolean',
     profileImageUrl: 'String',
     wantToBeSecretZombie: 'Boolean',
@@ -264,13 +280,15 @@ class FakeIdGenerator extends IdGenerator {
     },
     isActive: 'Boolean',
     gotEquipment: 'Boolean',
-    notes: 'String',
+    notes: 'String', */
   });
   serverMethods.set('updatePlayer', {
     playerId: 'PublicPlayerId',
     gameId: 'GameId',
     name: '|String',
-    needGun: '|Boolean',
+    allegiance: '|String',
+    avatarUrl: '|String',
+    /*needGun: '|Boolean',
     canInfect: '|Boolean',
     profileImageUrl: '|String',
     wantToBeSecretZombie: '|Boolean',
@@ -296,7 +314,7 @@ class FakeIdGenerator extends IdGenerator {
     }),
     isActive: '|Boolean',
     gotEquipment: '|Boolean',
-    notes: '|String',
+    notes: '|String', */
   });
 
 

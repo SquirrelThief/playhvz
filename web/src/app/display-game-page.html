@@ -15,418 +15,316 @@
 -->
 
 <dom-module id="ghvz-display-game-page">
-<script>
-  // Not sure why this HTMLImports.whenReady is really needed.
-  // Something about polymer initialization order.
-  // I think we're not supposed to need this.
-  HTMLImports.whenReady(() => {
-    Polymer({
-      is: 'ghvz-display-game-page',
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-display-game-page',
 
-      properties: {
-        bridge: Object,
-        isAdmin: Boolean,
-        database: Object,
-        userId: String,
-        email: String,
-        game: Object,
-        player: Object,
-        path: {
-          type: String,
-          observer: 'onPathChanged_',
-        },
+        properties: {
+          bridge: Object,
+          isAdmin: Boolean,
+          database: Object,
+          userId: String,
+          email: String,
+          game: Object,
+          player: Object,
+          path: {
+            type: String,
+            observer: 'onPathChanged_',
+          },
 
-        mostRecentPage: String,
+          mostRecentPage: String,
 
-        isMobile: Boolean,
+          isMobile: Boolean,
 
-        showPage: {
-          type: Object,
-          value: {
-            'joinGame': 'joinGame',
-            'main': 'main',
-            'chat': 'chat',
-            'faq': 'faq',
-            'stuntimer': 'stuntimer',
-            'leaderboard': 'leaderboard',
-            'notifications': 'notifications',
-            'profile': 'profile',
-            'rewards': 'rewards',
-            'infect': 'infect',
-            'declare': 'declare',
-            'rules': 'rules',
-            'stats': 'stats',
-            'missions': 'missions',
-            'adminMain': 'adminMain',
-            'adminDevTools': 'adminDevTools',
-            'adminGame': 'adminGame',
-            'adminGuns': 'adminGuns',
-            'adminGameSummary': 'adminGameSummary',
-            'adminMissions': 'adminMissions',
-            'adminNotifications': 'adminNotifications',
-            'adminPlayers': 'adminPlayers',
-            'adminRewards': 'adminRewards',
-            'adminChats': 'adminChats',
+          showPage: {
+            type: Object,
+            value: {
+              'joinGame': 'joinGame',
+              'main': 'main',
+              'chat': 'chat',
+              'faq': 'faq',
+              'stuntimer': 'stuntimer',
+              'leaderboard': 'leaderboard',
+              'notifications': 'notifications',
+              'profile': 'profile',
+              'rewards': 'rewards',
+              'infect': 'infect',
+              'declare': 'declare',
+              'rules': 'rules',
+              'stats': 'stats',
+              'missions': 'missions',
+              'adminMain': 'adminMain',
+              'adminDevTools': 'adminDevTools',
+              'adminGame': 'adminGame',
+              'adminGuns': 'adminGuns',
+              'adminGameSummary': 'adminGameSummary',
+              'adminMissions': 'adminMissions',
+              'adminNotifications': 'adminNotifications',
+              'adminPlayers': 'adminPlayers',
+              'adminRewards': 'adminRewards',
+              'adminChats': 'adminChats',
+            },
           },
         },
-      },
 
-      onPathChanged_(newPath, oldPath) {
-        if (newPath) {
-          this.mostRecentPage = newPath[0];
-        }
-      },
+        onPathChanged_(newPath, oldPath) {
+          if (newPath) {
+            this.mostRecentPage = newPath[0];
+          }
+        },
 
-      computeShowPage_: function(desiredPage, mostRecentPage) {
-        if (mostRecentPage && mostRecentPage == desiredPage) {
-          return true;
-        }
-        return false;
-      },
+        computeShowPage_: function (desiredPage, mostRecentPage) {
+          if (mostRecentPage && mostRecentPage == desiredPage) {
+            return true;
+          }
+          return false;
+        },
 
-      computePageClass_(desiredPage, mostRecentPage) {
-        return desiredPage == mostRecentPage ? "visible-page" : null;
-      },
+        computePageClass_(desiredPage, mostRecentPage) {
+          return desiredPage == mostRecentPage ? "visible-page" : null;
+        },
+      });
     });
-  });
-</script>
-<style>
-  :host {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  :host[!isMobile] {
-    padding: 8px;
-  }
+  </script>
+  <style>
+    :host {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      box-sizing: border-box;
+    }
 
-  .expand {
-    flex-grow: 1;
-    flex-direction: column;
-  }
-  ghvz-card {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-  }
-</style>
-<template>
+    :host[ !isMobile] {
+      padding: 8px;
+    }
 
-  <template is="dom-if" if="[[computeShowPage_(showPage.adminMain, mostRecentPage)]]">
-    <ghvz-admin-page
-        class$="expand [[computePageClass_(showPage.adminMain, mostRecentPage)]]"
-        bridge="[[bridge]]"
-        database="[[database]]"
-        game="[[game]]"
-        user-id="[[userId]]"
-        is-mobile="[[isMobile]]"
-        is-admin="[[isAdmin]]"
+    .expand {
+      flex-grow: 1;
+      flex-direction: column;
+    }
+
+    ghvz-card {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+  <template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.adminMain, mostRecentPage)]]">
+      <ghvz-admin-page class$="expand [[computePageClass_(showPage.adminMain, mostRecentPage)]]" bridge="[[bridge]]"
+        database="[[database]]" game="[[game]]" user-id="[[userId]]" is-mobile="[[isMobile]]" is-admin="[[isAdmin]]"
         player="[[player]]">
-    </ghvz-admin-page>
-  </template>
+      </ghvz-admin-page>
+    </template>
 
-  <template is="dom-if" if="[[!isMobile]]">
-    <template is="dom-if" if="[[computeShowPage_(showPage.main, mostRecentPage)]]">
-      <ghvz-main-page
-          class$="expand [[computePageClass_(showPage.main, mostRecentPage)]]"
-          name="main-page-card"
-          bridge="[[bridge]]"
-          database="[[database]]"
-          game="[[game]]"
-          user-id="[[userId]]"
-          is-mobile="[[isMobile]]"
-          is-admin="[[isAdmin]]"
+    <template is="dom-if" if="[[!isMobile]]">
+      <template is="dom-if" if="[[computeShowPage_(showPage.main, mostRecentPage)]]">
+        <ghvz-main-page class$="expand [[computePageClass_(showPage.main, mostRecentPage)]]" name="main-page-card"
+          bridge="[[bridge]]" database="[[database]]" game="[[game]]" user-id="[[userId]]" is-mobile="[[isMobile]]"
+          is-admin="[[isAdmin]]" player="[[player]]">
+        </ghvz-main-page>
+      </template>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.chat, mostRecentPage)]]">
+      <ghvz-card id$="chat-page-[[player.name]]" class$="expand [[computePageClass_(showPage.chat, mostRecentPage)]]"
+        name="chat-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <ghvz-chat-page bridge="[[bridge]]" database="[[database]]" game="[[game]]" user-id="[[userId]]"
+          player="[[player]]" path="[[path]]" is-mobile="[[isMobile]]" is-admin="[[isAdmin]]">
+        </ghvz-chat-page>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.declare, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.declare, mostRecentPage)]]" spaced$="[[!isMobile]]"
+        with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Declare Allegiance</div>
+        <ghvz-declare-page class="expand" bridge="[[bridge]]" game="[[game]]" player="[[player]]" user-id="[[userId]]">
+        </ghvz-declare-page>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.joinGame, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.joinGame, mostRecentPage)]]" spaced$="[[!isMobile]]"
+        with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Join Game</div>
+        <ghvz-game-registration class="expand" bridge="[[bridge]]" email="[[email]]" game="[[game]]" player="[[player]]"
+          user-id="[[userId]]">
+        </ghvz-game-registration>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.infect, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.infect, mostRecentPage)]]" name="infect-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Infect</div>
+        <ghvz-infect class="expand" bridge="[[bridge]]" game="[[game]]" player="[[player]]">
+        </ghvz-infect>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.rewards, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.rewards, mostRecentPage)]]" name="rewards-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Rewards</div>
+        <ghvz-claim-reward class="expand" bridge="[[bridge]]" game="[[game]]" player="[[player]]">
+        </ghvz-claim-reward>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.notifications, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.notifications, mostRecentPage)]]" name="notifications-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Notifications</div>
+        <ghvz-notifications-page class="expand" bridge="[[bridge]]" game="[[game]]" is-mobile="[[isMobile]]"
+          player="[[player]]" path="[[path]]">
+        </ghvz-notifications-page>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.adminGuns, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.adminGuns, mostRecentPage)]]" name="guns-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Guns</div>
+        <ghvz-guns class="expand" is-mobile="[[isMobile]]" bridge="[[bridge]]" game="[[game]]">
+        </ghvz-guns>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.adminGameSummary, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.adminGameSummary, mostRecentPage)]]" name="summary-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Game Summary</div>
+        <ghvz-game-summary is-admin class="expand" bridge="[[bridge]]" game="[[game]]">
+        </ghvz-game-summary>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.adminPlayers, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.adminPlayers, mostRecentPage)]]" name="players-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Players</div>
+        <ghvz-player-table class="expand" game="[[game]]" is-mobile="[[isMobile]]" bridge="[[bridge]]"
+          reward-categories-by-id="[[game.rewardCategoriesById]]" players="[[game.players]]"
+          players-by-id="[[game.playersById]]">
+          </ghv-player-table>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.adminRewards, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.adminRewards, mostRecentPage)]]" name="admin-rewards-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Rewards</div>
+        <ghvz-rewards class="expand" is-mobile="[[isMobile]]" bridge="[[bridge]]" game="[[game]]">
+        </ghvz-rewards>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.adminMissions, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.adminMissions, mostRecentPage)]]" name="admin-missions-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Missions</div>
+        <ghvz-missions is-mobile="[[isMobile]]" class="expand" bridge="[[bridge]]" player="[[player]]" game="[[game]]">
+        </ghvz-missions>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.adminGame, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.adminGame, mostRecentPage)]]" padded name="game-details-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Game</div>
+        <ghvz-game-details class="expand" modify is-mobile="[[isMobile]]" bridge="[[bridge]]" game="[[game]]">
+        </ghvz-game-details>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.adminNotifications, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.adminNotifications, mostRecentPage)]]"
+        name="admin-notifications-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Notifications</div>
+        <ghvz-notifications class="expand" is-mobile="[[isMobile]]" bridge="[[bridge]]" game="[[game]]">
+        </ghvz-notifications>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.rules, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.rules, mostRecentPage)]]" name="rules-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]" padded>
+        <div class="header">Rules</div>
+        <ghvz-rules class="expand" bridge="[[bridge]]" is-mobile="[[isMobile]]" game="[[game]]" is-admin="[[isAdmin]]">
+        </ghvz-rules>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.faq, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.faq, mostRecentPage)]]" name="faq-card" spaced$="[[!isMobile]]"
+        with-back="[[isMobile]]" with-menu="[[isMobile]]" padded>
+        <div class="header">FAQ</div>
+        <ghvz-faq-page class="expand" bridge="[[bridge]]" game="[[game]]" is-mobile="[[isMobile]]"
+          is-admin="[[isAdmin]]"></ghvz-faq-page>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.stuntimer, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.stuntimer, mostRecentPage)]]" name="stuntimer-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]" padded>
+        <div class="header">Stun Timer</div>
+        <ghvz-stun-timer class="expand" game="[[game]]">
+        </ghvz-stun-timer>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.missions, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.missions, mostRecentPage)]]" name="missions-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]" padded>
+        <div class="header">Missions</div>
+        <ghvz-missions-page is-mobile="[[isMobile]]" class="expand" bridge="[[bridge]]" game="[[game]]"
           player="[[player]]">
-      </ghvz-main-page>
+        </ghvz-missions-page>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.leaderboard, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.leaderboard, mostRecentPage)]]" name="leaderboard-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Leaderboard</div>
+        <ghvz-leaderboard-summary class="expand" game="[[game]]">
+        </ghvz-leaderboard-summary>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.profile, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.profile, mostRecentPage)]]" padded name="profile-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <ghvz-profile-page class="expand" bridge="[[bridge]]" is-admin="[[isAdmin]]" game="[[game]]"
+          acting-player-id="[[player.id]]" path="[[path]]">
+        </ghvz-profile-page>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.stats, mostRecentPage)]]">
+      <ghvz-card class$="[[computePageClass_(showPage.stats, mostRecentPage)]]" name="stats-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <div class="header">Game Stats</div>
+        <ghvz-stats-page class="expand" bridge="[[bridge]]" database="[[database]]" game="[[game]]"
+          user-id="[[userId]]">
+        </ghvz-stats-page>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.adminChats, mostRecentPage)]]">
+      <ghvz-card id$="admin-chat-page-[[player.name]]"
+        class$="expand [[computePageClass_(showPage.adminChats, mostRecentPage)]]" name="chat-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <ghvz-admin-chat-page bridge="[[bridge]]" database="[[database]]" game="[[game]]" user-id="[[userId]]"
+          player="[[player]]" path="[[path]]" is-mobile="[[isMobile]]" is-admin="[[isAdmin]]">
+        </ghvz-admin-chat-page>
+      </ghvz-card>
     </template>
   </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.chat, mostRecentPage)]]">
-    <ghvz-card
-      id$="chat-page-[[player.name]]"
-      class$="expand [[computePageClass_(showPage.chat, mostRecentPage)]]"
-      name="chat-card"
-      spaced$="[[!isMobile]]"
-      with-back="[[isMobile]]"
-      with-menu="[[isMobile]]">
-      <ghvz-chat-page
-          bridge="[[bridge]]"
-          database="[[database]]"
-          game="[[game]]"
-          user-id="[[userId]]"
-          player="[[player]]"
-          path="[[path]]"
-          is-mobile="[[isMobile]]"
-          is-admin="[[isAdmin]]">
-      </ghvz-chat-page>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.declare, mostRecentPage)]]">
-    <ghvz-card
-        class$="[[computePageClass_(showPage.declare, mostRecentPage)]]"
-        spaced$="[[!isMobile]]"
-        with-back="[[isMobile]]"
-        with-menu="[[isMobile]]">
-      <div class="header">Declare Allegiance</div>
-      <ghvz-declare-page
-          class="expand"
-          bridge="[[bridge]]"
-          game="[[game]]"
-          player="[[player]]"
-          user-id="[[userId]]">
-      </ghvz-declare-page>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.joinGame, mostRecentPage)]]">
-    <ghvz-card
-        class$="[[computePageClass_(showPage.joinGame, mostRecentPage)]]"
-        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Join Game</div>
-      <ghvz-game-registration
-          class="expand"
-          bridge="[[bridge]]"
-          email="[[email]]"
-          game="[[game]]"
-          player="[[player]]"
-          user-id="[[userId]]">
-      </ghvz-game-registration>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if"  if="[[computeShowPage_(showPage.infect, mostRecentPage)]]">
-    <ghvz-card
-        class$="[[computePageClass_(showPage.infect, mostRecentPage)]]"
-        name="infect-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Infect</div>
-      <ghvz-infect
-          class="expand"
-          bridge="[[bridge]]"
-          game="[[game]]"
-          player="[[player]]">
-      </ghvz-infect>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if"  if="[[computeShowPage_(showPage.rewards, mostRecentPage)]]">
-    <ghvz-card
-        class$="[[computePageClass_(showPage.rewards, mostRecentPage)]]"
-        name="rewards-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Rewards</div>
-      <ghvz-claim-reward
-          class="expand"
-          bridge="[[bridge]]"
-          game="[[game]]"
-          player="[[player]]">
-      </ghvz-claim-reward>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.notifications, mostRecentPage)]]">
-    <ghvz-card
-        class$="[[computePageClass_(showPage.notifications, mostRecentPage)]]"
-        name="notifications-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Notifications</div>
-      <ghvz-notifications-page
-          class="expand"
-          bridge="[[bridge]]"
-          game="[[game]]"
-          is-mobile="[[isMobile]]"
-          player="[[player]]"
-          path="[[path]]">
-      </ghvz-notifications-page>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.adminGuns, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.adminGuns, mostRecentPage)]]" name="guns-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Guns</div>
-      <ghvz-guns
-          class="expand"
-          is-mobile="[[isMobile]]"
-          bridge="[[bridge]]"
-          game="[[game]]">
-      </ghvz-guns>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.adminGameSummary, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.adminGameSummary, mostRecentPage)]]" name="summary-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Game Summary</div>
-      <ghvz-game-summary
-          is-admin
-          class="expand"
-          bridge="[[bridge]]"
-          game="[[game]]">
-      </ghvz-game-summary>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.adminPlayers, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.adminPlayers, mostRecentPage)]]" name="players-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Players</div>
-      <ghvz-player-table
-          class="expand"
-          game="[[game]]"
-          is-mobile="[[isMobile]]"
-          bridge="[[bridge]]"
-          reward-categories-by-id="[[game.rewardCategoriesById]]"
-          players="[[game.players]]"
-          players-by-id="[[game.playersById]]">
-      </ghv-player-table>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.adminRewards, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.adminRewards, mostRecentPage)]]" name="admin-rewards-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Rewards</div>
-      <ghvz-rewards
-          class="expand"
-          is-mobile="[[isMobile]]"
-          bridge="[[bridge]]"
-          game="[[game]]">
-      </ghvz-rewards>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.adminMissions, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.adminMissions, mostRecentPage)]]" name="admin-missions-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Missions</div>
-      <ghvz-missions
-          is-mobile="[[isMobile]]"
-          class="expand"
-          bridge="[[bridge]]"
-          player="[[player]]"
-          game="[[game]]">
-      </ghvz-missions>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.adminGame, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.adminGame, mostRecentPage)]]" padded name="game-details-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Game</div>
-      <ghvz-game-details
-          class="expand"
-          modify
-          is-mobile="[[isMobile]]"
-          bridge="[[bridge]]"
-          game="[[game]]">
-      </ghvz-game-details>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.adminNotifications, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.adminNotifications, mostRecentPage)]]" name="admin-notifications-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Notifications</div>
-      <ghvz-notifications
-          class="expand"
-          is-mobile="[[isMobile]]"
-          bridge="[[bridge]]"
-          game="[[game]]">
-      </ghvz-notifications>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.rules, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.rules, mostRecentPage)]]" name="rules-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]" padded>
-      <div class="header">Rules</div>
-      <ghvz-rules
-          class="expand"
-          bridge="[[bridge]]"
-          is-mobile="[[isMobile]]"
-          game="[[game]]"
-          is-admin="[[isAdmin]]">
-      </ghvz-rules>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.faq, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.faq, mostRecentPage)]]" name="faq-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]" padded>
-      <div class="header">FAQ</div>
-      <ghvz-faq-page class="expand" bridge="[[bridge]]" game="[[game]]" is-mobile="[[isMobile]]" is-admin="[[isAdmin]]"></ghvz-faq-page>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.stuntimer, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.stuntimer, mostRecentPage)]]" name="stuntimer-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]" padded>
-      <div class="header">Stun Timer</div>
-      <ghvz-stun-timer
-          class="expand"
-          game="[[game]]">
-      </ghvz-stun-timer>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.missions, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.missions, mostRecentPage)]]" name="missions-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]" padded>
-      <div class="header">Missions</div>
-      <ghvz-missions-page
-          is-mobile="[[isMobile]]"
-          class="expand"
-          bridge="[[bridge]]"
-          game="[[game]]"
-          player="[[player]]">
-      </ghvz-missions-page>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.leaderboard, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.leaderboard, mostRecentPage)]]" name="leaderboard-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Leaderboard</div>
-      <ghvz-leaderboard-summary
-          class="expand"
-          game="[[game]]">
-      </ghvz-leaderboard-summary>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.profile, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.profile, mostRecentPage)]]" padded name="profile-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <ghvz-profile-page
-          class="expand"
-          bridge="[[bridge]]"
-          is-admin="[[isAdmin]]"
-          game="[[game]]"
-          acting-player-id="[[player.id]]"
-          path="[[path]]">
-      </ghvz-profile-page>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.stats, mostRecentPage)]]">
-    <ghvz-card class$="[[computePageClass_(showPage.stats, mostRecentPage)]]" name="stats-card" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Game Stats</div>
-      <ghvz-stats-page
-          class="expand"
-          bridge="[[bridge]]"
-          database="[[database]]"
-          game="[[game]]"
-          user-id="[[userId]]">
-      </ghvz-stats-page>
-    </ghvz-card>
-  </template>
-
-  <template is="dom-if" if="[[computeShowPage_(showPage.adminChats, mostRecentPage)]]">
-    <ghvz-card
-      id$="admin-chat-page-[[player.name]]"
-      class$="expand [[computePageClass_(showPage.adminChats, mostRecentPage)]]"
-      name="chat-card"
-      spaced$="[[!isMobile]]"
-      with-back="[[isMobile]]"
-      with-menu="[[isMobile]]">
-      <ghvz-admin-chat-page
-          bridge="[[bridge]]"
-          database="[[database]]"
-          game="[[game]]"
-          user-id="[[userId]]"
-          player="[[player]]"
-          path="[[path]]"
-          is-mobile="[[isMobile]]"
-          is-admin="[[isAdmin]]">
-      </ghvz-admin-chat-page>
-    </ghvz-card>
-  </template>
-</template>
 </dom-module>
