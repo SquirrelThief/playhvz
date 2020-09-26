@@ -4,6 +4,8 @@
 .idea
 .navigation
 output.json
+.idea/codeStyles
+.idea/modules.xml
 /.idea/workspace.xml
 /.idea/usage.statistics.xml
 /.idea/tasks.xml
