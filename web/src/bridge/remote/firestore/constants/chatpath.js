@@ -15,24 +15,8 @@ limitations under the License.
 */
 
 /***********************************************************************
- * Class representing a Firestore Game object.
+ * Firebase constants for the Chat collection.
  ***********************************************************************/
-const EMPTY_TIMESTAMP = 0
+class ChatPath { }
 
-class Game {
-  constructor(obj) {
-    Object.assign(this, obj);
-  }
-
-  id = null
-  name = null
-  startTime = EMPTY_TIMESTAMP
-  endTime = EMPTY_TIMESTAMP
-  creatorUserId = null
-  adminGroupId = null
-  adminOnCallPlayerId = null
-  figureheadAdminPlayerAccount = null
-  infectRewardId = null
-  rules = []
-  faq = []
-}
+ChatPath.COLLECTION_PATH = "chatRooms";

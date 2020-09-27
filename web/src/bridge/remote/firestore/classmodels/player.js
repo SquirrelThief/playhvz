@@ -27,7 +27,8 @@ class Player {
   name = null
   userId = null
   avatarUrl = ""
-  allegiance = ""
+  allegiance = Defaults.defaultAllegiance
+  points = 0
   chatRoomMemberships = {}
   rewards = {}
   lives = {}

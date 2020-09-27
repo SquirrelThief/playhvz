@@ -14,18 +14,29 @@
 
 // TODO: High-level file comment.
 
-function Utils() {}
+function Utils() { }
 
 /*
 * Generates a random number to use as an ID. Probability of id collision
 * is negligible.
 */
-Utils.generateId = function(type, note) {
-	if (!type) throw "Utils.generateId() called without a type";
+Utils.generateId = function (type, note) {
+  if (!type) throw "Utils.generateId() called without a type";
   let result = type + "-";
   if (note)
     result += note + "-";
-	return result + new Date().getTime() + "-" + Math.floor(Math.random() * Math.pow(2, 32));
+  return result + new Date().getTime() + "-" + Math.floor(Math.random() * Math.pow(2, 32));
+}
+
+/*
+* Generates a random number to use as an ID. Probability of id collision
+* is negligible.
+*/
+Utils.generateFakeId = function (note = null) {
+  let result = ""
+  if (note)
+    result += note + "-";
+  return result + new Date().getTime() + "-" + Math.floor(Math.random() * Math.pow(2, 32));
 }
 
 /*
@@ -33,11 +44,11 @@ Utils.generateId = function(type, note) {
 * objects, strings, arrays, numbers, booleans, null, and undefined.
 * Won't work on Date, etc.
 */
-Utils.copyOf = function(value) {
+Utils.copyOf = function (value) {
   return value && JSON.parse(JSON.stringify(value));
 }
 
-Utils.merge = function(...objs) {
+Utils.merge = function (...objs) {
   var result = {};
   for (let obj of objs) {
     Utils.mergeInto(result, obj);
@@ -45,7 +56,7 @@ Utils.merge = function(...objs) {
   return result;
 };
 
-Utils.mergeInto = function(dest, source) {
+Utils.mergeInto = function (dest, source) {
   for (var key in source) {
     if (dest[key] instanceof Array) {
       let destArray = dest[key];
@@ -72,13 +83,13 @@ Utils.mergeInto = function(dest, source) {
 * enumerable or not. All functions are included. Inspired by
 * http://stackoverflow.com/questions/31054910/get-functions-methods-of-a-class
 */
-Utils.getAllFuncNames = function(originalObj) {
+Utils.getAllFuncNames = function (originalObj) {
   var props = [];
   for (let obj = originalObj; obj; obj = Object.getPrototypeOf(obj)) {
     props = props.concat(Object.getOwnPropertyNames(obj));
   }
-  return props.sort().filter(function(e, i, arr) { 
-    if (e!=arr[i+1] && typeof originalObj[e] == 'function') return true;
+  return props.sort().filter(function (e, i, arr) {
+    if (e != arr[i + 1] && typeof originalObj[e] == 'function') return true;
   });
 }
 
@@ -86,7 +97,7 @@ Utils.getAllFuncNames = function(originalObj) {
 * Takes the array, and subtracts all occurrences of the given things.
 * subtract([15, 4, 3, 10, 2, 4], 3, 4) would be [15, 10, 2]
 */
-Utils.subtract = function(array, ...thingsToSubtract) {
+Utils.subtract = function (array, ...thingsToSubtract) {
   return array.filter((value) => thingsToSubtract.indexOf(value) == -1);
 }
 
@@ -94,11 +105,11 @@ Utils.subtract = function(array, ...thingsToSubtract) {
 * Function that can be passed to playerArray.sort() to sort players in descending
 * order by points. 
 */
-Utils.byPoints = function(player1, player2) {
+Utils.byPoints = function (player1, player2) {
   return parseFloat(player2.points) - parseFloat(player1.points);
 }
 
-Utils.filter = function(value, filter) {
+Utils.filter = function (value, filter) {
   if (value instanceof HTMLElement)
     value = value.textContent;
   if (typeof value == 'boolean') {
@@ -114,7 +125,7 @@ Utils.filter = function(value, filter) {
   return value.indexOf(filter) >= 0;
 }
 
-Utils.compare = function(aValue, bValue) {
+Utils.compare = function (aValue, bValue) {
   const aBoolish = (typeof aValue == 'boolean');
   const bBoolish = (typeof bValue == 'boolean');
   if (aBoolish && bBoolish) {
@@ -142,7 +153,7 @@ Utils.compare = function(aValue, bValue) {
     return 0;
 }
 
-Utils.getKeys = function(...objs) {
+Utils.getKeys = function (...objs) {
   let keys = [];
   for (let obj of objs)
     for (let key in obj)
@@ -150,7 +161,7 @@ Utils.getKeys = function(...objs) {
   return keys;
 }
 
-Utils.formatTime = function(timestampInMs) {
+Utils.formatTime = function (timestampInMs) {
   var date = new Date(timestampInMs);
   var result = "";
   result += Utils.formatMonthTime(timestampInMs) + ' ';
@@ -159,19 +170,19 @@ Utils.formatTime = function(timestampInMs) {
   return result;
 }
 
-Utils.formatMonthTime = function(timestampInMs) {
+Utils.formatMonthTime = function (timestampInMs) {
   var date = new Date(timestampInMs);
   var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return months[date.getMonth()];
 }
 
-Utils.formatDayTime = function(timestampInMs) {
+Utils.formatDayTime = function (timestampInMs) {
   var date = new Date(timestampInMs);
   var days = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
   return days[date.getDay()];
 }
 
-Utils.formatClockTime = function(timestampInMs) {
+Utils.formatClockTime = function (timestampInMs) {
   var date = new Date(timestampInMs);
   let hours = date.getHours();
   var pm = hours >= 12;
@@ -185,7 +196,7 @@ Utils.formatClockTime = function(timestampInMs) {
 //If same day, just time.
 //If less than a week ago, the day + time
 //If longer than that, date + time
-Utils.formatShortTime = function(timestampInMs) {
+Utils.formatShortTime = function (timestampInMs) {
   var date = new Date(timestampInMs);
   var now = new Date();
   // Same Day
@@ -212,7 +223,7 @@ function assert(condition, ...message) {
   return condition;
 }
 
-Utils.findIndexById = function(collection, id, expect) {
+Utils.findIndexById = function (collection, id, expect) {
   expect = expect !== false;
   assert(collection, "Bad arg");
   let index = collection.findIndex((obj) => (obj.id == id));
@@ -227,7 +238,7 @@ Utils.findIndexById = function(collection, id, expect) {
  * Returns a shuffled copy of the given array.
  * @param {Array} a items The array containing the items.
  */
-Utils.shuffle = function(a) {
+Utils.shuffle = function (a) {
   a = a.slice();
   for (let i = a.length; i; i--) {
     let j = Math.floor(Math.random() * i);
@@ -238,7 +249,7 @@ Utils.shuffle = function(a) {
 
 // A nice deterministic shuffle.
 // Similar to how humans shuffle cards.
-Utils.deterministicShuffle = function(originalArray, numShuffles) {
+Utils.deterministicShuffle = function (originalArray, numShuffles) {
   function innerShuffle(array) {
     let newArray = [];
     let arrayA = array.slice(0, array.length / 2);
@@ -256,7 +267,7 @@ Utils.deterministicShuffle = function(originalArray, numShuffles) {
   return array;
 }
 
-Utils.copyProperties = function(object, snapshotValue, propertyNames) {
+Utils.copyProperties = function (object, snapshotValue, propertyNames) {
   for (let propertyName of propertyNames) {
     let val = snapshotValue[propertyName];
     if (val === undefined)
@@ -266,29 +277,29 @@ Utils.copyProperties = function(object, snapshotValue, propertyNames) {
   return object;
 }
 
-Utils.addEmptyLists = function(object, lists) {
+Utils.addEmptyLists = function (object, lists) {
   for (let listName of lists) {
     object[listName] = [];
   }
   return object;
 }
 
-Utils.getUrlQueryParameters = function() {
+Utils.getUrlQueryParameters = function () {
   let a = window.location.search.substr(1).split('&');
   if (a == "")
     return {};
   var b = {};
   for (var i = 0; i < a.length; ++i) {
-      var p = a[i].split('=', 2);
-      if (p.length == 1)
-          b[p[0]] = "";
-      else
-          b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+    var p = a[i].split('=', 2);
+    if (p.length == 1)
+      b[p[0]] = "";
+    else
+      b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
   }
   return b;
 }
 
-Utils.getParameterByName = function(name, defaultValue) {
+Utils.getParameterByName = function (name, defaultValue) {
   let url = window.location.href;
   name = name.replace(/[\[\]]/g, "\\$&");
   var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
@@ -297,7 +308,7 @@ Utils.getParameterByName = function(name, defaultValue) {
   return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
-Utils.get = function(obj, path) {
+Utils.get = function (obj, path) {
   if (path.length == 0)
     return obj;
   return (function innerGet(obj, path) {
@@ -310,7 +321,7 @@ Utils.get = function(obj, path) {
     }
   })(obj, path);
 }
-Utils.set = function(obj, path, value) {
+Utils.set = function (obj, path, value) {
   assert(path.length);
   return (function innerSet(obj, path, value) {
     assert(obj);
@@ -323,7 +334,7 @@ Utils.set = function(obj, path, value) {
     }
   })(obj, path, value);
 }
-Utils.insert = function(obj, path, index, value) {
+Utils.insert = function (obj, path, index, value) {
   return (function innerInsert(obj, path, index, value) {
     assert(obj);
     if (path.length == 0) {
@@ -343,7 +354,7 @@ Utils.insert = function(obj, path, index, value) {
     }
   })(obj, path, index, value);
 }
-Utils.remove = function(obj, path, index) {
+Utils.remove = function (obj, path, index) {
   (function innerRemove(obj, path, index) {
     assert(obj);
     if (path.length == 0) {
@@ -361,7 +372,7 @@ Utils.remove = function(obj, path, index) {
   })(obj, path, index);
 }
 
-Utils.catchAndReturn = function(exceptionType, callback) {
+Utils.catchAndReturn = function (exceptionType, callback) {
   try {
     callback();
     return true;
@@ -374,7 +385,7 @@ Utils.catchAndReturn = function(exceptionType, callback) {
   }
 };
 
-Utils.forEachRowUnder = function(path, value, callback) {
+Utils.forEachRowUnder = function (path, value, callback) {
   callback(path);
   if (typeof value == 'object') { // Also catches arrays
     for (var key in value) // If an array, key is the index
@@ -384,7 +395,7 @@ Utils.forEachRowUnder = function(path, value, callback) {
   }
 }
 
-Utils.forEachPathUnder = function(path, value, callback) {
+Utils.forEachPathUnder = function (path, value, callback) {
   callback(path, value);
   if (typeof value == 'object') { // Also catches arrays
     for (var key in value) // If an array, key is the index
@@ -392,7 +403,7 @@ Utils.forEachPathUnder = function(path, value, callback) {
   }
 }
 
-Utils.matches = function(pattern, path) {
+Utils.matches = function (pattern, path) {
   if (pattern.length != path.length)
     return false;
   for (let i = 0; i < pattern.length; i++)
@@ -401,21 +412,21 @@ Utils.matches = function(pattern, path) {
   return true;
 }
 
-Utils.mapKeys = function(map) {
+Utils.mapKeys = function (map) {
   let result = [];
   for (let key in map)
     result.push(key);
   return result;
 };
 
-Utils.Validator = function(expectation, typeNameHandler) {
+Utils.Validator = function (expectation, typeNameHandler) {
   this.expectation = expectation;
   this.typeNameHandler = typeNameHandler;
 };
-Utils.Validator.prototype.validate = function(object) {
+Utils.Validator.prototype.validate = function (object) {
   return this.validateInner('(input)', object, this.expectation)
 };
-Utils.Validator.prototype.validateInner = function(key, object, expectation) {
+Utils.Validator.prototype.validateInner = function (key, object, expectation) {
   if (expectation === undefined) {
     throwError('No expectation for ' + key);
   }
@@ -465,10 +476,10 @@ Utils.Validator.prototype.validateInner = function(key, object, expectation) {
     throwError('Unknown expectation: ', expectation);
   }
 };
-Utils.Validator.Optional = function(expectation) {
+Utils.Validator.Optional = function (expectation) {
   this.expectation = expectation;
 };
-Utils.Validator.optional = function(expectation) {
+Utils.Validator.optional = function (expectation) {
   return new Utils.Validator.Optional(expectation);
 };
 
@@ -484,7 +495,7 @@ Utils.isTimestampMs = (x) => x > 1000000000000; // Sep 8, 2001
  *
  * @returns {String}
  */
-Utils.isMobile = function() {
+Utils.isMobile = function () {
   var userAgent = navigator.userAgent || navigator.vendor || window.opera;
   // Windows Phone must come first because its UA also contains "Android"
   if (/windows phone/i.test(userAgent)) {
@@ -500,7 +511,7 @@ Utils.isMobile = function() {
   return false;
 }
 
-Utils.arrayShallowEquals = function(a, b) {
+Utils.arrayShallowEquals = function (a, b) {
   assert(a);
   assert(b);
   if (a.length != b.length)
@@ -513,8 +524,8 @@ Utils.arrayShallowEquals = function(a, b) {
   return true;
 }
 
-Utils.numObjects = function(obj) {
-  if(obj)
+Utils.numObjects = function (obj) {
+  if (obj)
     return Object.keys(obj).length;
   else
     return 0;

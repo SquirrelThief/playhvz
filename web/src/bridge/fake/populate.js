@@ -12,40 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: High-level file comment.
-
-
-function populateUsers(bridge, config) {
-  let zellaUserId = 'user-' + config.fakeUserIds.zella;
-  let reggieUserId = 'user-' + config.fakeUserIds.reggie;
-  let minnyUserId = 'user-' + config.fakeUserIds.minny;
-  let deckerdUserId = 'user-' + config.fakeUserIds.deckerd;
-  let drakeUserId = 'user-' + config.fakeUserIds.drake;
-  let moldaviUserId = 'user-' + config.fakeUserIds.moldavi;
-  let zekeUserId = 'user-' + config.fakeUserIds.zeke;
-  let jackUserId = 'user-' + config.fakeUserIds.jack;
-
-  bridge.register({ userId: zellaUserId });
-  bridge.register({ userId: reggieUserId });
-  bridge.register({ userId: minnyUserId });
-  bridge.register({ userId: drakeUserId });
-  bridge.register({ userId: zekeUserId });
-  bridge.register({ userId: moldaviUserId });
-  bridge.register({ userId: jackUserId });
-  bridge.register({ userId: deckerdUserId });
-}
+/** This file calls all the bridge functions to set up a fake game and fake data. */
 
 function makePlayerProperties(id, userId, gameId, time, name) {
-  return {
-    playerId: id,
-    allegiance: "undeclared",
-    avatarUrl: PlayerUtils.getDefaultProfilePic(name),
-    userId: userId,
-    gameId: gameId,
+  let player = new Player({
+    id: id,
     name: name,
-    points: 0,
-    userId: userId
-  };
+    userId: userId,
+    avatarUrl: PlayerUtils.getDefaultProfilePic(name),
+    allegiance: Defaults.defaultAllegiance,
+  })
+  return player;
 }
 
 function populatePlayers(bridge, gameId, gameStartOffset, numPlayers, numStartingZombies, numRevivesPerDay, numDays, numShuffles, timeBetweenInfections) {
@@ -142,18 +119,44 @@ function populatePlayersHeavy(bridge, gameId, gameStartOffset) {
   populatePlayers(bridge, gameId, gameStartOffset, 300, 7, 6, 5, 3, 11 * 60 * 1000);
 }
 
-function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
-  let gameStartOffset = - 6 * 24 * 60 * 60 * 1000; // 6 days ago
-  bridge.setRequestTimeOffset(gameStartOffset);
+/************************************************************************
+ * START OF FUNCTIONS FOR POPULATING FAKE SERVER.
+ ************************************************************************/
 
+/** Function used by fake-app.html to populate user data. */
+function populateUsers(bridge, config) {
   let zellaUserId = 'user-' + config.fakeUserIds.zella;
-  let reggieUserId = 'user-' + config.fakeUserIds.reggie;
+  /*let reggieUserId = 'user-' + config.fakeUserIds.reggie;
   let minnyUserId = 'user-' + config.fakeUserIds.minny;
   let deckerdUserId = 'user-' + config.fakeUserIds.deckerd;
   let drakeUserId = 'user-' + config.fakeUserIds.drake;
   let moldaviUserId = 'user-' + config.fakeUserIds.moldavi;
   let zekeUserId = 'user-' + config.fakeUserIds.zeke;
-  let jackUserId = 'user-' + config.fakeUserIds.jack;
+  let jackUserId = 'user-' + config.fakeUserIds.jack;*/
+
+  bridge.register({ userId: zellaUserId });
+  /*bridge.register({ userId: reggieUserId });
+  bridge.register({ userId: minnyUserId });
+  bridge.register({ userId: drakeUserId });
+  bridge.register({ userId: zekeUserId });
+  bridge.register({ userId: moldaviUserId });
+  bridge.register({ userId: jackUserId });
+  bridge.register({ userId: deckerdUserId });*/
+}
+
+/** Function used by fake-app.html to populate game data. */
+function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
+  let gameStartOffset = - 6 * 24 * 60 * 60 * 1000; // 6 days ago
+  bridge.setRequestTimeOffset(gameStartOffset);
+
+  let zellaUserId = 'user-' + config.fakeUserIds.zella;
+  /* let reggieUserId = 'user-' + config.fakeUserIds.reggie;
+  let minnyUserId = 'user-' + config.fakeUserIds.minny;
+  let deckerdUserId = 'user-' + config.fakeUserIds.deckerd;
+  let drakeUserId = 'user-' + config.fakeUserIds.drake;
+  let moldaviUserId = 'user-' + config.fakeUserIds.moldavi;
+  let zekeUserId = 'user-' + config.fakeUserIds.zeke;
+  let jackUserId = 'user-' + config.fakeUserIds.jack; */
 
   bridge.createGame({
     gameId: gameId,
@@ -162,6 +165,10 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
     startTime: 1483344000000,
     endTime: 1483689600000,
   });
+
+  // TODO: SUPPORT THINGS BELOW THIS POINT.
+  return;
+
   bridge.addDefaultProfileImage({
     gameId: gameId,
     defaultProfileImageId: bridge.idGenerator.newGroupId(),
@@ -818,6 +825,11 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
 
   populateQuiz(bridge, gameId);
 }
+
+/************************************************************************
+ * END(?) OF FUNCTIONS FOR POPULATING FAKE SERVER.
+ ************************************************************************/
+
 
 function populateQuiz(bridge, gameId) {
   let stunQuestionId = bridge.idGenerator.newQuizQuestionId();

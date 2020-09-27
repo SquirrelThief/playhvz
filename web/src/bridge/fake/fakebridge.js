@@ -26,73 +26,76 @@ class FakeBridge {
     var checkedServer = new CheckedServer(idGenerator, fakeServer, Bridge.METHODS_MAP);
     var cloningFakeSerer = new CloningWrapper(checkedServer, Bridge.METHODS);
     var delayingCloningFakeServer = new DelayingWrapper(cloningFakeSerer, Bridge.METHODS);
-    this.server = delayingCloningFakeServer;
+    this.server = fakeServer;
 
     window.fakeBridge = this;
 
-    for (const funcName of Bridge.METHODS) {
-      if (!this[funcName])
-        this[funcName] = (...args) => this.server[funcName](...args)
-          .catch(function (error) {
-            console.error('failed in', funcName);
-            console.error(error);
-            console.error(arguments);
-            alertHandler(error)
-            throw error;
-          });
-    }
+    this.currentUserId = null
   }
+
   signIn({ userId }) {
     assert(userId);
+    this.currentUserId = userId;
     this.server.register({ userId: userId });
     return userId;
   }
+
   signOut() {
+    this.currentUserId = null
     return new Promise((resolve, reject) => {
       setTimeout(resolve, 0);
     });
   }
-  getSignedInPromise({ userId, email }) {
-    assert(userId);
+
+  getSignedInPromise() {
+    assert(this.currentUserId)
     return new Promise((resolve, reject) => {
-      this.server.register({ userId: userId })
-        .then(
-          () => {
-            //TODO(verdagon): somehow retrieve the fake user's email here
-            resolve({ userId: userId, email: "emailhere@somewebsite.lol" })
-          },
-          reject);
+      this.server.register({ userId: this.currentUserId })
+      resolve({ userId: this.currentUserId, email: "emailhere@somewebsite.lol" })
     });
   }
-  listenToGame(userId, gameId, destination) {
-    var gatedWriter = new GatedWriter(new MappingWriter(destination), false);
-    var cloningWriter = new CloningWriter(gatedWriter);
-    cloningWriter.batchedWrite([
-      {
-        type: 'set',
-        path: [],
-        value: Utils.copyOf(this.simpleWriter.destination),
-      },
-    ]);
-    this.teeWriter.addDestination(cloningWriter);
 
-    var interval =
-      setInterval(() => {
-        gatedWriter.openGate();
-        gatedWriter.closeGate();
-      }, 100);
+  getGameList(userId) {
+    return this.server.getGameList(userId)
+  }
 
-    let foundGamePromise = new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve();
-      }, 1000);
-    });
-    let finishedLoadingGamePromise = new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve();
-      }, 2000);
-    });
-    return [foundGamePromise, finishedLoadingGamePromise];
+  /* listenToGame(userId, gameId, destination) {
+     var gatedWriter = new GatedWriter(new MappingWriter(destination), false);
+     var cloningWriter = new CloningWriter(gatedWriter);
+     cloningWriter.batchedWrite([
+       {
+         type: 'set',
+         path: [],
+         value: Utils.copyOf(this.simpleWriter.destination),
+       },
+     ]);
+     this.teeWriter.addDestination(cloningWriter);
+ 
+     var interval =
+       setInterval(() => {
+         gatedWriter.openGate();
+         gatedWriter.closeGate();
+       }, 100);
+ 
+     let foundGamePromise = new Promise((resolve, reject) => {
+       setTimeout(() => {
+         resolve();
+       }, 1000);
+     });
+     let finishedLoadingGamePromise = new Promise((resolve, reject) => {
+       setTimeout(() => {
+         resolve();
+       }, 2000);
+     });
+     return [foundGamePromise, finishedLoadingGamePromise];
+   } */
+  register(args) {
+    let { userId } = args;
+    this.currentUserId = userId
+    return userId;
+  }
+  createGame(args) {
+    this.server.createGame(args)
   }
 }
 

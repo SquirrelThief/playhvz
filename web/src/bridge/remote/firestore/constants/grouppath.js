@@ -15,24 +15,8 @@ limitations under the License.
 */
 
 /***********************************************************************
- * Class representing a Firestore Game object.
+ * Firebase constants for the Game collection.
  ***********************************************************************/
-const EMPTY_TIMESTAMP = 0
+class GroupPath { }
 
-class Game {
-  constructor(obj) {
-    Object.assign(this, obj);
-  }
-
-  id = null
-  name = null
-  startTime = EMPTY_TIMESTAMP
-  endTime = EMPTY_TIMESTAMP
-  creatorUserId = null
-  adminGroupId = null
-  adminOnCallPlayerId = null
-  figureheadAdminPlayerAccount = null
-  infectRewardId = null
-  rules = []
-  faq = []
-}
+GroupPath.COLLECTION_PATH = "groups";

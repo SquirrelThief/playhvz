@@ -19,12 +19,12 @@ limitations under the License.
  ***********************************************************************/
 class PlayerPath { }
 
-PlayerPath.PLAYER_COLLECTION_PATH = "players";
+PlayerPath.COLLECTION_PATH = "players";
 
 PlayerPath.PLAYERS_COLLECTION = function (db, gameId) {
-  return GamePath.GAMES_COLLECTION(db).doc(gameId).collection(PlayerPath.PLAYER_COLLECTION_PATH);
+  return GamePath.GAMES_COLLECTION(db).doc(gameId).collection(PlayerPath.COLLECTION_PATH);
 }
 
 PlayerPath.PLAYERS_QUERY = function (db) {
-  return db.collectionGroup(PlayerPath.PLAYER_COLLECTION_PATH);
+  return db.collectionGroup(PlayerPath.COLLECTION_PATH);
 }

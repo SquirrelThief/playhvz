@@ -12,33 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: High-level file comment.
-
+/** 
+ * This file fakes all the logic that happens in our Firebase Functions, directly creating
+ * the objects we expect and reading them back with no error checking, etc.
+ */
 'use strict';
 
 class FakeServer {
-  constructor(idGenerator, destination, time) {
+  constructor(idGenerator) {
     this.idGenerator = idGenerator;
-
-    this.destination = destination;
     this.game = null;
-    this.reader = null;
-    this.writer = null;
-
+    this.fakeDatabase = new FakeDatabase()
     window.fakeServer = this;
-  }
-
-  setupPrivateModelAndReaderAndWriter(game) {
-    this.game = game;
-    var writer = new SimpleWriter(this.game);
-    var mappingWriter = new MappingWriter(writer);
-    var teeWriter = new TeeWriter(
-      mappingWriter,
-      new CloningWriter(this.destination));
-    var batchingWriter = new BatchingWriter(teeWriter);
-    this.writer = batchingWriter;
-
-    this.reader = new PathFindingReader(new SimpleReader(this.game));
   }
 
   getTime_(args) {
@@ -47,17 +32,31 @@ class FakeServer {
       requestTimeOffset = 0;
     return new Date().getTime() + requestTimeOffset;
   }
+
   register(args) {
     let { userId } = args;
     return userId;
   }
+
   createGame(args) {
     let { gameId, creatorUserId } = args;
-    let modelGame = new Model.Game(gameId, args);
-    this.setupPrivateModelAndReaderAndWriter(modelGame);
-    this.writer.set([], modelGame);
-    this.addAdmin({ userId: creatorUserId });
+    this.game = new Game({
+      id: gameId,
+      name: args["name"],
+      startTime: args["startTime"],
+      endTime: args["endTime"],
+      creatorUserId: creatorUserId,
+    });
+    this.fakeDatabase.add(this.fakeDatabase.Type.game, gameId, this.game)
+    FakeGroupUtils.createManagedGroups(this.fakeDatabase, this.game);
+    FakeRewardUtils.createManagedRewards(this.fakeDatabase, this.game)
+    FakePlayerUtils.createFigureHeadPlayer(this.fakeDatabase, this.game)
   }
+
+  getGameList(userId) {
+
+  }
+
   setAdminContact(args) {
     let { playerId } = args;
     this.writer.set(["adminContactPlayerId"], playerId);

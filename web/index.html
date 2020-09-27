@@ -117,6 +117,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
 
+  <script src="/src/constants/defaults.js"></script>
   <script src="/src/utils/utils.js"></script>
   <script src="/src/utils/gatedwriter.js"></script>
   <script src="/src/utils/cloningwriter.js"></script>
@@ -144,12 +145,25 @@
   <script src="/src/bridge/pathfindingreader.js"></script>
 
   <!-- Firestore items -->
+  <script src="/src/bridge/remote/firestore/classmodels/chatroom.js"></script>
   <script src="/src/bridge/remote/firestore/classmodels/game.js"></script>
+  <script src="/src/bridge/remote/firestore/classmodels/group.js"></script>
   <script src="/src/bridge/remote/firestore/classmodels/player.js"></script>
+  <script src="/src/bridge/remote/firestore/classmodels/reward.js"></script>
   <script src="/src/bridge/remote/firestore/firestoreoperations.js"></script>
   <script src="/src/bridge/remote/firestore/utils/dataconverterutils.js"></script>
+  <script src="/src/bridge/remote/firestore/constants/chatpath.js"></script>
   <script src="/src/bridge/remote/firestore/constants/gamepath.js"></script>
+  <script src="/src/bridge/remote/firestore/constants/grouppath.js"></script>
   <script src="/src/bridge/remote/firestore/constants/playerpath.js"></script>
+  <script src="/src/bridge/remote/firestore/constants/rewardpath.js"></script>
+
+  <!-- Fake/Local Server items -->
+  <script src="/src/bridge/fake/firestore/fakedatabase.js"></script>
+  <script src="/src/bridge/fake/firestore/creationutils/fakechatutils.js"></script>
+  <script src="/src/bridge/fake/firestore/creationutils/fakegrouputils.js"></script>
+  <script src="/src/bridge/fake/firestore/creationutils/fakeplayerutils.js"></script>
+  <script src="/src/bridge/fake/firestore/creationutils/fakerewardutils.js"></script>
 
   <link rel="import" href="/src/active/active.html">
   <link rel="import" href="/src/active/inactive-dialog.html">

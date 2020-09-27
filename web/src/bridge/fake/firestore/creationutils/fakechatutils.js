@@ -1,5 +1,5 @@
 /*
- Copyright 2020 Google Inc.
+ * Copyright 2020 Google Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -12,19 +12,18 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 
-/***********************************************************************
- * Firebase constants for the Game collection.
- ***********************************************************************/
-class GamePath { }
+/** Class to mimic locally what firebase functions would have done on the server side. */
 
-GamePath.COLLECTION_PATH = "games";
+class FakeChatUtils { }
 
-GamePath.GAMES_COLLECTION = function (db) {
-  return db.collection(GamePath.COLLECTION_PATH);
-}
-
-GamePath.GAME_DOC_REF = function (db, gameId) {
-  return GamePath.GAMES_COLLECTION(db).doc(gameId);
+FakeChatUtils.create = function (associatedGroupId, chatName, withAdmins) {
+    let generatedId = Utils.generateFakeId();
+    return new ChatRoom({
+        id: generatedId,
+        name: chatName,
+        associatedGroupId: associatedGroupId,
+        withAdmins: withAdmins,
+    });
 }
