@@ -35,6 +35,8 @@ class FakeServer {
 
   register(args) {
     let { userId } = args;
+    let user = new User({ userId: userId })
+    this.fakeDatabase.setUser(userId, user)
     return userId;
   }
 

@@ -92,6 +92,7 @@ class FakeBridge {
   register(args) {
     let { userId } = args;
     this.currentUserId = userId
+    this.server.register(args)
     return userId;
   }
   createGame(args) {
