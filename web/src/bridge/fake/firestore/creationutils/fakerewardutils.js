@@ -37,8 +37,8 @@ FakeRewardUtils.createManagedRewards = function (fakeDatabase, game) {
     )
     infectRewardData.id = Utils.generateFakeId();
     declareRewardData.id = Utils.generateFakeId();
-    fakeDatabase.add(fakeDatabase.Type.reward, game.id, infectRewardData.id, infectRewardData)
-    fakeDatabase.add(fakeDatabase.Type.reward, game.id, declareRewardData.id, declareRewardData)
+    fakeDatabase.setReward(game.id, infectRewardData.id, infectRewardData)
+    fakeDatabase.setReward(game.id, declareRewardData.id, declareRewardData)
     game.infectRewardId = infectRewardData.id
 }
 

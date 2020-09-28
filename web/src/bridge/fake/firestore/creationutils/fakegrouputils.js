@@ -38,9 +38,9 @@ FakeGroupUtils.createManagedGroups = function (fakeDatabase, game) {
             settings,
         )
         groupData.id = generatedId
-        fakeDatabase.add(fakeDatabase.Type.group, game.id, generatedId, groupData);
+        fakeDatabase.setGroup(game.id, generatedId, groupData);
         const chatData = FakeChatUtils.create(groupData.id, chatName, /* withAdmins= */ false);
-        fakeDatabase.add(fakeDatabase.Type.chatRoom, game.id, chatData.id, chatData)
+        fakeDatabase.setChatRoom(game.id, chatData.id, chatData)
     }
 }
 

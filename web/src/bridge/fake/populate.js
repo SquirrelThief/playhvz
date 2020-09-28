@@ -120,7 +120,7 @@ function populatePlayersHeavy(bridge, gameId, gameStartOffset) {
 }
 
 /************************************************************************
- * START OF FUNCTIONS FOR POPULATING FAKE SERVER.
+ * START OF FUNCTIONS FOR POPULATING FAKE SERVER (for fake-app.html).
  ************************************************************************/
 
 /** Function used by fake-app.html to populate user data. */

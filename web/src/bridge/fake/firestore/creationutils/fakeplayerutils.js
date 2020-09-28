@@ -22,7 +22,7 @@ class FakePlayerUtils { }
 FakePlayerUtils.createFigureHeadPlayer = function (fakeDatabase, game) {
     let figureHeadPlayer = FakePlayerUtils.create("", Defaults.FIGUREHEAD_ADMIN_NAME)
     figureHeadPlayer.id = Utils.generateFakeId()
-    fakeDatabase.add(fakeDatabase.Type.player, game.id, figureHeadPlayer.id, figureHeadPlayer)
+    fakeDatabase.setPlayer(game.id, figureHeadPlayer.id, figureHeadPlayer)
     game.figureheadAdminPlayerAccount = figureHeadPlayer.id
 }
 

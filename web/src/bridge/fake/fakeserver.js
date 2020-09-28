@@ -47,7 +47,7 @@ class FakeServer {
       endTime: args["endTime"],
       creatorUserId: creatorUserId,
     });
-    this.fakeDatabase.add(this.fakeDatabase.Type.game, gameId, this.game)
+    this.fakeDatabase.setGame(gameId, this.game)
     FakeGroupUtils.createManagedGroups(this.fakeDatabase, this.game);
     FakeRewardUtils.createManagedRewards(this.fakeDatabase, this.game)
     FakePlayerUtils.createFigureHeadPlayer(this.fakeDatabase, this.game)

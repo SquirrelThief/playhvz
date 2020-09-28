@@ -15,89 +15,84 @@ limitations under the License.
  */
 
 // Fake JSON object that serves as our "firestore" database. Controls adding and reading objects/documents.
+// The main thing defined here that you might need to update is the firestore hierarchy. This is the 
+// class that defines hierarchy for the fake imitation of firestore. E.g. /games/gameId/[chatRoom|players|groups]/etc.
 // TODO: use seeded id generator so ids are the same every time instead of random.  
 
 class FakeDatabase {
-    // Type of database object/document we're setting/getting.
-    Type = {
-        game: "game",
-        chatRoom: "chatRoom",
-        group: "group",
-        player: "player",
-        reward: "reward",
-    };
-
     constructor() {
         this.fakeDb = {}
     }
 
-    /** 
-     * This function saves us some redundant copy-paste but might not be super readable :/. The key idea is
-     * that at certain levels of the database we perform the exact same type of operations. Namely, at the 
-     * root (/*) level the given collection name is the root collection name. At the <type> level, e.g. "groups",
-     * the collection path is /games/<gameId>/<typeCollectionName>/<itemId>, e.g. /games/<gameId>/groups/<groupId>.
-     * Instead of copy-pasting the same logic in all the places we just need to define the hierarchy correctly.
-     * 
-     * Adding a new database collection should be easy. Look at its ancestry and add a function that supports that
-     * ancestry. E.g. ancestry:
-     * /games/gameId 
-     *    -> function: "TopLevelItem"
-     *    -> functon args needed: gameId, gameData
-     * /games/gameId/players/playerId 
-     *    -> function: "GameSubItem" 
-     *    -> function args needed: gameId, playerId, playerData
-     * /games/gameId/rewards/rewardId/claimCodes/claimCodeId
-     *    -> function: "RewardSubItem"
-     *    -> function args needed: gameId, rewardId, claimCodeId, claimCodeData
-     */
-    add = function (type, ...args) {
-        if (args.length < 2) {
-            // Minimum args: [path ids], item id, item data.
-            throw "Too few args, expected item type, [pathIds], itemId, and itemData."
-        }
-        let collectionName = "error_an_id_was_passed_wrong_to_add"
-        switch (type) {
-            case this.Type.game:
-                // /games
-                collectionName = GamePath.COLLECTION_PATH;
-                this.addTopLevelItem(collectionName, /* id= */ args[0], /* object= */ args[1]);
-                break;
-            case this.Type.group:
-                // /games/gameId/groups
-                collectionName = GroupPath.COLLECTION_PATH;
-                this.addGameSubItem(collectionName, /* gameId= */ args[0], /* id= */ args[1], /* object= */ args[2]);
-                break;
-            case this.Type.chatRoom:
-                // /games/gameId/chatRooms
-                collectionName = ChatPath.COLLECTION_PATH;
-                this.addGameSubItem(collectionName, /* gameId= */ args[0], /* id= */ args[1], /* object= */ args[2]);
-                break;
-            case this.Type.player:
-                // /games/gameId/players
-                collectionName = PlayerPath.COLLECTION_PATH;
-                this.addGameSubItem(collectionName, /* gameId= */ args[0], /* id= */ args[1], /* object= */ args[2]);
-                break;
-            case this.Type.reward:
-                // /games/gameId/rewards
-                collectionName = RewardPath.COLLECTION_PATH;
-                this.addGameSubItem(collectionName, /* gameId= */ args[0], /* id= */ args[1], /* object= */ args[2]);
-                break;
+    setChatRoom(gameId, chatRoomId, chatRoom) {
+        this.verifyId(gameId)
+        this.verifyId(chatRoomId)
+        this.verifyObject(chatRoom)
+        let path = [GamePath.COLLECTION_PATH, gameId, ChatPath.COLLECTION_PATH, chatRoomId]
+        this.setItem(path, chatRoom);
+    }
+
+    setGame(gameId, game) {
+        this.verifyId(gameId)
+        this.verifyObject(game)
+        let path = [GamePath.COLLECTION_PATH, gameId]
+        this.setItem(path, game);
+    }
+
+    setGroup(gameId, groupId, group) {
+        this.verifyId(gameId)
+        this.verifyId(groupId)
+        this.verifyObject(group)
+        let path = [GamePath.COLLECTION_PATH, gameId, GroupPath.COLLECTION_PATH, groupId]
+        this.setItem(path, group);
+    }
+
+    setPlayer(gameId, playerId, player) {
+        this.verifyId(gameId)
+        this.verifyId(playerId)
+        this.verifyObject(player)
+        let path = [GamePath.COLLECTION_PATH, gameId, PlayerPath.COLLECTION_PATH, playerId]
+        this.setItem(path, player);
+    }
+
+    setReward(gameId, rewardId, reward) {
+        this.verifyId(gameId)
+        this.verifyId(rewardId)
+        this.verifyObject(reward)
+        let path = [GamePath.COLLECTION_PATH, gameId, RewardPath.COLLECTION_PATH, rewardId]
+        this.setItem(path, reward);
+    }
+
+    setUser(userId, user) {
+        this.verifyId(userId)
+        this.verifyObject(user)
+        let path = [UserPath.COLLECTION_PATH, userId]
+        this.setItem(path, user);
+    }
+
+    /** Adds an item to the fake database along the desired path. */
+    setItem(path, itemData) {
+        assert(path.length % 2 == 0)
+        let object = this.fakeDb
+        for (let i = 0; i < path.length; i += 2) {
+            let collectionName = path[i]
+            let itemId = path[i + 1]
+            if (!object[collectionName]) {
+                object[collectionName] = {}
+            }
+            if (i == path.length - 2) {
+                object[collectionName][itemId] = itemData
+            } else {
+                object = object[collectionName][itemId]
+            }
         }
     }
 
-    /** Adds an item to the root of the fake database (aka /*). */
-    addTopLevelItem(collectionName, itemId, itemData) {
-        if (!this.fakeDb[collectionName]) {
-            this.fakeDb[collectionName] = {}
-        }
-        this.fakeDb[collectionName][itemId] = itemData;
+    verifyId(id) {
+        assert(typeof id == 'string' && id)
     }
 
-    /** Adds an item to game's subcollection (aka /games/gameId/*). */
-    addGameSubItem(collectionName, gameId, itemId, itemData) {
-        if (!this.fakeDb[GamePath.COLLECTION_PATH][gameId][collectionName]) {
-            this.fakeDb[GamePath.COLLECTION_PATH][gameId][collectionName] = {}
-        }
-        this.fakeDb[GamePath.COLLECTION_PATH][gameId][collectionName][itemId] = itemData;
+    verifyObject(object) {
+        assert(typeof object == 'object')
     }
 }
