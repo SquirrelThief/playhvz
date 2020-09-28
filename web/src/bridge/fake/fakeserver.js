@@ -55,8 +55,36 @@ class FakeServer {
     FakePlayerUtils.createFigureHeadPlayer(this.fakeDatabase, this.game)
   }
 
-  getGameList(userId) {
+  joinGame(userId, gameName, playerName) {
+    let games = this.fakeDatabase.getAllGames()
+    let gameId = null
+    for (let game of games) {
+      if (game.name == gameName) {
+        gameId = game.id;
+        break;
+      }
+    }
+    assert(gameId)
+    let player = new Player({
+      id: Utils.generateFakeId(),
+      name: playerName,
+      userId: userId
+    })
+    this.fakeDatabase.setPlayer(gameId, player.id, player)
+  }
 
+  getGameList(userId) {
+    let games = this.fakeDatabase.getAllGames()
+    let playerGames = []
+    for (let game of games) {
+      for (let player of this.fakeDatabase.getAllPlayersOfGame(game.id)) {
+        if (player.userId == userId) {
+          playerGames.push(game)
+          continue;
+        }
+      }
+    }
+    return playerGames
   }
 
   setAdminContact(args) {

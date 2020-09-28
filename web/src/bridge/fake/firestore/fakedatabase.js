@@ -24,6 +24,14 @@ class FakeDatabase {
         this.fakeDb = {}
     }
 
+    getAllGames() {
+        return Object.values(this.fakeDb[GamePath.COLLECTION_PATH])
+    }
+
+    getAllPlayersOfGame(gameId) {
+        return Object.values(this.fakeDb[GamePath.COLLECTION_PATH][gameId][PlayerPath.COLLECTION_PATH])
+    }
+
     setChatRoom(gameId, chatRoomId, chatRoom) {
         this.verifyId(gameId)
         this.verifyId(chatRoomId)

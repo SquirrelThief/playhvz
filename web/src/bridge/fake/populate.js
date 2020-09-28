@@ -158,103 +158,67 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   let zekeUserId = 'user-' + config.fakeUserIds.zeke;
   let jackUserId = 'user-' + config.fakeUserIds.jack; */
 
+  let gameName = "Test game"
+
   bridge.createGame({
     gameId: gameId,
     creatorUserId: zellaUserId,
-    name: "Test game",
+    name: gameName,
     startTime: 1483344000000,
     endTime: 1483689600000,
   });
 
-  // TODO: SUPPORT THINGS BELOW THIS POINT.
-  return;
+  /*
+  // TODO: add support for this to firestore
+    bridge.addDefaultProfileImage({
+      gameId: gameId,
+      defaultProfileImageId: bridge.idGenerator.newGroupId(),
+      allegianceFilter: 'resistance',
+      profileImageUrl: 'http://dfwresistance.us/images/resistance-dfw-icon.png',
+    });
+    bridge.addDefaultProfileImage({
+      gameId: gameId,
+      defaultProfileImageId: bridge.idGenerator.newGroupId(),
+      allegianceFilter: 'resistance',
+      profileImageUrl: 'https://cdn.vectorstock.com/i/thumb-large/03/81/1890381.jpg',
+    });
+    bridge.addDefaultProfileImage({
+      gameId: gameId,
+      defaultProfileImageId: bridge.idGenerator.newGroupId(),
+      allegianceFilter: 'horde',
+      profileImageUrl: 'https://goo.gl/DP2vlY',
+    });
+    bridge.addDefaultProfileImage({
+      gameId: gameId,
+      defaultProfileImageId: bridge.idGenerator.newGroupId(),
+      allegianceFilter: 'horde',
+      profileImageUrl: 'https://cdn4.iconfinder.com/data/icons/miscellaneous-icons-3/200/monster_zombie_hand-512.png',
+    });
+  */
 
-  bridge.addDefaultProfileImage({
-    gameId: gameId,
-    defaultProfileImageId: bridge.idGenerator.newGroupId(),
-    allegianceFilter: 'resistance',
-    profileImageUrl: 'http://dfwresistance.us/images/resistance-dfw-icon.png',
-  });
-  bridge.addDefaultProfileImage({
-    gameId: gameId,
-    defaultProfileImageId: bridge.idGenerator.newGroupId(),
-    allegianceFilter: 'resistance',
-    profileImageUrl: 'https://cdn.vectorstock.com/i/thumb-large/03/81/1890381.jpg',
-  });
-  bridge.addDefaultProfileImage({
-    gameId: gameId,
-    defaultProfileImageId: bridge.idGenerator.newGroupId(),
-    allegianceFilter: 'horde',
-    profileImageUrl: 'https://goo.gl/DP2vlY',
-  });
-  bridge.addDefaultProfileImage({
-    gameId: gameId,
-    defaultProfileImageId: bridge.idGenerator.newGroupId(),
-    allegianceFilter: 'horde',
-    profileImageUrl: 'https://cdn4.iconfinder.com/data/icons/miscellaneous-icons-3/200/monster_zombie_hand-512.png',
-  });
 
-  let everyoneGroupId = bridge.idGenerator.newGroupId('everyone');
-  let everyoneChatRoomId = bridge.idGenerator.newChatRoomId('everyone');
-  bridge.createGroup({
-    gameId: gameId,
-    groupId: everyoneGroupId,
-    name: "Everyone",
-    ownerPlayerId: null,
-    allegianceFilter: 'none',
-    autoAdd: true,
-    autoRemove: false,
-    canAddOthers: false,
-    canRemoveOthers: false,
-    canAddSelf: false,
-    canRemoveSelf: false,
-  });
-  bridge.createChatRoom({
-    gameId: gameId,
-    chatRoomId: everyoneChatRoomId,
-    accessGroupId: everyoneGroupId,
-    name: "Global Chat",
-    withAdmins: false
-  });
-
-  var resistanceGroupId = bridge.idGenerator.newGroupId('resistance');
-  bridge.createGroup({
-    gameId: gameId,
-    groupId: resistanceGroupId,
-    name: "Resistance",
-    ownerPlayerId: null,
-    allegianceFilter: 'resistance',
-    autoAdd: true,
-    autoRemove: true,
-    canAddOthers: false,
-    canRemoveOthers: false,
-    canAddSelf: false,
-    canRemoveSelf: false,
-  });
-  var resistanceChatRoomId = bridge.idGenerator.newChatRoomId('resistance');
-  bridge.createChatRoom({
-    gameId: gameId,
-    chatRoomId: resistanceChatRoomId,
-    accessGroupId: resistanceGroupId,
-    name: "Resistance Comms Hub",
-    withAdmins: false
-  });
-
-  bridge.addAdmin({
-    gameId: gameId,
-    userId: minnyUserId
-  });
-
+  /*
+    bridge.addAdmin({
+      gameId: gameId,
+      userId: minnyUserId
+    });
+  */
   var zellaPlayerId = bridge.idGenerator.newPublicPlayerId();
-  bridge.createPlayer(makePlayerProperties(zellaPlayerId, zellaUserId, gameId, 1483257600000, 'ZellaTheUltimate'));
-  bridge.joinResistance({
+  let zellaName = "ZellaTheUltimate";
+  bridge.joinGame(gameName, zellaName);
+
+  //bridge.createPlayer(makePlayerProperties(zellaPlayerId, zellaUserId, gameId, 1483257600000, 'ZellaTheUltimate'));
+
+  /*bridge.joinResistance({
     gameId: gameId,
     playerId: zellaPlayerId,
     lifeCode: "glarple-zerp-wobbledob",
     lifeId: bridge.idGenerator.newPublicLifeId(),
     privateLifeId: null,
   });
-
+*/
+  // TODO: SUPPORT THINGS BELOW THIS POINT.
+  return;
   var deckerdPlayerId = bridge.idGenerator.newPublicPlayerId();
   bridge.createPlayer(makePlayerProperties(deckerdPlayerId, deckerdUserId, gameId, 1483257600000, 'DeckerdTheHesitant'));
 

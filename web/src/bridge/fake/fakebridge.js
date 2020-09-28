@@ -55,10 +55,6 @@ class FakeBridge {
     });
   }
 
-  getGameList(userId) {
-    return this.server.getGameList(userId)
-  }
-
   /* listenToGame(userId, gameId, destination) {
      var gatedWriter = new GatedWriter(new MappingWriter(destination), false);
      var cloningWriter = new CloningWriter(gatedWriter);
@@ -95,8 +91,19 @@ class FakeBridge {
     this.server.register(args)
     return userId;
   }
+
   createGame(args) {
     this.server.createGame(args)
+  }
+
+  getGameList(userId) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.getGameList(userId))
+    });
+  }
+
+  joinGame(gameName, playerName) {
+    this.server.joinGame(this.currentUserId, gameName, playerName);
   }
 }
 

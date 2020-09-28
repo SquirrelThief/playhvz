@@ -37,26 +37,8 @@
         ],
 
         getGameList_() {
-          let gameIdArray = [];
-          // Get all the game ids for which this user has a player, then
-          // get all of those games.
-          this.bridge.getGameList(this.userId).then(querySnapshot => {
-            let gameDocSnapshotPromises = [];
-            for (doc of querySnapshot.docs) {
-              const gameId = doc.ref.parent.parent.id
-              const promise = this.bridge.getGame(gameId)
-              gameDocSnapshotPromises.push(promise);
-            }
-            // Once we have all the game docs, we can now render the data.
-            Promise.all(gameDocSnapshotPromises).then(valueSnapshots => {
-              let gameArray = []
-              for (docSnapshot of valueSnapshots) {
-                if (docSnapshot.exists) {
-                  gameArray.push(DataConverterUtils.convertSnapshotToGame(docSnapshot));
-                }
-              }
-              this.games = gameArray;
-            });
+          this.bridge.getGameList(this.userId).then(gameArray => {
+            this.games = gameArray;
           });
         },
 

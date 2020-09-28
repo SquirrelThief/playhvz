@@ -78,7 +78,10 @@ class Bridge {
     return this.inner.setPlayerId(playerId);
   }
 
+  //////////////////////////////////////////////////////////////////////
   // Start of new Firestore supporting functions.
+  //////////////////////////////////////////////////////////////////////
+  /** Returns an array of Game objects. */
   getGameList(userId) {
     return this.inner.getGameList(userId);
   }
@@ -86,7 +89,14 @@ class Bridge {
   getGame(gameId) {
     return this.inner.getGame(gameId);
   }
+
+  joinGame(gameName, playerName) {
+    return this.inner.joinGame(gameName, playerName);
+  }
+  //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
+  //////////////////////////////////////////////////////////////////////
+
 
   check_(typeName, value) {
     if (typeName.startsWith('!'))

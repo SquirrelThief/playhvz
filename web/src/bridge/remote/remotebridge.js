@@ -116,14 +116,38 @@ class RemoteBridge {
     return firebase.auth().signOut();
   }
 
+  ///////////////////////////////////////////////////////////////
   // Start of new Firestore support functions.
+  ///////////////////////////////////////////////////////////////
   getGameList(userId) {
-    return this.firestoreOperations.getGamesByPlayer(userId);
+    // Get all the game ids for which this user has a player, then
+    // get all of those games.
+    return this.firestoreOperations.getGamesByPlayer(userId).then(querySnapshot => {
+      let gameDocSnapshotPromises = [];
+      for (let doc of querySnapshot.docs) {
+        const gameId = doc.ref.parent.parent.id
+        const promise = this.getGame(gameId)
+        gameDocSnapshotPromises.push(promise);
+      }
+      // Once we have all the game docs, we can now render the data.
+      return Promise.all(gameDocSnapshotPromises).then(valueSnapshots => {
+        let gameArray = []
+        for (let docSnapshot of valueSnapshots) {
+          if (docSnapshot.exists) {
+            gameArray.push(DataConverterUtils.convertSnapshotToGame(docSnapshot));
+          }
+        }
+        return gameArray;
+      });
+    });
   }
+
   getGame(gameId) {
     return this.firestoreOperations.getGame(gameId);
   }
+  ///////////////////////////////////////////////////////////////
   // End of new Firestore support functions.
+  ///////////////////////////////////////////////////////////////
 
   // Deprecated
   listenToGame(userId, gameId, destination) {
