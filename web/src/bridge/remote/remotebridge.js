@@ -143,7 +143,12 @@ class RemoteBridge {
   }
 
   getGame(gameId) {
-    return this.firestoreOperations.getGame(gameId);
+    return this.firestoreOperations.getGame(gameId).then(docSnapshot => {
+      if (!docSnapshot.exists) {
+        return null
+      }
+      return DataConverterUtils.convertSnapshotToGame(docSnapshot);
+    });
   }
   ///////////////////////////////////////////////////////////////
   // End of new Firestore support functions.

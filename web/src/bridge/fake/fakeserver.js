@@ -87,6 +87,15 @@ class FakeServer {
     return playerGames
   }
 
+  getGame(gameId) {
+    let games = this.fakeDatabase.getAllGames()
+    for (let game of games) {
+      if (game.id == gameId) {
+        return game
+      }
+    }
+  }
+
   setAdminContact(args) {
     let { playerId } = args;
     this.writer.set(["adminContactPlayerId"], playerId);

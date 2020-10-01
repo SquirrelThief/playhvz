@@ -152,13 +152,13 @@
             let trimmedGameId = this.path[1];
             this.gameId = trimmedGameId;
             this.showLoadingSpinner = true;
-            this.bridge.getGame(this.gameId).then(docSnapshot => {
+            this.bridge.getGame(this.gameId).then(game => {
               this.showLoadingSpinner = false;
-              if (!docSnapshot.exists) {
+              if (!game) {
                 // If the game doesn't exist then navigate to the user's game list.
                 this.setPath_(["gameList"], /* replace= */ true);
               }
-              this.set('game', DataConverterUtils.convertSnapshotToGame(docSnapshot));
+              this.set('game', game);
             });
           }
         },
