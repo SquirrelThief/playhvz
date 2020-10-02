@@ -93,6 +93,14 @@ class Bridge {
   joinGame(gameName, playerName) {
     return this.inner.joinGame(gameName, playerName);
   }
+
+  getPlayer(userId, gameId) {
+    return this.inner.getPlayer(userId, gameId);
+  }
+
+  changePlayerAllegiance(gameId, playerId, newAllegiance) {
+    return this.inner.changePlayerAllegiance(gameId, playerId, newAllegiance)
+  }
   //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
   //////////////////////////////////////////////////////////////////////

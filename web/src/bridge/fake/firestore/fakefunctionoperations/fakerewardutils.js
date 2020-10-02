@@ -35,8 +35,8 @@ FakeRewardUtils.createManagedRewards = function (fakeDatabase, game) {
         Defaults.DECLARE_REWARD_POINTS,
         /* managed= */ true
     )
-    infectRewardData.id = Utils.generateFakeId();
-    declareRewardData.id = Utils.generateFakeId();
+    infectRewardData.id = fakeDatabase.idGenerator.generateId("reward", "infect");
+    declareRewardData.id = fakeDatabase.idGenerator.generateId("reward", "declare");
     fakeDatabase.setReward(game.id, infectRewardData.id, infectRewardData)
     fakeDatabase.setReward(game.id, declareRewardData.id, declareRewardData)
     game.infectRewardId = infectRewardData.id

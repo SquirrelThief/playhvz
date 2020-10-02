@@ -20,6 +20,10 @@ limitations under the License.
 class GamePath { }
 
 GamePath.COLLECTION_PATH = "games";
+GamePath.FIELD__ADMIN_GROUP_ID = "adminGroupId";
+GamePath.FIELD__OWNERS = "owners";
+GamePath.FIELD__CREATOR_USER_ID = "creatorUserId";
+GamePath.FIELD__ADMIN_ON_CALL_PLAYER_ID = "adminOnCallPlayerId";
 
 GamePath.GAMES_COLLECTION = function (db) {
   return db.collection(GamePath.COLLECTION_PATH);

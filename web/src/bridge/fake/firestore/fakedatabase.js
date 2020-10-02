@@ -20,7 +20,8 @@ limitations under the License.
 // TODO: use seeded id generator so ids are the same every time instead of random.  
 
 class FakeDatabase {
-    constructor() {
+    constructor(idGenerator) {
+        this.idGenerator = idGenerator
         this.fakeDb = {}
     }
 
@@ -28,8 +29,38 @@ class FakeDatabase {
         return Object.values(this.fakeDb[GamePath.COLLECTION_PATH])
     }
 
+    getGame(gameId) {
+        return this.fakeDb[GamePath.COLLECTION_PATH][gameId];
+    }
+
     getAllPlayersOfGame(gameId) {
         return Object.values(this.fakeDb[GamePath.COLLECTION_PATH][gameId][PlayerPath.COLLECTION_PATH])
+    }
+
+    getPlayer(gameId, playerId) {
+        return this.fakeDb[GamePath.COLLECTION_PATH][gameId][PlayerPath.COLLECTION_PATH][playerId];
+    }
+
+    getPlayerByName(gameId, playerName) {
+        let players = this.getAllPlayersOfGame(gameId);
+        for (let player of players) {
+            if (player.name == playerName) {
+                return player
+            }
+        }
+        return null
+    }
+
+    getAllGroupsOfGame(gameId) {
+        return Object.values(this.fakeDb[GamePath.COLLECTION_PATH][gameId][GroupPath.COLLECTION_PATH])
+    }
+
+    getGroup(gameId, groupId) {
+        return this.fakeDb[GamePath.COLLECTION_PATH][gameId][GroupPath.COLLECTION_PATH][groupId];
+    }
+
+    getAllChatsOfGame(gameId) {
+        return Object.values(this.fakeDb[GamePath.COLLECTION_PATH][gameId][ChatPath.COLLECTION_PATH])
     }
 
     setChatRoom(gameId, chatRoomId, chatRoom) {

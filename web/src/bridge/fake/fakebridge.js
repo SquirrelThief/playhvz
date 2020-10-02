@@ -109,7 +109,19 @@ class FakeBridge {
   }
 
   joinGame(gameName, playerName) {
-    this.server.joinGame(this.currentUserId, gameName, playerName);
+    return this.server.joinGame(this.currentUserId, gameName, playerName);
+  }
+
+  getPlayer(userId, gameId) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.getPlayer(userId, gameId));
+    });
+  }
+
+  changePlayerAllegiance(gameId, playerId, newAllegiance) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.changePlayerAllegiance(gameId, playerId, newAllegiance));
+    });
   }
 }
 

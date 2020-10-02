@@ -203,11 +203,11 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
       userId: minnyUserId
     });
   */
-  var zellaPlayerId = bridge.idGenerator.newPublicPlayerId();
+  //var zellaPlayerId = bridge.idGenerator.newPublicPlayerId();
   let zellaName = "ZellaTheUltimate";
-  bridge.joinGame(gameName, zellaName);
+  var zellaPlayerId = bridge.joinGame(gameName, zellaName);
+  bridge.changePlayerAllegiance(gameId, zellaPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
-  //bridge.createPlayer(makePlayerProperties(zellaPlayerId, zellaUserId, gameId, 1483257600000, 'ZellaTheUltimate'));
 
   /*bridge.joinResistance({
     gameId: gameId,

@@ -20,3 +20,7 @@ limitations under the License.
 class ChatPath { }
 
 ChatPath.COLLECTION_PATH = "chatRooms";
+ChatPath.FIELD_NAME = "name";
+ChatPath.FIELD_ASSOCIATED_GROUP_ID = "associatedGroupId";
+ChatPath.FIELD_WITH_ADMINS = "withAdmins";
+ChatPath.FIELD_IS_VISIBLE = "isVisible";

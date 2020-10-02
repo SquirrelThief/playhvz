@@ -22,7 +22,7 @@ class FakeServer {
   constructor(idGenerator) {
     this.idGenerator = idGenerator;
     this.game = null;
-    this.fakeDatabase = new FakeDatabase()
+    this.fakeDatabase = new FakeDatabase(idGenerator)
     window.fakeServer = this;
   }
 
@@ -66,11 +66,12 @@ class FakeServer {
     }
     assert(gameId)
     let player = new Player({
-      id: Utils.generateFakeId(),
+      id: this.fakeDatabase.idGenerator.generateId("player", ""),
       name: playerName,
       userId: userId
     })
     this.fakeDatabase.setPlayer(gameId, player.id, player)
+    return player.id
   }
 
   getGameList(userId) {
@@ -94,6 +95,25 @@ class FakeServer {
         return game
       }
     }
+  }
+
+  getPlayer(userId, gameId) {
+    for (let player of this.fakeDatabase.getAllPlayersOfGame(gameId)) {
+      if (player.userId == userId) {
+        return player
+      }
+    }
+    return null
+  }
+
+  changePlayerAllegiance(gameId, playerId, newAllegiance) {
+    return FakePlayerUtils.internallyChangePlayerAllegiance(
+      this.fakeDatabase,
+      gameId,
+      playerId,
+      newAllegiance,
+      this.getTime_({ requestTimeOffset: 5 }),
+      this.idGenerator.newPublicLifeId("allegiancechange"))
   }
 
   setAdminContact(args) {

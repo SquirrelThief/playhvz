@@ -20,3 +20,16 @@ limitations under the License.
 class GroupPath { }
 
 GroupPath.COLLECTION_PATH = "groups";
+GroupPath.FIELD__NAME = "name";
+GroupPath.FIELD__MANAGED = "managed";
+GroupPath.FIELD__MEMBERS = "members";
+GroupPath.FIELD__OWNERS = "owners";
+GroupPath.FIELD__SETTINGS = "settings";
+GroupPath.FIELD__SETTINGS_ALLEGIANCE_FILTER = "allegianceFilter";
+GroupPath.FIELD__SETTINGS_ADD_SELF = "canAddSelf";
+GroupPath.FIELD__SETTINGS_ADD_OTHERS = "canAddOthers";
+GroupPath.FIELD__SETTINGS_REMOVE_SELF = "canRemoveSelf";
+GroupPath.FIELD__SETTINGS_REMOVE_OTHERS = "canRemoveOthers";
+GroupPath.FIELD__SETTINGS_AUTO_ADD = "autoAdd";
+GroupPath.FIELD__SETTINGS_AUTO_REMOVE = "autoRemove";
+GroupPath.FIELD__SETTINGS_ALLEGIANCE_FILTER = "allegianceFilter";

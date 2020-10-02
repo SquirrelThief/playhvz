@@ -21,6 +21,17 @@ class PlayerPath { }
 
 PlayerPath.COLLECTION_PATH = "players";
 
+PlayerPath.FIELD__NAME = "name";
+PlayerPath.FIELD_ALLEGIANCE = "allegiance";
+PlayerPath.FIELD__USER_ID = "userId";
+PlayerPath.FIELD__LIVES = "lives";
+PlayerPath.FIELD__LIFE_CODE = "lifeCode";
+PlayerPath.FIELD__LIFE_CODE_STATUS = "isActive";
+PlayerPath.FIELD__LIFE_CODE_TIMESTAMP = "created";
+PlayerPath.FIELD__CHAT_MEMBERSHIPS = "chatRoomMemberships";
+PlayerPath.FIELD__CHAT_VISIBILITY = "isVisible";
+PlayerPath.FIELD__CHAT_NOTIFICATIONS = "allowNotifications";
+
 PlayerPath.PLAYERS_COLLECTION = function (db, gameId) {
   return GamePath.GAMES_COLLECTION(db).doc(gameId).collection(PlayerPath.COLLECTION_PATH);
 }

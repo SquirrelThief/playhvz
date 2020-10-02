@@ -82,7 +82,6 @@
         observers: [
           'onBridgeSet_(bridge, userId)',
           'loadGameInPath_(bridge, path, userId)',
-          'selectPlayer_(bridge, userId, game.players.length)',
           'navigateGameToDashboard_(bridge, path)',
         ],
 
@@ -153,28 +152,26 @@
             this.gameId = trimmedGameId;
             this.showLoadingSpinner = true;
             this.bridge.getGame(this.gameId).then(game => {
-              this.showLoadingSpinner = false;
+              //this.showLoadingSpinner = false;
               if (!game) {
                 // If the game doesn't exist then navigate to the user's game list.
                 this.setPath_(["gameList"], /* replace= */ true);
               }
-              this.set('game', game);
-            });
-          }
-        },
-
-        selectPlayer_() {
-          if (this.userId && this.game && !this.playerId) {
-            let player = this.game.players.find(player => player.userId == this.userId);
-            if (player) {
-              this.playerId = player.id;
-              // Async so we dont accidentally cause calls into firebaselistener
-              // while we're already reacting to something from it.
-              this.async(() => {
-                // This also causes player to be set, via the player-selector.
-                this.$.playerSelector.select(this.game.playersById[this.playerId]);
+              this.bridge.getPlayer(this.userId, game.id).then(player => {
+                if (player) {
+                  this.playerId = player.id
+                  // Async so we dont accidentally cause calls into firebaselistener
+                  // while we're already reacting to something from it.
+                  this.async(() => {
+                    // This also causes player to be set, via the player-selector.
+                    this.$.playerSelector.select(this.game.playersById[this.playerId]);
+                  });
+                }
+                this.showLoadingSpinner = false;
+                this.set('game', game);
+                this.set('player', player);
               });
-            }
+            });
           }
         },
 
