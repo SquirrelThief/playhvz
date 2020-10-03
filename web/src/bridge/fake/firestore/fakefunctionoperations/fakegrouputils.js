@@ -51,7 +51,7 @@ FakeGroupUtils.createManagedGroup = function (name, settings) {
         [GroupPath.FIELD__MANAGED]: true,
         [GroupPath.FIELD__OWNERS]: [],
         [GroupPath.FIELD__SETTINGS]: settings,
-        [GroupPath.FIELD__MEMBERS]: new Set()
+        [GroupPath.FIELD__MEMBERS]: []
     });
 }
 
@@ -87,7 +87,7 @@ FakeGroupUtils.updatePlayerMembershipInGroups = function (fakeDatabase, gameId, 
 
 // Add a new player to managed groups
 FakeGroupUtils.addPlayerToManagedGroups = function (fakeDatabase, gameId, player, ignoreAllegiance) {
-    let playerAllegiance = player[PlayerPath.FIELD_ALLEGIANCE]
+    let playerAllegiance = player[PlayerPath.FIELD__ALLEGIANCE]
     let groups = fakeDatabase.getAllGroupsOfGame(gameId)
     let managedGroups = []
     for (let group of groups) {
@@ -115,7 +115,7 @@ FakeGroupUtils.addPlayerToManagedGroups = function (fakeDatabase, gameId, player
 
 // Remove player from *any* auto-remove groups
 FakeGroupUtils.removePlayerFromGroups = function (fakeDatabase, gameId, player) {
-    let playerAllegiance = player[PlayerPath.FIELD_ALLEGIANCE]
+    let playerAllegiance = player[PlayerPath.FIELD__ALLEGIANCE]
     let groups = fakeDatabase.getAllGroupsOfGame(gameId)
     let autoRemoveGroups = []
     for (let group of groups) {
@@ -139,13 +139,13 @@ FakeGroupUtils.addPlayerToGroup = function (fakeDatabase, gameId, groupId, playe
     let chats = fakeDatabase.getAllChatsOfGame(gameId)
     let groupChatRoom = null
     for (let chat of chats) {
-        if (chat[ChatPath.FIELD_ASSOCIATED_GROUP_ID] == group.id) {
+        if (chat[ChatPath.FIELD__ASSOCIATED_GROUP_ID] == group.id) {
             groupChatRoom = chat;
         }
     }
     if (groupChatRoom == null) {
         // Group is not associated with any chat rooms, just update membership directly
-        group[GroupPath.FIELD__MEMBERS].add(player.id)
+        group[GroupPath.FIELD__MEMBERS].push(player.id)
         return
     }
     // Group is associated with a chat room (we can assume only one chat room per group).
@@ -158,13 +158,16 @@ FakeGroupUtils.removePlayerFromGroup = function (fakeDatabase, gameId, groupId, 
     let chats = fakeDatabase.getAllChatsOfGame(gameId)
     let groupChatRoom = null
     for (let chat of chats) {
-        if (chat[ChatPath.FIELD_ASSOCIATED_GROUP_ID] == group.id) {
+        if (chat[ChatPath.FIELD__ASSOCIATED_GROUP_ID] == group.id) {
             groupChatRoom = chat;
         }
     }
     if (groupChatRoom == null) {
         // Group is not associated with any chat rooms, just update membership directly
-        group[GroupPath.FIELD__MEMBERS].delete(player.id)
+        let position = group[GroupPath.FIELD__MEMBERS].indexOf(player.id)
+        if (position) {
+            group[GroupPath.FIELD__MEMBERS].splice(position, 1);
+        }
         return
     }
     // Group is associated with a chat room (we can assume only one chat room per group).

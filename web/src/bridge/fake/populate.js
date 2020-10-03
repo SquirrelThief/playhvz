@@ -122,26 +122,28 @@ function populatePlayersHeavy(bridge, gameId, gameStartOffset) {
 /************************************************************************
  * START OF FUNCTIONS FOR POPULATING FAKE SERVER (for fake-app.html).
  ************************************************************************/
+let zellaUserId;
+let zekeUserId;
 
 /** Function used by fake-app.html to populate user data. */
 function populateUsers(bridge, config) {
-  let zellaUserId = 'user-' + config.fakeUserIds.zella;
+  this.zellaUserId = 'user-' + config.fakeUserIds.zella;
+  this.zekeUserId = 'user-' + config.fakeUserIds.zeke;
   /*let reggieUserId = 'user-' + config.fakeUserIds.reggie;
-  let minnyUserId = 'user-' + config.fakeUserIds.minny;
-  let deckerdUserId = 'user-' + config.fakeUserIds.deckerd;
-  let drakeUserId = 'user-' + config.fakeUserIds.drake;
-  let moldaviUserId = 'user-' + config.fakeUserIds.moldavi;
-  let zekeUserId = 'user-' + config.fakeUserIds.zeke;
-  let jackUserId = 'user-' + config.fakeUserIds.jack;*/
+    let minnyUserId = 'user-' + config.fakeUserIds.minny;
+    let deckerdUserId = 'user-' + config.fakeUserIds.deckerd;
+    let drakeUserId = 'user-' + config.fakeUserIds.drake;
+    let moldaviUserId = 'user-' + config.fakeUserIds.moldavi;
+    let jackUserId = 'user-' + config.fakeUserIds.jack;*/
 
-  bridge.register({ userId: zellaUserId });
+  bridge.register({ userId: this.zellaUserId });
+  bridge.register({ userId: this.zekeUserId });
   /*bridge.register({ userId: reggieUserId });
-  bridge.register({ userId: minnyUserId });
-  bridge.register({ userId: drakeUserId });
-  bridge.register({ userId: zekeUserId });
-  bridge.register({ userId: moldaviUserId });
-  bridge.register({ userId: jackUserId });
-  bridge.register({ userId: deckerdUserId });*/
+    bridge.register({ userId: minnyUserId });
+    bridge.register({ userId: drakeUserId }); 
+    bridge.register({ userId: moldaviUserId });
+    bridge.register({ userId: jackUserId });
+    bridge.register({ userId: deckerdUserId });*/
 }
 
 /** Function used by fake-app.html to populate game data. */
@@ -203,56 +205,36 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
       userId: minnyUserId
     });
   */
-  //var zellaPlayerId = bridge.idGenerator.newPublicPlayerId();
+ 
   let zellaName = "ZellaTheUltimate";
+  bridge.signIn({ userId: this.zellaUserId });
   var zellaPlayerId = bridge.joinGame(gameName, zellaName);
   bridge.changePlayerAllegiance(gameId, zellaPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
-
-  /*bridge.joinResistance({
-    gameId: gameId,
-    playerId: zellaPlayerId,
-    lifeCode: "glarple-zerp-wobbledob",
-    lifeId: bridge.idGenerator.newPublicLifeId(),
-    privateLifeId: null,
-  });
-*/
-  // TODO: SUPPORT THINGS BELOW THIS POINT.
-  return;
+  let zekeName = "Zeke";
+  bridge.signOut({ userId: this.zellaUserId });
+  bridge.signIn({ userId: this.zekeUserId });
+  var zekePlayerId = bridge.joinGame(gameName, zekeName);
+  bridge.changePlayerAllegiance(gameId, zekePlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+  bridge.signOut({ userId: this.zekeUserId });
+  bridge.signIn({ userId: this.zellaUserId });
+  /*
   var deckerdPlayerId = bridge.idGenerator.newPublicPlayerId();
   bridge.createPlayer(makePlayerProperties(deckerdPlayerId, deckerdUserId, gameId, 1483257600000, 'DeckerdTheHesitant'));
+  */
 
-  bridge.sendChatMessage({
-    gameId: gameId,
-    messageId: bridge.idGenerator.newMessageId(),
-    chatRoomId: resistanceChatRoomId,
-    playerId: zellaPlayerId,
-    message: 'yo dawg i hear the zeds r comin!'
-  });
+  let globalChatRoomId = "chat-Global Chat-1";
+  let adminChatRoomId = "chat-Admins-2";
+  let resistanceChatRoomId = "chat-Resistance Chat-3";
+  let hordeChatRoomId = "chat-Horde Chat-4";
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, zellaPlayerId, 'Hello World!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, zekePlayerId, 'What up?');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, zellaPlayerId, 'yo dawg i hear the zeds r comin!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, zellaPlayerId, 'they are hereeee!!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), adminChatRoomId, zellaPlayerId, 'FOR GLORY!');
 
-  var hordeGroupId = bridge.idGenerator.newGroupId('horde');
-  bridge.createGroup({
-    groupId: hordeGroupId,
-    name: "Horde",
-    gameId: gameId,
-    ownerPlayerId: null,
-    allegianceFilter: 'horde',
-    autoAdd: true,
-    canAddOthers: true,
-    autoRemove: true,
-    canAddOthers: false,
-    canRemoveOthers: false,
-    canAddSelf: false,
-    canRemoveSelf: false,
-  });
-  var zedChatRoomId = bridge.idGenerator.newChatRoomId('horde');
-  bridge.createChatRoom({
-    gameId: gameId,
-    chatRoomId: zedChatRoomId,
-    accessGroupId: hordeGroupId,
-    name: "Horde ZedLink",
-    withAdmins: false
-  });
+  // TODO: SUPPORT THINGS BELOW THIS POINT.
+  return;
 
   var moldaviPlayerId = bridge.idGenerator.newPublicPlayerId();
   bridge.addAdmin({

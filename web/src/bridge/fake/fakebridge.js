@@ -118,11 +118,43 @@ class FakeBridge {
     });
   }
 
+  listenToPlayer(gameId, playerId) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.listenToPlayer(gameId, playerId));
+    });
+  }
+
   changePlayerAllegiance(gameId, playerId, newAllegiance) {
     return new Promise((resolve, reject) => {
       resolve(this.server.changePlayerAllegiance(gameId, playerId, newAllegiance));
     });
   }
+
+  listenToChatRoom(gameId, chatRoomId) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.listenToChatRoom(gameId, chatRoomId));
+    });
+  }
+
+  listenToGroup(gameId, groupId) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.listenToGroup(gameId, groupId));
+    });
+  }
+
+  listenToChatRoomMessages(gameId, chatRoomId) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.listenToChatRoomMessages(gameId, chatRoomId));
+    });
+  }
+
+  sendChatMessage(gameId, messageId, chatRoomId, playerId, message) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.sendChatMessage(gameId, messageId, chatRoomId, playerId, message));
+    });
+  }
+
+
 }
 
 function CloningWrapper(inner, funcNames) {

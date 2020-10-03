@@ -23,6 +23,7 @@
         is: 'ghvz-player-avatar',
 
         properties: {
+          bridge: Object,
           game: Object,
           playerId: String,
           withTooltip: {
@@ -34,11 +35,13 @@
         },
 
         observers: [
-          'onPlayerIdChanged_(playerId, game.playersById)',
+          'onPlayerIdChanged_(playerId, bridge, game)',
         ],
 
-        onPlayerIdChanged_(playerId, playersById) {
-          this.$.selector.select(playersById[playerId]);
+        onPlayerIdChanged_(playerId) {
+          this.bridge.listenToPlayer(this.game.id, this.playerId).then(player => {
+            this.player = player;
+          })
         },
 
         getAliveStatus_(allegiance) {
@@ -85,9 +88,8 @@
     }
   </style>
   <template>
-    <array-selector id="selector" items="[[game.players]]" selected="{{player}}"></array-selector>
     <!-- Circular image style thanks to: https://jsfiddle.net/rvem3v8d/ -->
-    <div style$="background-image: url('[[player.profileImageUrl]]')"
+    <div style$="background-image: url('[[player.avatarUrl]]')"
       class$="profile-pic [[getAliveStatusClass_(player.allegiance)]]">
     </div>
     <template is="dom-if" if="[[withTooltip]]">

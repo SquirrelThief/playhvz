@@ -29,14 +29,19 @@ Utils.generateId = function (type, note) {
 }
 
 /*
-* Generates a random number to use as an ID. Probability of id collision
-* is negligible.
-*/
-Utils.generateFakeId = function (note = null) {
-  let result = ""
-  if (note)
-    result += note + "-";
-  return result + new Date().getTime() + "-" + Math.floor(Math.random() * Math.pow(2, 32));
+ * Util for converting a map to an array for dom-repeat. Array items are of the form:
+ * {key: map.key, value: map[key]}.
+ */
+Utils.toArray = function (map) {
+  if (map == null) {
+    return []
+  }
+  return Object.keys(map).map(function (key) {
+    return {
+      key: key,
+      value: map[key]
+    };
+  });
 }
 
 /*

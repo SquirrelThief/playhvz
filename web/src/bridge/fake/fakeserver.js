@@ -65,11 +65,8 @@ class FakeServer {
       }
     }
     assert(gameId)
-    let player = new Player({
-      id: this.fakeDatabase.idGenerator.generateId("player", ""),
-      name: playerName,
-      userId: userId
-    })
+    let player = FakePlayerUtils.create(userId, playerName);
+    player.id = this.fakeDatabase.idGenerator.generateId("player", "");
     this.fakeDatabase.setPlayer(gameId, player.id, player)
     return player.id
   }
@@ -106,6 +103,10 @@ class FakeServer {
     return null
   }
 
+  listenToPlayer(gameId, playerId) {
+    return this.fakeDatabase.getPlayer(gameId, playerId);
+  }
+
   changePlayerAllegiance(gameId, playerId, newAllegiance) {
     return FakePlayerUtils.internallyChangePlayerAllegiance(
       this.fakeDatabase,
@@ -114,6 +115,24 @@ class FakeServer {
       newAllegiance,
       this.getTime_({ requestTimeOffset: 5 }),
       this.idGenerator.newPublicLifeId("allegiancechange"))
+  }
+
+  listenToGroup(gameId, groupId) {
+    return this.fakeDatabase.getGroup(gameId, groupId)
+  }
+
+  listenToChatRoom(gameId, chatRoomId) {
+    return this.fakeDatabase.getChatRoom(gameId, chatRoomId);
+  }
+
+  listenToChatRoomMessages(gameId, chatRoomId) {
+    return this.fakeDatabase.getAllChatMessages(gameId, chatRoomId);
+  }
+
+  sendChatMessage(gameId, messageId, chatRoomId, playerId, message) {
+    let firebaseMessage = FakeChatUtils.createMessage(this.fakeDatabase, playerId, this.getTime_({ requestTimeOffset: 5 }), message)
+    firebaseMessage.id = messageId;
+    this.fakeDatabase.setChatMessage(gameId, chatRoomId, firebaseMessage);
   }
 
   setAdminContact(args) {
@@ -364,6 +383,7 @@ class FakeServer {
     return [message, notificationPlayerIds, ackRequestPlayerIds, textRequestPlayerIds];
   }
 
+  /*
   sendChatMessage(args) {
     let { gameId, chatRoomId, playerId, messageId, message } = args;
 
@@ -397,7 +417,7 @@ class FakeServer {
       throw 'Can\'t send message to chat room without membership';
     }
   }
-
+*/
   sendRequests(chatRoomId, senderPlayerId, type, message, playerIds) {
     let requestCategoryId = this.idGenerator.newRequestCategoryId();
     this.addRequestCategory({

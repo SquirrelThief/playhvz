@@ -98,8 +98,28 @@ class Bridge {
     return this.inner.getPlayer(userId, gameId);
   }
 
+  listenToPlayer(gameId, playerId) {
+    return this.inner.listenToPlayer(gameId, playerId);
+  }
+
   changePlayerAllegiance(gameId, playerId, newAllegiance) {
     return this.inner.changePlayerAllegiance(gameId, playerId, newAllegiance)
+  }
+
+  listenToGroup(gameId, groupId) {
+    return this.inner.listenToGroup(gameId, groupId);
+  }
+
+  listenToChatRoom(gameId, chatRoomId) {
+    return this.inner.listenToChatRoom(gameId, chatRoomId);
+  }
+
+  listenToChatRoomMessages(gameId, chatRoomId) {
+    return this.inner.listenToChatRoomMessages(gameId, chatRoomId);
+  }
+
+  sendChatMessage(gameId, messageId, chatRoomId, playerId, message) {
+    return this.inner.sendChatMessage(gameId, messageId, chatRoomId, playerId, message);
   }
   //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
@@ -505,7 +525,7 @@ class FakeIdGenerator extends IdGenerator {
     privateLifeId: '?!PrivateLifeId',
   });
 
-  serverMethods.set('sendChatMessage', {
+  /*serverMethods.set('sendChatMessage', {
     gameId: 'GameId',
     messageId: '!MessageId',
     chatRoomId: 'ChatRoomId',
@@ -515,7 +535,7 @@ class FakeIdGenerator extends IdGenerator {
       latitude: 'Number',
       longitude: 'Number',
     }),
-  });
+  });*/
 
   serverMethods.set('addRequestCategory', {
     gameId: 'GameId',

@@ -15,7 +15,7 @@
 // Common functions needed for chat, like create chat room.
 
 
-class ChatUtils {}
+class ChatUtils { }
 
 /**
  * Create a new chat room.
@@ -23,7 +23,7 @@ class ChatUtils {}
  * @returns the id of the new chat room. Note that this does not mean the chat room exists yet, 
  *   just that we've request for a chat room with this id to be created by the server.
  */
- ChatUtils.createChatRoom = function(bridge, gameId, playerId, chatRoomName, userSetProperties) {
+ChatUtils.createChatRoom = function (bridge, gameId, playerId, chatRoomName, userSetProperties) {
   assert(chatRoomName);
 
   let propertyDefaults = {
@@ -75,8 +75,8 @@ class ChatUtils {}
  * @returns the id of the new chat room. Note that this does not mean the chat room exists yet, 
  *   just that we've request for a chat room with this id to be created by the server.
  */
-ChatUtils.createAdminChat = function(bridge, game, player, chatRoomName) {
-  let name =  player.name + " & HvZ CDC";
+ChatUtils.createAdminChat = function (bridge, game, player, chatRoomName) {
+  let name = player.name + " & HvZ CDC";
   let groupId = bridge.newGroupId('withadmins');
   bridge.createGroup({
     name: name,
@@ -118,8 +118,9 @@ ChatUtils.createAdminChat = function(bridge, game, player, chatRoomName) {
 /**
 * Check that a chat room isn't hidden, or if it is hidden, show the room again if there are new 
 * messages since the time we hid it.
-*/ 
-ChatUtils.chatIsVisible = function(chatRoom, membership) {
+*/
+ChatUtils.chatIsVisible = function (membership) {
+  return membership.isVisible;
   if (!membership || !chatRoom) {
     return false;
   }

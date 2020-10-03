@@ -60,7 +60,7 @@
 
           isAdmin: {
             type: Boolean,
-            computed: 'computeIsAdmin_(userId, game.adminUsers.length)',
+            value: false,
           },
 
           showGameIdHint: {
@@ -83,6 +83,7 @@
           'onBridgeSet_(bridge, userId)',
           'loadGameInPath_(bridge, path, userId)',
           'navigateGameToDashboard_(bridge, path)',
+          'computeIsAdmin_(game, player)',
         ],
 
         listeners: {
@@ -152,7 +153,6 @@
             this.gameId = trimmedGameId;
             this.showLoadingSpinner = true;
             this.bridge.getGame(this.gameId).then(game => {
-              //this.showLoadingSpinner = false;
               if (!game) {
                 // If the game doesn't exist then navigate to the user's game list.
                 this.setPath_(["gameList"], /* replace= */ true);
@@ -162,10 +162,10 @@
                   this.playerId = player.id
                   // Async so we dont accidentally cause calls into firebaselistener
                   // while we're already reacting to something from it.
-                  this.async(() => {
+                  /*this.async(() => {
                     // This also causes player to be set, via the player-selector.
                     this.$.playerSelector.select(this.game.playersById[this.playerId]);
-                  });
+                  });*/
                 }
                 this.showLoadingSpinner = false;
                 this.set('game', game);
@@ -176,8 +176,9 @@
         },
 
         computeIsAdmin_: function () {
-          let admin = this.game.adminUsers.find((admin) => admin.userId == this.userId);
-          return !!admin;
+          this.bridge.listenToGroup(this.game.id, this.game[GamePath.FIELD__ADMIN_GROUP_ID]).then(group => {
+            this.isAdmin = group[GroupPath.FIELD__MEMBERS].includes(this.player.id)
+          })
         },
 
         signIn_: function () {

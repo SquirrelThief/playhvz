@@ -31,9 +31,10 @@ FakePlayerUtils.createFigureHeadPlayer = function (fakeDatabase, game) {
 FakePlayerUtils.create = function (uid, name) {
     return new Player({
         [PlayerPath.FIELD__USER_ID]: uid,
-        [PlayerPath.FIELD_NAME]: name,
-        [PlayerPath.FIELD_ALLEGIANCE]: Defaults.defaultAllegiance,
+        [PlayerPath.FIELD__NAME]: name,
+        [PlayerPath.FIELD__ALLEGIANCE]: Defaults.defaultAllegiance,
         [PlayerPath.FIELD__CHAT_MEMBERSHIPS]: {},
+        [PlayerPath.FIELD__AVATAR_URL]: "https://goo.gl/DP2vlY",
         [PlayerPath.FIELD__LIVES]: {}
     });
 }
@@ -51,10 +52,10 @@ FakePlayerUtils.internallyChangePlayerAllegiance = function (fakeDatabase, gameI
         }
         player[PlayerPath.FIELD__LIVES][newLifeCode] = lifeData
     }
-    if (player[PlayerPath.FIELD_ALLEGIANCE] === newAllegiance) {
+    if (player[PlayerPath.FIELD__ALLEGIANCE] === newAllegiance) {
         return
     }
     //StatUtils.invalidateGameStats(db, gameId)
-    player[PlayerPath.FIELD_ALLEGIANCE] = newAllegiance
+    player[PlayerPath.FIELD__ALLEGIANCE] = newAllegiance
     FakeGroupUtils.updatePlayerMembershipInGroups(fakeDatabase, gameId, player)
 }

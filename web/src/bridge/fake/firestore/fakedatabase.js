@@ -63,12 +63,32 @@ class FakeDatabase {
         return Object.values(this.fakeDb[GamePath.COLLECTION_PATH][gameId][ChatPath.COLLECTION_PATH])
     }
 
+    getChatRoom(gameId, chatRoomId) {
+        return this.fakeDb[GamePath.COLLECTION_PATH][gameId][ChatPath.COLLECTION_PATH][chatRoomId];
+    }
+
+    getAllChatMessages(gameId, chatRoomId) {
+        let messages = this.fakeDb[GamePath.COLLECTION_PATH][gameId][ChatPath.COLLECTION_PATH][chatRoomId][ChatPath.MESSAGE_COLLECTION_PATH]
+        if (!messages) {
+            return []
+        }
+        return Object.values(messages);
+    }
+
     setChatRoom(gameId, chatRoomId, chatRoom) {
         this.verifyId(gameId)
         this.verifyId(chatRoomId)
         this.verifyObject(chatRoom)
         let path = [GamePath.COLLECTION_PATH, gameId, ChatPath.COLLECTION_PATH, chatRoomId]
         this.setItem(path, chatRoom);
+    }
+
+    setChatMessage(gameId, chatRoomId, message) {
+        this.verifyId(gameId)
+        this.verifyId(chatRoomId)
+        this.verifyObject(message)
+        let path = [GamePath.COLLECTION_PATH, gameId, ChatPath.COLLECTION_PATH, chatRoomId, ChatPath.MESSAGE_COLLECTION_PATH, message.id]
+        this.setItem(path, message);
     }
 
     setGame(gameId, game) {

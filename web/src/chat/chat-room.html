@@ -25,6 +25,7 @@
         properties: {
           bridge: Object,
           game: Object,
+          chatRoom: Object,
           currentPlayer: Object,
           chatRoomId: String,
           isAdmin: Boolean,
@@ -51,6 +52,21 @@
             value: false,
           },
 
+          showLoadingSpinner: {
+            type: Boolean,
+            value: false,
+          },
+
+          messages: {
+            type: Array,
+            value: null,
+          },
+
+          members: {
+            type: Array,
+            value: null,
+          },
+
           pendingLastSeenTime: Number,
 
           isMemberOfChatRoom: Boolean,
@@ -63,10 +79,10 @@
         },
 
         observers: [
-          'onChatRoomIdChange_(chatRoomId, game.chatRooms, game.chatRoomsById)',
+          'onChatRoomIdChange_(chatRoomId, game, bridge)',
           'onChatRoomMembershipChange_(chatRoomId, currentPlayer.private.chatRoomMembershipsById.*)',
           'onChatRoomNameChange_(chatRoom.name, isAttached)',
-          'onMessageReceived_(chatRoom.messages.*)',
+          'onMessageReceived_(messages.*)',
         ],
 
         attached: function () {
@@ -76,8 +92,32 @@
         },
 
         onChatRoomIdChange_(chatRoomId) {
-          assert(this.game.chatRoomsById[chatRoomId]);
-          this.$.chatRoomSelector.select(this.game.chatRoomsById[chatRoomId]);
+          this.showLoadingSpinner = true;
+          assert(chatRoomId)
+          this.bridge.listenToChatRoom(this.game.id, chatRoomId).then(chatRoom => {
+            this.chatRoom = chatRoom;
+            // Listen to all the players in the chat room.
+            this.bridge.listenToGroup(this.game.id, this.chatRoom[ChatPath.FIELD__ASSOCIATED_GROUP_ID]).then(group => {
+              let playerPromises = []
+              for (let playerId of group[GroupPath.FIELD__MEMBERS]) {
+                playerPromises.push(this.bridge.listenToPlayer(this.game.id, playerId));
+              }
+              // Once we have all the players, we can now render the data.
+              return Promise.all(playerPromises).then(players => {
+                let playerArray = []
+                for (let player of players) {
+                  playerArray.push(player)
+                }
+                this.members = playerArray
+
+                // Once we have all the necessary player data, load all the chat messages.
+                this.bridge.listenToChatRoomMessages(this.game.id, chatRoomId).then(messages => {
+                  this.showLoadingSpinner = false;
+                  this.messages = messages;
+                });
+              });
+            });
+          });
           this.hideChatInfo();
           this.pendingLastSeenTime = null;
         },
@@ -89,8 +129,8 @@
         },
 
         onChatRoomMembershipChange_: function () {
-          let membership = this.currentPlayer.private.chatRoomMembershipsById[this.chatRoomId];
-          this.isMemberOfChatRoom = membership ? true : false;
+          /*let membership = this.currentPlayer.private.chatRoomMembershipsById[this.chatRoomId];
+          this.isMemberOfChatRoom = membership ? true : false; */
         },
 
         onMessageReceived_() {
@@ -128,11 +168,11 @@
         },
 
         maybeUpdateLastSeenTime_() {
-          if (this.chatRoom.messages.length <= 0) {
+          /*if (this.messages.length <= 0) {
             // No messages to check
             return;
           }
-          let lastMessage = this.chatRoom.messages[this.chatRoom.messages.length - 1];
+          let lastMessage = this.messages[this.messages.length - 1];
           let chatRoomMembership = this.currentPlayer.private.chatRoomMembershipsById[this.chatRoomId];
           if (!chatRoomMembership) {
             // This might happen if we're an admin looking at a chat we aren't in
@@ -154,7 +194,7 @@
                 lastSeenTime: lastMessage.time,
               });
             }
-          }
+          }*/
         },
 
         /* Returns true if any part of the message is visible in the container. */
@@ -182,13 +222,13 @@
         },
 
         displaySenderInfo(message) {
-          let messageIndex = this.chatRoom.messages.indexOf(message);
+          let messageIndex = this.messages.indexOf(message);
           if (messageIndex == 0) {
             return 'display-sender';
           }
-          let currentMessage = this.chatRoom.messages[messageIndex];
-          let previousMessage = this.chatRoom.messages[messageIndex - 1];
-          if (currentMessage.playerId != previousMessage.playerId) {
+          let currentMessage = this.messages[messageIndex];
+          let previousMessage = this.messages[messageIndex - 1];
+          if (currentMessage.senderId != previousMessage.senderId) {
             return 'display-sender';
           } else {
             return 'hide-sender';
@@ -196,15 +236,14 @@
         },
 
         getName_(playerId) {
-          let player = this.game.playersById[playerId];
-          /* this.$.playerSelector.select(
-                 this.game.players.find(player => player.id == playerId)); */
-          return player && player.name;
+          let player = this.members.find(player => player.id == playerId)
+          // TODO: handle getting name for player that isn't in the chat room
+          return player && player[PlayerPath.FIELD__NAME];
         },
 
         getProfilePic_(playerId) {
-          let player = this.game.playersById[playerId];
-          return player && player.profileImageUrl;
+          let player = this.members.find(player => player.id == playerId)
+          return player && player[PlayerPath.FIELD__AVATAR_URL];
         },
 
         openPlayerProfile_(e) {
@@ -290,10 +329,10 @@
         },
 
         getNoRespondPlayer_(senderId, requests) {
-          return requests
+          /*return requests
             .filter(request => request.response == null && request.playerId != senderId)
             .map(request => this.game.playersById[request.playerId].name)
-            .join(", ");
+            .join(", "); */
         },
 
         isRequestAck_(requestCategoryType) {
@@ -554,10 +593,6 @@
     }
   </style>
   <template>
-    <!-- -->
-    <array-selector id="chatRoomSelector" items="[[game.chatRooms]]" selected="{{chatRoom}}"></array-selector>
-    <array-selector id="playerSelector" items="[[game.players]]" multi selected="{{selectedPlayers}}"></array-selector>
-
     <paper-icon-button id="info" icon="icons:info-outline" on-tap="toggleChatInfo_" name$="chat-info-[[chatRoom.name]]">
     </paper-icon-button>
 
@@ -647,12 +682,13 @@
   </div>
 
   <div id="conversationContainer" name$="conversationContainer: [[chatRoom.name]]" class="conversation-container">
-    <template id="renderedMessages" is="dom-repeat" items="[[chatRoom.messages]]">
+    <paper-spinner active hidden$="[[!showLoadingSpinner]]"></paper-spinner>
+    <template id="renderedMessages" is="dom-repeat" items="[[messages]]">
       <div id$="[[item.id]]" name$="message-[[chatRoom.name]]-[[item.message]]"
-        class$="[[computeMessageDisplayClass_(item.playerId, currentPlayer.id)]] [[displaySenderInfo(item)]]">
+        class$="[[computeMessageDisplayClass_(item.senderId, currentPlayer.id)]] [[displaySenderInfo(item)]]">
         <div class="display-message">
           <div class="player-name">
-            [[getName_(item.playerId, game.players.length)]]
+            [[getName_(item.senderId)]]
           </div>
           <div class="message-text-container">
             <template is="dom-if" if="[[item.message]]">
@@ -664,12 +700,12 @@
               </ghvz-static-map>
             </template>
             <paper-tooltip position="top" animation-delay="0">
-              [[getTime_(item.time)]]
+              [[getTime_(item.timestamp)]]
             </paper-tooltip>
           </div>
         </div>
         <div class="display-avatar">
-          <ghvz-player-avatar small game="[[game]]" player-id="[[item.playerId]]"
+          <ghvz-player-avatar small bridge="[[bridge]]" game="[[game]]" player-id="[[item.senderId]]"
             name$="avatar-[[chatRoom.name]]-[[item.message]]"></ghvz-player-avatar>
         </div>
       </div>

@@ -22,7 +22,8 @@ class PlayerPath { }
 PlayerPath.COLLECTION_PATH = "players";
 
 PlayerPath.FIELD__NAME = "name";
-PlayerPath.FIELD_ALLEGIANCE = "allegiance";
+PlayerPath.FIELD__ALLEGIANCE = "allegiance";
+PlayerPath.FIELD__AVATAR_URL = "avatarUrl";
 PlayerPath.FIELD__USER_ID = "userId";
 PlayerPath.FIELD__LIVES = "lives";
 PlayerPath.FIELD__LIFE_CODE = "lifeCode";
