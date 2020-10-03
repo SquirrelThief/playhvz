@@ -33,3 +33,11 @@ GroupPath.FIELD__SETTINGS_REMOVE_OTHERS = "canRemoveOthers";
 GroupPath.FIELD__SETTINGS_AUTO_ADD = "autoAdd";
 GroupPath.FIELD__SETTINGS_AUTO_REMOVE = "autoRemove";
 GroupPath.FIELD__SETTINGS_ALLEGIANCE_FILTER = "allegianceFilter";
+
+GroupPath.GROUPS_COLLECTION = function (db, gameId) {
+  return GamePath.GAMES_COLLECTION(db).doc(gameId).collection(GroupPath.COLLECTION_PATH);
+}
+
+GroupPath.GROUP_DOC_REF = function (db, gameId, groupId) {
+  return GroupPath.GROUPS_COLLECTION(db, gameId).doc(groupId);
+}

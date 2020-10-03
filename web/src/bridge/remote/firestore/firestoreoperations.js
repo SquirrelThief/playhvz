@@ -43,4 +43,29 @@ class FirestoreOperations {
   getGame(gameId) {
     return GamePath.GAME_DOC_REF(this.db, gameId).get();
   }
+
+  /**
+  * Function that finds the player associated with this game.
+  *
+  * @param userId userId of the current user
+  * @param gameId gameId of the game to get
+  */
+  getUserPlayer(userId, gameId) {
+    return PlayerPath.PLAYER_IN_GAME_QUERY(this.db, userId, gameId).get();
+  }
+
+  getPlayer(gameId, playerId) {
+    return PlayerPath.PLAYER_DOC_REF(this.db, gameId, playerId).get();
+  }
+
+  getGroup(gameId, groupId) {
+    return GroupPath.GROUP_DOC_REF(this.db, gameId, groupId).get();
+  }
+  getChatRoom(gameId, chatRoomId) {
+    return ChatPath.CHAT_ROOM_DOC_REF(this.db, gameId, chatRoomId).get();
+  }
+
+  getChatRoomMessages(gameId, chatRoomId) {
+    return ChatPath.MESSAGES_COLLECTION(this.db, gameId, chatRoomId).get();
+  }
 }

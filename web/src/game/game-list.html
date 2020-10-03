@@ -38,7 +38,6 @@
 
         getGameList_() {
           this.bridge.getGameList(this.userId).then(gameArray => {
-            debugger
             this.games = gameArray;
           });
         },

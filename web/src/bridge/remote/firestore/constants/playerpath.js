@@ -40,3 +40,11 @@ PlayerPath.PLAYERS_COLLECTION = function (db, gameId) {
 PlayerPath.PLAYERS_QUERY = function (db) {
   return db.collectionGroup(PlayerPath.COLLECTION_PATH);
 }
+
+PlayerPath.PLAYER_IN_GAME_QUERY = function (db, userId, gameId) {
+  return PlayerPath.PLAYERS_COLLECTION(db, gameId).where(PlayerPath.FIELD__USER_ID, "==", userId);
+}
+
+PlayerPath.PLAYER_DOC_REF = function (db, gameId, playerId) {
+  return PlayerPath.PLAYERS_COLLECTION(db, gameId).doc(playerId);
+}

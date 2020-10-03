@@ -30,3 +30,23 @@ DataConverterUtils.convertSnapshotToPlayer = function (documentSnapshot) {
   player.id = documentSnapshot.id
   return player
 };
+
+DataConverterUtils.convertSnapshotToGroup = function (documentSnapshot) {
+  const group = new Group(documentSnapshot.data())
+  group.id = documentSnapshot.id
+  return group
+};
+
+DataConverterUtils.convertSnapshotToChatRoom = function (documentSnapshot) {
+  const chatRoom = new ChatRoom(documentSnapshot.data())
+  chatRoom.id = documentSnapshot.id
+  return chatRoom
+};
+
+DataConverterUtils.convertSnapshotToMessage = function (documentSnapshot) {
+  const message = new Message(documentSnapshot.data())
+  message.id = documentSnapshot.id
+  // Firebase Timestamps are objects... which is not what we're expecting.
+  message.timestamp = message.timestamp.toMillis()
+  return message
+};

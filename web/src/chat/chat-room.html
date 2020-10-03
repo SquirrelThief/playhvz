@@ -114,6 +114,9 @@
                 this.bridge.listenToChatRoomMessages(this.game.id, chatRoomId).then(messages => {
                   this.showLoadingSpinner = false;
                   this.messages = messages;
+                  for (let message of messages) {
+                    console.log(message)
+                  }
                 });
               });
             });

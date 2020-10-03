@@ -133,8 +133,9 @@ class RemoteBridge {
       return Promise.all(gameDocSnapshotPromises).then(valueSnapshots => {
         let gameArray = []
         for (let docSnapshot of valueSnapshots) {
-          if (docSnapshot.exists) {
-            gameArray.push(DataConverterUtils.convertSnapshotToGame(docSnapshot));
+          if (docSnapshot) {
+            //gameArray.push(DataConverterUtils.convertSnapshotToGame(docSnapshot));
+            gameArray.push(docSnapshot);
           }
         }
         return gameArray;
@@ -150,6 +151,55 @@ class RemoteBridge {
       return DataConverterUtils.convertSnapshotToGame(docSnapshot);
     });
   }
+
+
+  getPlayer(userId, gameId) {
+    return this.firestoreOperations.getUserPlayer(userId, gameId).then(querySnapshot => {
+      if (querySnapshot.docs.length > 1) {
+        return null
+      }
+      return DataConverterUtils.convertSnapshotToPlayer(querySnapshot.docs[0]);
+    });
+  }
+
+  listenToPlayer(gameId, playerId) {
+    return this.firestoreOperations.getPlayer(gameId, playerId).then(docSnapshot => {
+      if (!docSnapshot.exists) {
+        return null
+      }
+      return DataConverterUtils.convertSnapshotToPlayer(docSnapshot);
+    });
+  }
+
+  listenToGroup(gameId, groupId) {
+    return this.firestoreOperations.getGroup(gameId, groupId).then(docSnapshot => {
+      if (!docSnapshot.exists) {
+        return null
+      }
+      return DataConverterUtils.convertSnapshotToGroup(docSnapshot);
+    });
+  }
+
+  listenToChatRoom(gameId, chatRoomId) {
+    return this.firestoreOperations.getChatRoom(gameId, chatRoomId).then(docSnapshot => {
+      if (!docSnapshot.exists) {
+        return null
+      }
+      return DataConverterUtils.convertSnapshotToChatRoom(docSnapshot);
+    });
+  }
+
+  listenToChatRoomMessages(gameId, chatRoomId) {
+    return this.firestoreOperations.getChatRoomMessages(gameId, chatRoomId).then(querySnapshot => {
+      let messageArray = [];
+      for (let doc of querySnapshot.docs) {
+        let message = DataConverterUtils.convertSnapshotToMessage(doc);
+        messageArray.push(message);
+      }
+      return messageArray;
+    });
+  }
+
   ///////////////////////////////////////////////////////////////
   // End of new Firestore support functions.
   ///////////////////////////////////////////////////////////////

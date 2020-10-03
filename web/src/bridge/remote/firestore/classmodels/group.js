@@ -26,8 +26,6 @@ class Group {
   owners = []
   settings = new Settings()
   members = []
-
-
 }
 
 class Settings {
