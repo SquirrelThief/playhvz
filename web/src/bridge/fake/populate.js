@@ -129,21 +129,36 @@ let zekeUserId;
 function populateUsers(bridge, config) {
   this.zellaUserId = 'user-' + config.fakeUserIds.zella;
   this.zekeUserId = 'user-' + config.fakeUserIds.zeke;
-  /*let reggieUserId = 'user-' + config.fakeUserIds.reggie;
-    let minnyUserId = 'user-' + config.fakeUserIds.minny;
-    let deckerdUserId = 'user-' + config.fakeUserIds.deckerd;
-    let drakeUserId = 'user-' + config.fakeUserIds.drake;
-    let moldaviUserId = 'user-' + config.fakeUserIds.moldavi;
-    let jackUserId = 'user-' + config.fakeUserIds.jack;*/
+  this.reggieUserId = 'user-' + config.fakeUserIds.reggie;
+  this.minnyUserId = 'user-' + config.fakeUserIds.minny;
+  this.deckerdUserId = 'user-' + config.fakeUserIds.deckerd;
+  this.drakeUserId = 'user-' + config.fakeUserIds.drake;
+  this.moldaviUserId = 'user-' + config.fakeUserIds.moldavi;
+  this.jackUserId = 'user-' + config.fakeUserIds.jack;
 
-  bridge.register({ userId: this.zellaUserId });
   bridge.register({ userId: this.zekeUserId });
-  /*bridge.register({ userId: reggieUserId });
-    bridge.register({ userId: minnyUserId });
-    bridge.register({ userId: drakeUserId }); 
-    bridge.register({ userId: moldaviUserId });
-    bridge.register({ userId: jackUserId });
-    bridge.register({ userId: deckerdUserId });*/
+  bridge.register({ userId: this.reggieUserId });
+  bridge.register({ userId: this.minnyUserId });
+  bridge.register({ userId: this.drakeUserId });
+  bridge.register({ userId: this.moldaviUserId });
+  bridge.register({ userId: this.jackUserId });
+  bridge.register({ userId: this.deckerdUserId });
+  bridge.register({ userId: this.zellaUserId });
+}
+
+function populateFakeAppPlayers(bridge, gameName, gameId) {
+  let zellaName = "ZellaTheUltimate";
+  bridge.signIn({ userId: this.zellaUserId });
+  this.zellaPlayerId = bridge.joinGame(gameName, zellaName);
+  bridge.changePlayerAllegiance(gameId, zellaPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+
+  let zekeName = "Zeke";
+  bridge.signOut({ userId: this.zellaUserId });
+  bridge.signIn({ userId: this.zekeUserId });
+  this.zekePlayerId = bridge.joinGame(gameName, zekeName);
+  bridge.changePlayerAllegiance(gameId, zekePlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+  bridge.signOut({ userId: this.zekeUserId });
+
 }
 
 /** Function used by fake-app.html to populate game data. */
@@ -151,20 +166,10 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   let gameStartOffset = - 6 * 24 * 60 * 60 * 1000; // 6 days ago
   bridge.setRequestTimeOffset(gameStartOffset);
 
-  let zellaUserId = 'user-' + config.fakeUserIds.zella;
-  /* let reggieUserId = 'user-' + config.fakeUserIds.reggie;
-  let minnyUserId = 'user-' + config.fakeUserIds.minny;
-  let deckerdUserId = 'user-' + config.fakeUserIds.deckerd;
-  let drakeUserId = 'user-' + config.fakeUserIds.drake;
-  let moldaviUserId = 'user-' + config.fakeUserIds.moldavi;
-  let zekeUserId = 'user-' + config.fakeUserIds.zeke;
-  let jackUserId = 'user-' + config.fakeUserIds.jack; */
-
   let gameName = "Test game"
-
   bridge.createGame({
     gameId: gameId,
-    creatorUserId: zellaUserId,
+    creatorUserId: this.zellaUserId,
     name: gameName,
     startTime: 1483344000000,
     endTime: 1483689600000,
@@ -198,26 +203,16 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
     });
   */
 
-
   /*
     bridge.addAdmin({
       gameId: gameId,
       userId: minnyUserId
     });
   */
- 
-  let zellaName = "ZellaTheUltimate";
-  bridge.signIn({ userId: this.zellaUserId });
-  var zellaPlayerId = bridge.joinGame(gameName, zellaName);
-  bridge.changePlayerAllegiance(gameId, zellaPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
-  let zekeName = "Zeke";
-  bridge.signOut({ userId: this.zellaUserId });
-  bridge.signIn({ userId: this.zekeUserId });
-  var zekePlayerId = bridge.joinGame(gameName, zekeName);
-  bridge.changePlayerAllegiance(gameId, zekePlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
-  bridge.signOut({ userId: this.zekeUserId });
+  this.populateFakeAppPlayers(bridge, gameName, gameId);
   bridge.signIn({ userId: this.zellaUserId });
+
   /*
   var deckerdPlayerId = bridge.idGenerator.newPublicPlayerId();
   bridge.createPlayer(makePlayerProperties(deckerdPlayerId, deckerdUserId, gameId, 1483257600000, 'DeckerdTheHesitant'));
@@ -227,11 +222,11 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   let adminChatRoomId = "chat-Admins-2";
   let resistanceChatRoomId = "chat-Resistance Chat-3";
   let hordeChatRoomId = "chat-Horde Chat-4";
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, zellaPlayerId, 'Hello World!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, zekePlayerId, 'What up?');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, zellaPlayerId, 'yo dawg i hear the zeds r comin!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, zellaPlayerId, 'they are hereeee!!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), adminChatRoomId, zellaPlayerId, 'FOR GLORY!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.zellaPlayerId, 'Hello World!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.zekePlayerId, 'What up?');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.zellaPlayerId, 'yo dawg i hear the zeds r comin!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.zellaPlayerId, 'they are hereeee!!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), adminChatRoomId, this.zellaPlayerId, 'FOR GLORY!');
 
   // TODO: SUPPORT THINGS BELOW THIS POINT.
   return;

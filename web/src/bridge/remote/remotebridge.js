@@ -152,6 +152,15 @@ class RemoteBridge {
     });
   }
 
+  listenToGame(gameId, callback) {
+    this.firestoreOperations.getListenableGame(gameId).onSnapshot(docSnapshot => {
+      let game = null;
+      if (docSnapshot.exists) {
+        game = DataConverterUtils.convertSnapshotToGame(docSnapshot);
+      }
+      callback(game);
+    });
+  }
 
   getPlayer(userId, gameId) {
     return this.firestoreOperations.getUserPlayer(userId, gameId).then(querySnapshot => {

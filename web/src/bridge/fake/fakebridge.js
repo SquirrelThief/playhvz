@@ -102,10 +102,8 @@ class FakeBridge {
     });
   }
 
-  getGame(gameId) {
-    return new Promise((resolve, reject) => {
-      resolve(this.server.getGame(gameId))
-    });
+  listenToGame(gameId, callback) {
+    callback(this.server.getGame(gameId));
   }
 
   joinGame(gameName, playerName) {

@@ -152,26 +152,24 @@
             let trimmedGameId = this.path[1];
             this.gameId = trimmedGameId;
             this.showLoadingSpinner = true;
-            this.bridge.getGame(this.gameId).then(game => {
+            let self = this
+            let gameUpdatedCallback = function (game) {
               if (!game) {
                 // If the game doesn't exist then navigate to the user's game list.
-                this.setPath_(["gameList"], /* replace= */ true);
+                self.setPath_(["gameList"], /* replace= */ true);
+                self.showLoadingSpinner = false;
+                return;
               }
-              this.bridge.getPlayer(this.userId, game.id).then(player => {
+              self.set('game', game);
+              self.bridge.getPlayer(self.userId, game.id).then(player => {
                 if (player) {
-                  this.playerId = player.id
-                  // Async so we dont accidentally cause calls into firebaselistener
-                  // while we're already reacting to something from it.
-                  /*this.async(() => {
-                    // This also causes player to be set, via the player-selector.
-                    this.$.playerSelector.select(this.game.playersById[this.playerId]);
-                  });*/
+                  self.playerId = player.id
                 }
-                this.showLoadingSpinner = false;
-                this.set('game', game);
-                this.set('player', player);
+                self.showLoadingSpinner = false;
+                self.set('player', player);
               });
-            });
+            }
+            this.bridge.listenToGame(this.gameId, gameUpdatedCallback);
           }
         },
 

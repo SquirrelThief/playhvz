@@ -44,6 +44,10 @@ class FirestoreOperations {
     return GamePath.GAME_DOC_REF(this.db, gameId).get();
   }
 
+  getListenableGame(gameId) {
+    return GamePath.GAME_DOC_REF(this.db, gameId);
+  }
+
   /**
   * Function that finds the player associated with this game.
   *

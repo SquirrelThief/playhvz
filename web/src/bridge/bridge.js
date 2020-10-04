@@ -86,8 +86,8 @@ class Bridge {
     return this.inner.getGameList(userId);
   }
 
-  getGame(gameId) {
-    return this.inner.getGame(gameId);
+  listenToGame(gameId, callback) {
+    return this.inner.listenToGame(gameId, callback);
   }
 
   joinGame(gameName, playerName) {

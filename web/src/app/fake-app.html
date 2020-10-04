@@ -158,10 +158,11 @@
         },
 
         loadUserTapped_(e) {
-          this.loadUser_(e.model.option.userId, ['game', 'poptest-1']);
+          this.loadUser_(e.model.option.userId, ['game', 'game-poptest-1']);
         },
 
         loadUser_(userId, path) {
+          this.bridge.signIn({ userId: userId })
           let optionIndex = this.userOptions.findIndex((option) => option.userId == userId);
           let option = this.userOptions[optionIndex];
 
