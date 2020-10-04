@@ -121,6 +121,10 @@ class Bridge {
   sendChatMessage(gameId, messageId, chatRoomId, playerId, message) {
     return this.inner.sendChatMessage(gameId, messageId, chatRoomId, playerId, message);
   }
+
+  infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode) {
+    return this.inner.infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode);
+  }
   //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
   //////////////////////////////////////////////////////////////////////
@@ -143,7 +147,7 @@ class IdGenerator {
 
   newChatRoomId(note) { return this.generateId('chatRoom', note); }
   verifyChatRoomId(id) { return this.verify('chatRoom', id); }
-  newClaimId(note) { return this.generateId('claim', note); }
+  newClaimId(note, playerId) { return this.generateId(note, playerId); }
   verifyClaimId(id) { return this.verify('claim', id); }
   newDefaultProfileImageId(note) { return this.generateId('defaultProfileImage', note); }
   verifyDefaultProfileImageId(id) { return this.verify('defaultProfileImage', id); }
@@ -575,13 +579,13 @@ class FakeIdGenerator extends IdGenerator {
     lifeCode: '?String',
   });
 
-  serverMethods.set('infect', {
-    gameId: 'GameId',
-    infectionId: '!InfectionId',
-    infectorPlayerId: '?PublicPlayerId',
-    victimLifeCode: '?String',
-    victimPlayerId: '?PublicPlayerId',
-  });
+  /* serverMethods.set('infect', {
+     gameId: 'GameId',
+     infectionId: '!InfectionId',
+     infectorPlayerId: '?PublicPlayerId',
+     victimLifeCode: '?String',
+     victimPlayerId: '?PublicPlayerId',
+   });*/
 
   serverMethods.set('queueNotification', {
     gameId: 'GameId',

@@ -42,7 +42,6 @@ FakeRewardUtils.createManagedRewards = function (fakeDatabase, game) {
     game.infectRewardId = infectRewardData.id
 }
 
-/* Creates a group with no owners because the server is the manager. */
 FakeRewardUtils.createReward = function (shortName, longName, description, imageUrl, points, managed) {
     return new Reward({
         shortName: shortName,
@@ -50,7 +49,82 @@ FakeRewardUtils.createReward = function (shortName, longName, description, image
         description: description,
         imageUrl: imageUrl,
         points: points,
-        managed: managed
+        managed: managed,
+        claimCodes: {}
     });
 }
 
+FakeRewardUtils.createRewardClaimCode = function (code) {
+    return new ClaimCode({
+        code: code,
+    });
+}
+
+FakeRewardUtils.giveRewardForInfecting = function (fakeDatabase, gameId, infectorPlayerId, timestamp) {
+    let infectRewardCode = fakeDatabase.idGenerator.newClaimId(Defaults.INFECT_REWARD_SHORT_NAME, FakeRewardUtils.sanitizePlayerId(infectorPlayerId));
+    infectRewardCode = FakeRewardUtils.normalizeLifeCode(infectRewardCode)
+    return FakeRewardUtils.redeemRewardCode(fakeDatabase, gameId, infectorPlayerId, infectRewardCode, timestamp)
+}
+
+FakeRewardUtils.normalizeLifeCode = function (rawText) {
+    let processedCode = rawText.trim()
+    processedCode = processedCode.toLowerCase()
+    processedCode = processedCode.split(' ').join('-')
+    return processedCode
+}
+
+FakeRewardUtils.redeemRewardCode = function (fakeDatabase, gameId, playerId, claimCode, timestamp) {
+    // Check if claim code is associated with valid reward.
+    const shortName = FakeRewardUtils.extractShortNameFromCode(claimCode)
+    let rewards = fakeDatabase.getAllRewardsForGame(gameId);
+    let rewardToClaim;
+    for (let reward of rewards) {
+        if (reward[RewardPath.FIELD__SHORT_NAME] == shortName) {
+            rewardToClaim = reward;
+        }
+    }
+    if (!rewardToClaim) {
+        console.log("No reward found with short name " + shortName + ", not granting reward...")
+        return;
+    }
+    // If the middle code matches the player id then this is a reward we're granting them. Let it be so.
+    const secondCode = FakeRewardUtils.extractPlayerIdFromCode(claimCode)
+    if (secondCode === FakeRewardUtils.sanitizePlayerId(playerId).toLowerCase()) {
+        let claimCodeObject = FakeRewardUtils.createRewardClaimCode(claimCode)
+        claimCodeObject.id = fakeDatabase.idGenerator.newRewardCategoryId();
+        fakeDatabase.setClaimCode(gameId, rewardToClaim.id, claimCodeObject.id, claimCodeObject);
+    }
+    let rewardClaimCodes = fakeDatabase.getAllClaimCodesForReward(gameId, rewardToClaim.id);
+    let claimCodeToClaim;
+    for (let rewardClaimCode of rewardClaimCodes) {
+        if (rewardClaimCode[RewardPath.FIELD__CLAIM_CODE_CODE] == claimCode && !rewardClaimCode[RewardPath.FIELD__CLAIM_CODE_REDEEMER]) {
+            claimCodeToClaim = rewardClaimCode;
+        }
+    }
+    if (!claimCodeToClaim) {
+        console.log("No unclaimed code that matches " + ClaimCode + ", not granting reward...")
+        return;
+    }
+    claimCodeToClaim[RewardPath.FIELD__CLAIM_CODE_REDEEMER] = playerId;
+    claimCodeToClaim[RewardPath.FIELD__CLAIM_CODE_TIMESTAMP] = timestamp
+    let player = fakeDatabase.getPlayer(gameId, playerId);
+    player[PlayerPath.FIELD__POINTS] += rewardToClaim[RewardPath.FIELD__POINTS]
+    if (player[PlayerPath.FIELD__REWARDS][rewardToClaim.id]) {
+        player[PlayerPath.FIELD__REWARDS][rewardToClaim.id] += 1
+    } else {
+        player[PlayerPath.FIELD__REWARDS][rewardToClaim.id] = 1
+    }
+}
+
+
+FakeRewardUtils.sanitizePlayerId = function (playerId) {
+    return playerId.split('-').join('')
+}
+
+FakeRewardUtils.extractShortNameFromCode = function (claimCode) {
+    return claimCode.split("-", 1)[0]
+}
+
+FakeRewardUtils.extractPlayerIdFromCode = function (claimCode) {
+    return claimCode.split("-", 2)[1]
+}

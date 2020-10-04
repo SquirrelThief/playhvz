@@ -135,6 +135,45 @@ class FakeServer {
     this.fakeDatabase.setChatMessage(gameId, chatRoomId, firebaseMessage);
   }
 
+  infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode) {
+    // Check if life code is associated with valid human player.
+    let infectorPlayer;
+    let victimPlayer;
+    for (let player of this.fakeDatabase.getAllPlayersOfGame(gameId)) {
+      if (player.id == infectorPlayerId) {
+        infectorPlayer = player;
+      }
+      let lifeCodes = Object.keys(player[PlayerPath.FIELD__LIVES]);
+      if (lifeCodes.length > 0 && lifeCodes.includes(victimLifeCode)) {
+        victimPlayer = player;
+      }
+    }
+    // TODO: handle player infecting themselves.
+    if (!victimPlayer) {
+      // Nobody had that lifecode...
+      return;
+    }
+    FakeRewardUtils.giveRewardForInfecting(this.fakeDatabase, gameId, infectorPlayer.id, this.getTime_({ requestTimeOffset: 5 }))
+    // Mark life code as used, aka deactivated
+    victimPlayer[PlayerPath.FIELD__LIVES][victimLifeCode][PlayerPath.FIELD__LIFE_CODE_STATUS] = false;
+    const lives = victimPlayer[PlayerPath.FIELD__LIVES]
+    for (const key of Object.keys(lives)) {
+      const metadata = lives[key]
+      if (metadata[PlayerPath.FIELD__LIFE_CODE_STATUS] == true) {
+        // Player still has some lives left, don't turn them into a zombie.
+        return;
+      }
+    }
+    return FakePlayerUtils.internallyChangePlayerAllegiance(
+      this.fakeDatabase,
+      gameId,
+      victimPlayer.id,
+      Defaults.ZOMBIE_ALLEGIANCE_FILTER,
+      this.getTime_({ requestTimeOffset: 5 }),
+        /* newLifeCode= */ "");
+
+  }
+
   setAdminContact(args) {
     let { playerId } = args;
     this.writer.set(["adminContactPlayerId"], playerId);
@@ -386,12 +425,12 @@ class FakeServer {
   /*
   sendChatMessage(args) {
     let { gameId, chatRoomId, playerId, messageId, message } = args;
-
+ 
     let game = this.game;
     let player = game.playersById[playerId];
     let chatRoom = game.chatRoomsById[chatRoomId];
     let group = game.groupsById[chatRoom.accessGroupId];
-
+ 
     // Make this chat room visible to everyone, since there's a new message.
     for (let publicPlayerId of group.players) {
       let member = game.playersById[publicPlayerId];
@@ -404,7 +443,7 @@ class FakeServer {
         lastHiddenTime: null,
       });
     }
-
+ 
     if (group.playersById[player.id]) {
       this.writer.insert(
         this.reader.getChatRoomPath(chatRoomId).concat(["messages"]),

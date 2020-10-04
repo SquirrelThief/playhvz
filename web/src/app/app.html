@@ -175,7 +175,12 @@
 
         computeIsAdmin_: function () {
           this.bridge.listenToGroup(this.game.id, this.game[GamePath.FIELD__ADMIN_GROUP_ID]).then(group => {
-            this.isAdmin = group[GroupPath.FIELD__MEMBERS].includes(this.player.id)
+            if (!this.player) {
+              this.isAdmin = false;
+              return;
+            } else {
+              this.isAdmin = group[GroupPath.FIELD__MEMBERS].includes(this.player.id)
+            }
           })
         },
 

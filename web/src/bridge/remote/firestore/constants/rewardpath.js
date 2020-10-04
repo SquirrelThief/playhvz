@@ -20,3 +20,14 @@ limitations under the License.
 class RewardPath { }
 
 RewardPath.COLLECTION_PATH = "rewards";
+RewardPath.FIELD__MANAGED = "managed";
+RewardPath.FIELD__SHORT_NAME = "shortName";
+RewardPath.FIELD__LONG_NAME = "longName";
+RewardPath.FIELD__DESCRIPTION = "description";
+RewardPath.FIELD__IMAGE_URL = "imageUrl";
+RewardPath.FIELD__POINTS = "points";
+
+RewardPath.CLAIM_CODE_COLLECTION_PATH = "claimCodes";
+RewardPath.FIELD__CLAIM_CODE_CODE = "code";
+RewardPath.FIELD__CLAIM_CODE_REDEEMER = "redeemer";
+RewardPath.FIELD__CLAIM_CODE_TIMESTAMP = "timestamp";

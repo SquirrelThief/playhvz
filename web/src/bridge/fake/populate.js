@@ -147,18 +147,36 @@ function populateUsers(bridge, config) {
 }
 
 function populateFakeAppPlayers(bridge, gameName, gameId) {
-  let zellaName = "ZellaTheUltimate";
   bridge.signIn({ userId: this.zellaUserId });
-  this.zellaPlayerId = bridge.joinGame(gameName, zellaName);
-  bridge.changePlayerAllegiance(gameId, zellaPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+  this.zellaPlayerId = bridge.joinGame(gameName, "ZellaTheUltimate");
+  bridge.changePlayerAllegiance(gameId, this.zellaPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
-  let zekeName = "Zeke";
-  bridge.signOut({ userId: this.zellaUserId });
   bridge.signIn({ userId: this.zekeUserId });
-  this.zekePlayerId = bridge.joinGame(gameName, zekeName);
-  bridge.changePlayerAllegiance(gameId, zekePlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
-  bridge.signOut({ userId: this.zekeUserId });
+  this.zekePlayerId = bridge.joinGame(gameName, "Zeke");
+  bridge.changePlayerAllegiance(gameId, this.zekePlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
+  bridge.signIn({ userId: this.deckerdUserId });
+  this.deckerdPlayerId = bridge.joinGame(gameName, "DeckerdTheHesitant");
+
+  bridge.signIn({ userId: this.moldaviUserId });
+  this.moldaviPlayerId = bridge.joinGame(gameName, "MoldaviTheMoldavish");
+  bridge.changePlayerAllegiance(gameId, this.moldaviPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+  /*bridge.addAdmin({
+    gameId: gameId,
+    userId: moldaviUserId
+  });
+  bridge.setAdminContact({
+    gameId: gameId,
+    playerId: moldaviPlayerId
+  });*/
+
+  bridge.signIn({ userId: this.jackUserId });
+  this.jackPlayerId = bridge.joinGame(gameName, "JackSlayerTheBeanSlasher");
+  bridge.changePlayerAllegiance(gameId, this.jackPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+
+  bridge.signIn({ userId: this.drakeUserId });
+  this.drakePlayerId = bridge.joinGame(gameName, "Drackan");
+  bridge.changePlayerAllegiance(gameId, this.drakePlayerId, Defaults.ZOMBIE_ALLEGIANCE_FILTER)
 }
 
 /** Function used by fake-app.html to populate game data. */
@@ -213,11 +231,6 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   this.populateFakeAppPlayers(bridge, gameName, gameId);
   bridge.signIn({ userId: this.zellaUserId });
 
-  /*
-  var deckerdPlayerId = bridge.idGenerator.newPublicPlayerId();
-  bridge.createPlayer(makePlayerProperties(deckerdPlayerId, deckerdUserId, gameId, 1483257600000, 'DeckerdTheHesitant'));
-  */
-
   let globalChatRoomId = "chat-Global Chat-1";
   let adminChatRoomId = "chat-Admins-2";
   let resistanceChatRoomId = "chat-Resistance Chat-3";
@@ -225,81 +238,28 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.zellaPlayerId, 'Hello World!');
   bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.zekePlayerId, 'What up?');
   bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.zellaPlayerId, 'yo dawg i hear the zeds r comin!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.zellaPlayerId, 'they are hereeee!!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.zekePlayerId, 'they are hereeee!!');
   bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), adminChatRoomId, this.zellaPlayerId, 'FOR GLORY!');
+
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'yee!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'man what i would do for some garlic rolls!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'https://www.youtube.com/watch?v=GrHPTWTSFgc');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.jackPlayerId, 'yee!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.jackPlayerId, 'yee!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'yee!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.jackPlayerId, 'yee!');
+
+
+  let self = this
+  let callback = function (playerId, player) {
+    // Get the first life code
+    let lifeCode = Object.keys(player[PlayerPath.FIELD__LIVES])[0]
+    bridge.infectPlayerByLifeCode(gameId, /* infectorPlayerId= */ self.drakePlayerId, lifeCode);
+  }
+  bridge.listenToPlayer(gameId, this.zekePlayerId, callback);
 
   // TODO: SUPPORT THINGS BELOW THIS POINT.
   return;
-
-  var moldaviPlayerId = bridge.idGenerator.newPublicPlayerId();
-  bridge.addAdmin({
-    gameId: gameId,
-    userId: moldaviUserId
-  });
-  var moldaviPlayerProperties = makePlayerProperties(moldaviPlayerId, moldaviUserId, gameId, 1483257600000, 'MoldaviTheMoldavish');
-  bridge.createPlayer(moldaviPlayerProperties);
-  bridge.setAdminContact({
-    gameId: gameId,
-    playerId: moldaviPlayerId
-  });
-  bridge.updatePlayer({
-    gameId: gameId,
-    playerId: moldaviPlayerId,
-    allegiance: moldaviPlayerProperties.allegiance,
-    avatarUrl: moldaviPlayerProperties.avatarUrl
-  });
-  bridge.joinResistance({
-    gameId: gameId,
-    playerId: moldaviPlayerId,
-    lifeCode: "zooble-flipwoogly",
-    lifeId: null,
-    privateLifeId: null,
-  });
-
-  var jackPlayerId = bridge.idGenerator.newPublicPlayerId();
-  let jackProperties = makePlayerProperties(jackPlayerId, jackUserId, gameId, 1483257600000, 'JackSlayerTheBeanSlasher');
-  bridge.createPlayer(jackProperties);
-  bridge.joinResistance({
-    gameId: gameId,
-    playerId: jackPlayerId,
-    lifeCode: "grobble-forgbobbly",
-    lifeId: null,
-    privateLifeId: null,
-  });
-
-  var drakePlayerId = bridge.idGenerator.newPublicPlayerId();
-  bridge.createPlayer(makePlayerProperties(drakePlayerId, drakeUserId, gameId, 1483257600000, 'Drackan'));
-  bridge.joinHorde({
-    gameId: gameId,
-    playerId: drakePlayerId
-  });
-
-  var zekePlayerId = bridge.idGenerator.newPublicPlayerId();
-  bridge.createPlayer(makePlayerProperties(zekePlayerId, zekeUserId, gameId, 1483257600000, 'Zeke'));
-  bridge.joinResistance({
-    gameId: gameId,
-    playerId: zekePlayerId,
-    lifeCode: "bobblewob-dobblewob",
-    lifeId: null,
-    privateLifeId: null,
-  });
-
-  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: moldaviPlayerId, message: 'yee!' });
-  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: moldaviPlayerId, message: 'man what i would do for some garlic rolls!' });
-  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: moldaviPlayerId, message: 'https://www.youtube.com/watch?v=GrHPTWTSFgc' });
-  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: jackPlayerId, message: 'yee!' });
-
-  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: jackPlayerId, message: 'yee!' });
-  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: moldaviPlayerId, message: 'yee!' });
-  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: resistanceChatRoomId, playerId: jackPlayerId, message: 'yee!' });
-
-  bridge.infect({
-    infectionId: bridge.idGenerator.newInfectionId(),
-    infectorPlayerId: drakePlayerId,
-    victimLifeCode: "bobblewob-dobblewob",
-    victimPlayerId: null,
-    gameId: gameId,
-  });
 
   bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: zekePlayerId, message: 'zeds rule!' });
   bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: drakePlayerId, message: 'hoomans drool!' });
