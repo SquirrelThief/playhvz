@@ -98,8 +98,8 @@ class Bridge {
     return this.inner.getPlayer(userId, gameId);
   }
 
-  listenToPlayer(gameId, playerId) {
-    return this.inner.listenToPlayer(gameId, playerId);
+  listenToPlayer(gameId, playerId, callback) {
+    return this.inner.listenToPlayer(gameId, playerId, callback);
   }
 
   changePlayerAllegiance(gameId, playerId, newAllegiance) {

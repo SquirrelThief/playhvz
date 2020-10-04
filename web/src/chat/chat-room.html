@@ -63,8 +63,8 @@
           },
 
           members: {
-            type: Array,
-            value: null,
+            type: Map,
+            value: new Map(),
           },
 
           pendingLastSeenTime: Number,
@@ -92,29 +92,30 @@
         },
 
         onChatRoomIdChange_(chatRoomId) {
-          this.showLoadingSpinner = true;
           assert(chatRoomId)
+          this.showLoadingSpinner = true;
+          let self = this;
+          let playerUpdatedCallback = function (playerId, player) {
+            if (player == null && self.members.has(playerId)) {
+              self.members.delete(playerId)
+              return;
+            }
+            self.members.set(playerId, player)
+          }
+
+
           this.bridge.listenToChatRoom(this.game.id, chatRoomId).then(chatRoom => {
             this.chatRoom = chatRoom;
             // Listen to all the players in the chat room.
             this.bridge.listenToGroup(this.game.id, this.chatRoom[ChatPath.FIELD__ASSOCIATED_GROUP_ID]).then(group => {
-              let playerPromises = []
               for (let playerId of group[GroupPath.FIELD__MEMBERS]) {
-                playerPromises.push(this.bridge.listenToPlayer(this.game.id, playerId));
+                this.bridge.listenToPlayer(this.game.id, playerId, playerUpdatedCallback);
               }
-              // Once we have all the players, we can now render the data.
-              return Promise.all(playerPromises).then(players => {
-                let playerArray = []
-                for (let player of players) {
-                  playerArray.push(player)
-                }
-                this.members = playerArray
 
-                // Once we have all the necessary player data, load all the chat messages.
-                this.bridge.listenToChatRoomMessages(this.game.id, chatRoomId).then(messages => {
-                  this.showLoadingSpinner = false;
-                  this.messages = messages;
-                });
+              // Once we have all the necessary player data, load all the chat messages.
+              this.bridge.listenToChatRoomMessages(this.game.id, chatRoomId).then(messages => {
+                this.showLoadingSpinner = false;
+                this.messages = messages;
               });
             });
           });
@@ -236,13 +237,13 @@
         },
 
         getName_(playerId) {
-          let player = this.members.find(player => player.id == playerId)
+          let player = this.members.get(playerId)
           // TODO: handle getting name for player that isn't in the chat room
           return player && player[PlayerPath.FIELD__NAME];
         },
 
         getProfilePic_(playerId) {
-          let player = this.members.find(player => player.id == playerId)
+          let player = this.members.get(playerId)
           return player && player[PlayerPath.FIELD__AVATAR_URL];
         },
 

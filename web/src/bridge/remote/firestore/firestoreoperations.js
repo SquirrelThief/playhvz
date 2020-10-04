@@ -55,7 +55,7 @@ class FirestoreOperations {
   }
 
   getPlayer(gameId, playerId) {
-    return PlayerPath.PLAYER_DOC_REF(this.db, gameId, playerId).get();
+    return PlayerPath.PLAYER_DOC_REF(this.db, gameId, playerId);
   }
 
   getGroup(gameId, groupId) {

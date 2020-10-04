@@ -118,10 +118,8 @@ class FakeBridge {
     });
   }
 
-  listenToPlayer(gameId, playerId) {
-    return new Promise((resolve, reject) => {
-      resolve(this.server.listenToPlayer(gameId, playerId));
-    });
+  listenToPlayer(gameId, playerId, callback) {
+    callback(playerId, this.server.listenToPlayer(gameId, playerId));
   }
 
   changePlayerAllegiance(gameId, playerId, newAllegiance) {

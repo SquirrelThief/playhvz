@@ -39,9 +39,11 @@
         ],
 
         onPlayerIdChanged_(playerId) {
-          this.bridge.listenToPlayer(this.game.id, this.playerId).then(player => {
-            this.player = player;
-          })
+          let self = this;
+          let playerUpdatedCallback = function (playerId, player) {
+            self.player = player;
+          }
+          this.bridge.listenToPlayer(this.game.id, this.playerId, playerUpdatedCallback);
         },
 
         getAliveStatus_(allegiance) {

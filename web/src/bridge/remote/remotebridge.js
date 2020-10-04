@@ -162,12 +162,13 @@ class RemoteBridge {
     });
   }
 
-  listenToPlayer(gameId, playerId) {
-    return this.firestoreOperations.getPlayer(gameId, playerId).then(docSnapshot => {
-      if (!docSnapshot.exists) {
-        return null
+  listenToPlayer(gameId, playerId, callback) {
+    this.firestoreOperations.getPlayer(gameId, playerId).onSnapshot(docSnapshot => {
+      let player = null;
+      if (docSnapshot.exists) {
+        player = DataConverterUtils.convertSnapshotToPlayer(docSnapshot);
       }
-      return DataConverterUtils.convertSnapshotToPlayer(docSnapshot);
+      callback(playerId, player)
     });
   }
 
