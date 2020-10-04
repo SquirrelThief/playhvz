@@ -32,5 +32,4 @@ class Player {
   chatRoomMemberships = {}
   rewards = {}
   lives = {}
-  lifeCodes = {}
 }

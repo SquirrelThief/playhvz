@@ -28,6 +28,10 @@ DataConverterUtils.convertSnapshotToGame = function (documentSnapshot) {
 DataConverterUtils.convertSnapshotToPlayer = function (documentSnapshot) {
   const player = new Player(documentSnapshot.data())
   player.id = documentSnapshot.id
+  // Firebase Timestamps aren't milliseconds, convert all timestamps to be MS.
+  for (let life in player[PlayerPath.FIELD__LIVES]) {
+    player[PlayerPath.FIELD__LIVES][life][PlayerPath.FIELD__LIFE_CODE_TIMESTAMP] = player[PlayerPath.FIELD__LIVES][life][PlayerPath.FIELD__LIFE_CODE_TIMESTAMP].toMillis()
+  }
   return player
 };
 

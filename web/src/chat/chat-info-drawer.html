@@ -45,7 +45,7 @@
             type: Boolean,
             value: false,
           },
-          
+
         },
 
         observers: [
@@ -81,7 +81,7 @@
           var action = e.target.dataset.action || e.currentTarget.dataset.action;
           var playerId = e.target.dataset.playerId || e.currentTarget.dataset.playerId;
           if (action) {
-            this.fire('ghvz-chat-info-action', {action: action, playerId: playerId});
+            this.fire('ghvz-chat-info-action', { action: action, playerId: playerId });
           }
           e.preventDefault();
           e.stopPropagation();
@@ -97,6 +97,7 @@
       display: block;
       overflow-y: auto;
     }
+
     .drawer-item {
       display: flex;
       align-items: center;
@@ -109,10 +110,12 @@
       color: black;
       text-decoration: none;
     }
+
     .drawer-item iron-icon {
       margin: 8px;
       opacity: .8;
     }
+
     .drawer-header {
       display: flex;
       align-items: center;
@@ -122,10 +125,12 @@
       font-size: 18px;
       font-weight: 500;
     }
+
     .drawer-section {
       border-top: 1px solid #ddd;
       padding: 8px 0;
     }
+
     .info-label {
       font-size: 12px;
       font-style: italic;
@@ -133,6 +138,7 @@
       opacity: .6;
       text-align: center;
     }
+
     .player-entry {
       display: flex;
       padding: 8px;
@@ -140,6 +146,7 @@
       height: 40px;
       font-size: 14px;
     }
+
     .player-info {
       display: flex;
       align-items: center;
@@ -148,16 +155,19 @@
       flex-grow: 2;
       text-decoration: none;
     }
+
     .player-name {
       padding-left: 12px;
       font-size: 14px;
     }
+
     .kick {
       padding: 12px;
       cursor: pointer;
       font-size: 16px;
       opacity: .5;
     }
+
     .kick:active {
       background-color: darkkhaki;
       border-radius: 50%;
@@ -197,25 +207,21 @@
         <div class="info-label" name="num-players">[[group.players.length]] members</div>
         <template is="dom-repeat" items="[[group.players]]" as="playerId">
           <div name$="[[getPlayerName_(playerId)]]"">
-            <div class="layout horizontal player-entry">
-              <div class="layout horizontal player-info"
-                  on-tap="captureTap_"
-                  data-action="profile"
-                  data-player-id$="[[playerId]]">
-                <ghvz-player-avatar medium game="[[game]]" player-id="[[playerId]]"></ghvz-player-avatar>
-                <div class='player-name'>
-                  [[getPlayerName_(playerId)]]
-                </div>
+            <div class=" layout horizontal player-entry">
+            <div class="layout horizontal player-info" on-tap="captureTap_" data-action="profile"
+              data-player-id$="[[playerId]]">
+              <ghvz-player-avatar medium bridge="[[bridge]]" game="[[game]]" player-id="[[playerId]]">
+              </ghvz-player-avatar>
+              <div class='player-name'>
+                [[getPlayerName_(playerId)]]
               </div>
-              <template is="dom-if" if="[[showPlayerDropdown]]">
-                <i class="material-icons kick" 
-                    id$="kick-[[getPlayerName_(playerId)]]"
-                    on-tap='captureTap_' 
-                    data-action="kick" 
-                    data-player-id$="[[playerId]]">
-                  clear
-                </i>
-                <!-- <paper-menu-button restore-focus-on-close="[[booleanFalse]]">
+            </div>
+            <template is="dom-if" if="[[showPlayerDropdown]]">
+              <i class="material-icons kick" id$="kick-[[getPlayerName_(playerId)]]" on-tap='captureTap_'
+                data-action="kick" data-player-id$="[[playerId]]">
+                clear
+              </i>
+              <!-- <paper-menu-button restore-focus-on-close="[[booleanFalse]]">
                   <paper-icon-button
                     class="dropdown-trigger" 
                     icon="icons:more-vert">
@@ -223,13 +229,13 @@
                   <paper-menu 
                     class="dropdown-content" 
                     selected="{{selectedMenuItem}}"> -->
-                    <!-- <paper-item 
+              <!-- <paper-item 
                       on-tap="captureTap_" 
                       data-action="ping" 
                       data-player-id$="[[item.id]]">
                       ping
                     </paper-item> -->
-                  <!--  <template is="dom-if" if="[[canRemoveOthers]]">
+              <!--  <template is="dom-if" if="[[canRemoveOthers]]">
                       <paper-item 
                         id$="kick-[[getPlayerName_(playerId)]]"
                         on-tap="captureTap_" 
@@ -240,11 +246,11 @@
                     </template>
                   </paper-menu>
                 </paper-menu-button> -->
-              </template>
-            </div>
+            </template>
           </div>
-        </template>
-      </div> 
-    </div>
+      </div>
+  </template>
+  </div>
+  </div>
   </template>
 </dom-module>

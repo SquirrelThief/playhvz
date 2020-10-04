@@ -41,14 +41,17 @@
         observers: [
           'onPathChanged_(path, game)',
           'onPlayerChanged_(player)',
-          'onPlayerIdChanged_(playerId, game.playersById)',
+          'onPlayerIdChanged_(playerId, bridge, game)',
         ],
 
         computeLifeCode_() {
           if (this.player.allegiance == 'resistance') {
-            if (this.player.lives.length) {
-              let life = this.player.lives[this.player.lives.length - 1];
-              return life && life.private && life.private.code;
+            let lives = this.player[PlayerPath.FIELD__LIVES]
+            for (let lifeKey in this.player[PlayerPath.FIELD__LIVES]) {
+              let lifeCode = this.player[PlayerPath.FIELD__LIVES][lifeKey]
+              if (lifeCode.isActive) {
+                return lifeCode.lifeCode;
+              }
             }
           }
           return null;
@@ -62,7 +65,9 @@
         },
 
         onPlayerIdChanged_() {
-          this.$.playerSelector.select(this.game.playersById[this.playerId]);
+          this.bridge.listenToPlayer(this.game.id, this.playerId).then(player => {
+            this.player = player;
+          });
         },
 
         onPathChanged_() {
@@ -164,7 +169,7 @@
       color: forestgreen;
     }
 
-    .info {
+    .profile-info {
       flex-grow: 1;
       font-size: 14px;
       padding: 8px;
@@ -176,7 +181,7 @@
       margin-bottom: 16px;
     }
 
-    .display-avatar {
+    .profile-display-avatar {
       padding: 24px;
     }
 
@@ -195,14 +200,14 @@
     }
   </style>
   <template>
-    <array-selector id="playerSelector" items="[[game.players]]" selected="{{player}}"></array-selector>
+    <!-- <array-selector id="playerSelector" items="[[game.players]]" selected="{{player}}"></array-selector> -->
     <div id="flexThing">
       <div class$="[[getAliveStatusClass_(player.allegiance)]]">
-        <div name="avatar" class="display-avatar">
-          <ghvz-player-avatar large game="[[game]]" player-id="[[player.id]]">
+        <div name="avatar" class="profile-display-avatar">
+          <ghvz-player-avatar large bridge="[[bridge]]" game="[[game]]" player-id="[[player.id]]">
           </ghvz-player-avatar>
         </div>
-        <div class="info">
+        <div class="profile-info">
           <div name="player-name" class="name">
             [[player.name]]
           </div>
@@ -241,7 +246,7 @@
           <b>[[computeBooleanText_(player.private.notificationSettings.vibrate)]]</b></div>
 
         <template is="dom-if" if="[[isAdmin]]">
-          <div name="volunteered-for">
+          <!-- <div name="volunteered-for">
             Volunteered for:
             <b>
               <template is="dom-if" if="[[player.private.volunteer.advertising]]">Advertising</template>
@@ -267,10 +272,10 @@
           <div name="got-equipment">Got equipment: <b>[[computeBooleanText_(player.private.gotEquipment)]]</b></div>
           <template is="dom-if" if="[[player.isActive]]">
             <paper-button raised name="deactivate-button" on-tap="deactivate_">Deactivate</paper-button>
-          </template>
+          </template> 
           <template is="dom-if" if="[[!player.isActive]]">
             <paper-button raised name="activate-button" on-tap="activate_">Activate</paper-button>
-          </template>
+          </template>-->
           <template is="dom-if" if="[[player.private.canInfect]]">
             <paper-button raised id="unset-infect-button" on-tap="unsetCanInfect_">Unset Can Infect</paper-button>
           </template>
@@ -282,19 +287,19 @@
 
         <template is="dom-repeat" items="[[player.lives]]" as="life">
           <div name$="life-line-[[index]]">
-            Life, at [[computeDateText_(life.time)]],
-            <template is="dom-if" if="[[life.private.code]]">
-              life code "[[life.private.code]]"
+            Life, at [[computeDateText_(life.created)]],
+            <template is="dom-if" if="[[life.lifeCode]]">
+              life code "[[life.lifeCode]]"
             </template>
           </div>
         </template>
-        <template is="dom-repeat" items="[[player.infections]]" as="infection">
+        <!-- <template is="dom-repeat" items="[[player.infections]]" as="infection">
           <div name$="infection-line-[[index]]">
             Infection, at [[computeDateText_(infection.time)]], infector
             <ghvz-player-label players-by-id="[[game.playersById]]" player-id="[[infection.infectorId]]">
             </ghvz-player-label>
           </div>
-        </template>
+        </template> -->
 
       </div>
     </template>
