@@ -214,21 +214,6 @@ class RemoteBridge {
   // End of new Firestore support functions.
   ///////////////////////////////////////////////////////////////
 
-  // Deprecated
-  listenToGame(userId, gameId, destination) {
-    return null /*this.firebaseListener.listenToGame(
-      userId,
-      gameId,
-      new ObservableWriter(
-        destination,
-        (operation) => {
-          if (operation.type == 'set' && operation.path.length == 0) {
-            // The game object has come, store it for later use
-            this.game = operation.value;
-          }
-        })); */
-  }
-
   register(args) {
     let { userId } = args;
     return new Promise((resolve, reject) => {
