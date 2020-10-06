@@ -107,7 +107,9 @@ class FakeBridge {
   }
 
   joinGame(gameName, playerName) {
-    return this.server.joinGame(this.currentUserId, gameName, playerName);
+    return new Promise((resolve, reject) => {
+      resolve(this.server.joinGame(this.currentUserId, gameName, playerName));
+    });
   }
 
   getPlayer(userId, gameId) {

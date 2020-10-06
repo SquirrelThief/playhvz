@@ -44,7 +44,7 @@
           playerId: {
             type: String,
             value: null,
-            // observer: 'onPlayerIdChanged_',
+            //observer: 'onPlayerIdChanged_',
           },
 
           player: Object,
@@ -121,6 +121,9 @@
 
         navigateGameToDashboard_() {
           if (this.path.length == 2 && this.path[0] == 'game') {
+            if (!this.player) {
+
+            }
             this.setPath_(this.path.slice().concat(['main']), true);
           }
         },
@@ -161,15 +164,11 @@
                 return;
               }
               self.set('game', game);
-              self.bridge.getPlayer(self.userId, game.id).then(player => {
-                if (player) {
-                  self.playerId = player.id
-                }
-                self.showLoadingSpinner = false;
-                self.set('player', player);
-              });
+              self.listenToPlayer_();
             }
             this.bridge.listenToGame(this.gameId, gameUpdatedCallback);
+          } else if (this.userId && this.gameId && !this.player) {
+            this.listenToPlayer_();
           }
         },
 
@@ -205,6 +204,17 @@
 
         showGameIdHint(userId, gameId) {
           return userId && !gameId;
+        },
+
+        listenToPlayer_() {
+          let self = this;
+          this.bridge.getPlayer(this.userId, this.game.id).then(player => {
+            if (player) {
+              self.playerId = player.id
+            }
+            self.showLoadingSpinner = false;
+            self.set('player', player);
+          });
         }
       });
     });

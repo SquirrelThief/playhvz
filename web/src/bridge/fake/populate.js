@@ -147,19 +147,24 @@ function populateUsers(bridge, config) {
 }
 
 function populateFakeAppPlayers(bridge, gameName, gameId) {
+  let self = this;
   bridge.signIn({ userId: this.zellaUserId });
-  this.zellaPlayerId = bridge.joinGame(gameName, "ZellaTheUltimate");
+  this.zellaPlayerId = "player-2";
+  bridge.joinGame(gameName, "ZellaTheUltimate")
   bridge.changePlayerAllegiance(gameId, this.zellaPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
   bridge.signIn({ userId: this.zekeUserId });
-  this.zekePlayerId = bridge.joinGame(gameName, "Zeke");
+  this.zekePlayerId = "player-3";
+  bridge.joinGame(gameName, "Zeke");
   bridge.changePlayerAllegiance(gameId, this.zekePlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
   bridge.signIn({ userId: this.deckerdUserId });
-  this.deckerdPlayerId = bridge.joinGame(gameName, "DeckerdTheHesitant");
+  this.deckerdPlayerId = "player-4";
+  bridge.joinGame(gameName, "DeckerdTheHesitant")
 
   bridge.signIn({ userId: this.moldaviUserId });
-  this.moldaviPlayerId = bridge.joinGame(gameName, "MoldaviTheMoldavish");
+  this.moldaviPlayerId = "player-5";
+  bridge.joinGame(gameName, "MoldaviTheMoldavish")
   bridge.changePlayerAllegiance(gameId, this.moldaviPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
   /*bridge.addAdmin({
     gameId: gameId,
@@ -171,11 +176,13 @@ function populateFakeAppPlayers(bridge, gameName, gameId) {
   });*/
 
   bridge.signIn({ userId: this.jackUserId });
-  this.jackPlayerId = bridge.joinGame(gameName, "JackSlayerTheBeanSlasher");
+  this.jackPlayerId = "player-6";
+  bridge.joinGame(gameName, "JackSlayerTheBeanSlasher")
   bridge.changePlayerAllegiance(gameId, this.jackPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
   bridge.signIn({ userId: this.drakeUserId });
-  this.drakePlayerId = bridge.joinGame(gameName, "Drackan");
+  this.drakePlayerId = "player-7";
+  bridge.joinGame(gameName, "Drackan")
   bridge.changePlayerAllegiance(gameId, this.drakePlayerId, Defaults.ZOMBIE_ALLEGIANCE_FILTER)
 }
 

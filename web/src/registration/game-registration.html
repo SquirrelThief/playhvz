@@ -68,44 +68,16 @@
         },
 
         done_() {
-          this.newPlayerArgs.profileImageUrl = PlayerUtils.getDefaultProfilePic(this.newPlayerArgs.name || "");
-          this.newPlayerArgs.beInPhotos = true;
-          this.newPlayerArgs.volunteer = {
-            advertising: false,
-            logistics: false,
-            communications: false,
-            moderator: false,
-            cleric: false,
-            sorcerer: false,
-            admin: false,
-            photographer: false,
-            chronicler: false,
-            server: false,
-            client: false,
-            android: false,
-            ios: false,
-          };
           this.submitEnabled = false;
-          this.bridge.createPlayer(
-            Utils.merge(
-              {
-                playerId: this.bridge.newPublicPlayerId(),
-                privatePlayerId: this.bridge.newPrivatePlayerId(),
-                userId: this.userId,
-                gameId: this.game.id,
-                isActive: true,
-                canInfect: false,
-                profileImageUrl: "",
-                wantToBeSecretZombie: false,
-                gotEquipment: false,
-                notes: '',
-                notificationSettings: {
-                  sound: true,
-                  vibrate: true,
-                },
-              },
-              this.newPlayerArgs));
-          // We observe player changing above, and when it does, we go to the dashboard
+          this.bridge.joinGame(this.game.name, this.newPlayerArgs.name).then(playerId => {
+            if (playerId) {
+              this.fire('ghvz-set-path', {
+                inGame: true,
+                path: ['main'],
+                replace: true,
+              });
+            }
+          });
         },
 
         isMultipleChoice(type) {
