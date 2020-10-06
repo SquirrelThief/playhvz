@@ -171,7 +171,10 @@ class FakeServer {
       Defaults.ZOMBIE_ALLEGIANCE_FILTER,
       this.getTime_({ requestTimeOffset: 5 }),
         /* newLifeCode= */ "");
+  }
 
+  listenToReward(gameId, rewardId) {
+    return this.fakeDatabase.getReward(gameId, rewardId);
   }
 
   setAdminContact(args) {

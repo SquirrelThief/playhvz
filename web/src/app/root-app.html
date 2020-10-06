@@ -34,7 +34,7 @@
                 defaultBridgeType = 'remote';
               }
               // TODO: Remove this when we're ready to support the fake server again.
-              defaultBridgeType = 'remote';
+              //defaultBridgeType = 'remote';
               var bridgeType = Utils.getParameterByName('bridge', defaultBridgeType);
               if (bridgeType != 'fake' && bridgeType != 'remote') {
                 this.fire('ghvz-alert', { message: "'bridge' must either be 'fake' or 'remote'! Falling back to fake." });

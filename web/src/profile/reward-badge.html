@@ -13,7 +13,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<dom-module id="ghvz-reward-category">
+<dom-module id="ghvz-reward-badge">
   <script>
     // Not sure why this HTMLImports.whenReady is really needed.
     // Something about polymer initialization order.
@@ -21,19 +21,23 @@
     // hey dudes, game.rewardCategories.0.name just changed
     HTMLImports.whenReady(() => {
       Polymer({
-        is: 'ghvz-reward-category',
+        is: 'ghvz-reward-badge',
 
         properties: {
           bridge: Object,
           game: Object,
-          rewardCategoryId: String,
-          rewardCategory: Object,
+          rewardObject: Object,
+          reward: Object,
         },
 
-        observers: ['computeRewardCategory_(game, rewardCategoryId)'],
+        observers: ['getReward_(bridge, game, rewardObject)'],
 
-        computeRewardCategory_() {
-          this.$.rewardCategorySelector.select(this.game.rewardCategoriesById[this.rewardCategoryId]);
+        getReward_() {
+          let self = this;
+          let rewardCallback = function (reward) {
+            self.reward = reward;
+          }
+          this.bridge.listenToReward(this.game.id, this.rewardObject.key, rewardCallback);
         },
       });
     });
@@ -42,6 +46,7 @@
     :host {
       display: block;
     }
+
     #container {
       display: flex;
       align-items: center;
@@ -80,13 +85,12 @@
     }
   </style>
   <template>
-    <array-selector id="rewardCategorySelector" items="[[game.rewardCategories]]" selected="{{rewardCategory}}"></array-selector>
-    <div id="container" name$="reward-[[rewardCategory.name]]">
+    <div id="container" name$="reward-[[reward.shortName]]">
       <div>
-        <img src$="[[rewardCategory.badgeImageUrl]]"/>
+        <img src$="[[reward.imageUrl]]" />
       </div>
-      <div id="name">[[rewardCategory.name]]</div>
-      <div id="description">[[rewardCategory.description]]</div>
+      <div id="name">[[reward.longName]]</div>
+      <div id="description">[[reward.description]]</div>
     </div>
   </template>
 </dom-module>

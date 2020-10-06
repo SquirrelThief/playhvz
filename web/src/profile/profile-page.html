@@ -135,7 +135,12 @@
           });
         },
         seePrivateInfo_(isAdmin, actingPlayerId, playerId) {
+          debugger;
           return isAdmin || actingPlayerId == playerId;
+        },
+
+        getRewardsAsArray(player) {
+          return Utils.toArray(player.rewards);
         },
       });
     });
@@ -202,7 +207,6 @@
     }
   </style>
   <template>
-    <!-- <array-selector id="playerSelector" items="[[game.players]]" selected="{{player}}"></array-selector> -->
     <div id="flexThing">
       <div class$="[[getAliveStatusClass_(player.allegiance)]]">
         <div name="avatar" class="profile-display-avatar">
@@ -223,22 +227,22 @@
             Points:
             <span name="profilePoints">[[player.points]]</span>
           </div>
-          <template is="dom-if" if="[[lifeCode]]">
-            <div name="lifecode" class="sub-item">
-              Life code: [[lifeCode]]
-            </div>
+          <template is="dom-if" if="[[seePrivateInfo_(isAdmin, actingPlayerId, playerId)]]">
+            <template is="dom-if" if="[[lifeCode]]">
+              <div name="lifecode" class="sub-item">
+                Life code: [[lifeCode]]
+              </div>
+            </template>
           </template>
         </div>
       </div>
     </div>
 
     <!-- TODO: Put this in appropriate location -->
-    <template is="dom-repeat" items="[[player.claims]]" as="claim">
-      <ghvz-reward-category bridge="[[bridge]]" game="[[game]]" reward-category-id="[[claim.rewardCategoryId]]">
-      </ghvz-reward-category>
+    <template is="dom-repeat" items="[[getRewardsAsArray(player)]]" as="rewardObject">
+      <ghvz-reward-badge bridge="[[bridge]]" game="[[game]]" reward-object="[[rewardObject]]">
+      </ghvz-reward-badge>
     </template>
-
-
 
     <template is="dom-if" if="[[seePrivateInfo_(isAdmin, actingPlayerId, playerId)]]">
       <div id="details">

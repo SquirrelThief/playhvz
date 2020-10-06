@@ -83,6 +83,10 @@ class FakeDatabase {
         return Object.values(this.fakeDb[GamePath.COLLECTION_PATH][gameId][RewardPath.COLLECTION_PATH][rewardId][RewardPath.CLAIM_CODE_COLLECTION_PATH])
     }
 
+    getReward(gameId, rewardId) {
+        return this.fakeDb[GamePath.COLLECTION_PATH][gameId][RewardPath.COLLECTION_PATH][rewardId];
+    }
+
     setChatRoom(gameId, chatRoomId, chatRoom) {
         this.verifyId(gameId)
         this.verifyId(chatRoomId)

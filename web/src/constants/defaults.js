@@ -32,13 +32,13 @@ Defaults.gameAdminChatName = "Admins";
 Defaults.INFECT_REWARD_SHORT_NAME = "infect";
 Defaults.INFECT_REWARD_LONG_NAME = "BraaAAaAAAAaains!";
 Defaults.INFECT_REWARD_DESCRIPTION = "Spread the zombie ideals and welcomed a new member to the Horde!";
-Defaults.INFECT_REWARD_IMAGE_URL = "";
+Defaults.INFECT_REWARD_IMAGE_URL = "https://lh3.googleusercontent.com/GoKTAX0zAEt6PlzUkTn7tMeK-q1hwKDpzWsMJHBntuyR7ZKVtFXjRkbFOEMqrqxPWJ-7dbCXD7NbVgHd7VmkYD8bDzsjd23XYk0KyALC3BElIk65vKajjjRD_X2_VkLPOVejrZLpPpa2ebQVUHJF5UXVlkst0m6RRqs2SumRzC7EMmEeq9x_TurwKUJmj7PhNBPCeoDEh51jAIc-ZqvRfDegLgq-HtoyJAo91lbD6jqA2-TFufJfiPd4nOWnKhZkQmarxA8LQT0kOu7r3M5F-GH3pCbQqpH1zraha8CqvKxMGLW1i4CbDs1beXatKTdjYhb1D_MVnJ6h7O4WX3GULwNTRSIFVOrogNWm4jWLMKfKt3NfXYUsCOMhlpAI3Q8o1Qgbotfud4_HcRvvs6C6i17X-oQm8282rFu6aQiLXOv55FfiMnjnkbTokOA1OGDQrkBPbSVumz9ZE3Hr-J7w_G8itxqThsSzwtK6p5YR_9lnepWe0HRNKfUZ2x-a2ndT9m6aRXC_ymWHQGfdGPvTfHOPxUpY8mtX2vknmj_dn4dIuir1PpcN0DJVVuyuww3sOn-1YRFh80gBFvwFuMnKwz8GY8IX5gZmbrrBsy_FmwFDIvBcwNjZKd9fH2gkK5rk1AlWv12LsPBsrRIEaLvcSq7Iim9XSsiivzcNrLFG=w294-h488-no";
 Defaults.INFECT_REWARD_POINTS = 50;
 
 Defaults.DECLARE_REWARD_SHORT_NAME = "declare";
 Defaults.DECLARE_REWARD_LONG_NAME = "By jolly, I declare";
 Defaults.DECLARE_REWARD_DESCRIPTION = "I'm a great player, I play by the rules";
-Defaults.DECLARE_REWARD_IMAGE_URL = "";
+Defaults.DECLARE_REWARD_IMAGE_URL = "https://photos.app.goo.gl/zdJuosGePWgAVyf47";
 Defaults.DECLARE_REWARD_POINTS = 10;
 
 Defaults.FIGUREHEAD_ADMIN_NAME = "HvZ CDC";

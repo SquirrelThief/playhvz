@@ -54,3 +54,9 @@ DataConverterUtils.convertSnapshotToMessage = function (documentSnapshot) {
   message.timestamp = message.timestamp.toMillis()
   return message
 };
+
+DataConverterUtils.convertSnapshotToReward = function (documentSnapshot) {
+  const reward = new Reward(documentSnapshot.data())
+  reward.id = documentSnapshot.id
+  return reward
+};

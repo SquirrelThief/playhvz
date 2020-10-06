@@ -153,10 +153,12 @@ class FakeBridge {
   infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode) {
     return new Promise((resolve, reject) => {
       resolve(this.server.infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode));
-    });
+    })
   }
 
-
+  listenToReward(gameId, rewardId, callback) {
+    callback(this.server.listenToReward(gameId, rewardId));
+  }
 
 }
 

@@ -258,12 +258,12 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   }
   bridge.listenToPlayer(gameId, this.zekePlayerId, callback);
 
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.zekePlayerId, 'zeds rule!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.drakePlayerId, 'hoomans drool!');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.drakePlayerId, 'monkeys eat stool!');
+
   // TODO: SUPPORT THINGS BELOW THIS POINT.
   return;
-
-  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: zekePlayerId, message: 'zeds rule!' });
-  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: drakePlayerId, message: 'hoomans drool!' });
-  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: drakePlayerId, message: 'monkeys eat stool!' });
 
   var zedSecondChatRoomGroupId = bridge.idGenerator.newGroupId();
   var zedSecondChatRoomId = bridge.idGenerator.newChatRoomId();

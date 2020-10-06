@@ -125,6 +125,10 @@ class Bridge {
   infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode) {
     return this.inner.infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode);
   }
+
+  listenToReward(gameId, rewardId, callback) {
+    return this.inner.listenToReward(gameId, rewardId, callback);
+  }
   //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
   //////////////////////////////////////////////////////////////////////
