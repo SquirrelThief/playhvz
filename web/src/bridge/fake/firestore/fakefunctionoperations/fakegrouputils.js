@@ -173,3 +173,29 @@ FakeGroupUtils.removePlayerFromGroup = function (fakeDatabase, gameId, groupId, 
     // Group is associated with a chat room (we can assume only one chat room per group).
     FakeChatUtils.removePlayerFromChat(fakeDatabase, gameId, player, groupId, groupChatRoom)
 }
+
+FakeGroupUtils.createGroupAndChat = function (fakeDatabase, gameId, playerId, chatName, settings) {
+    const group = FakeGroupUtils.createPlayerOwnedGroup(playerId, chatName, settings)
+    group.id = fakeDatabase.idGenerator.generateId("group", chatName)
+    fakeDatabase.setGroup(gameId, group.id, group);
+    const chatRoom = new ChatRoom({
+        [ChatPath.FIELD__ASSOCIATED_GROUP_ID]: group.id,
+        [ChatPath.FIELD__NAME]: chatName,
+        [ChatPath.FIELD__WITH_ADMINS]: false
+    });
+    chatRoom.id = fakeDatabase.idGenerator.generateId("chat", chatName)
+    fakeDatabase.setChatRoom(gameId, chatRoom.id, chatRoom)
+    let player = fakeDatabase.getPlayer(gameId, playerId);
+    FakeChatUtils.addPlayerToChat(fakeDatabase, gameId, player, group.id, chatRoom)
+    return chatRoom.id;
+}
+
+FakeGroupUtils.createPlayerOwnedGroup = function (ownerId, name, settings) {
+    return new Group({
+        [GroupPath.FIELD__NAME]: name,
+        [GroupPath.FIELD__MANAGED]: false,
+        [GroupPath.FIELD__OWNERS]: [ownerId],
+        [GroupPath.FIELD__SETTINGS]: settings,
+        [GroupPath.FIELD__MEMBERS]: []
+    });
+}

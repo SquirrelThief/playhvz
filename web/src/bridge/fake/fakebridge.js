@@ -162,6 +162,16 @@ class FakeBridge {
     callback(this.server.listenToReward(gameId, rewardId));
   }
 
+  createChatRoom(gameId, ownerId, chatName, allegianceFilter) {
+    return Promise.resolve(this.server.createChatRoom(gameId, ownerId, chatName, allegianceFilter));
+  }
+
+  addPlayersToChat(gameId, groupId, chatRoomId, playerIdList) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.addPlayersToChat(gameId, groupId, chatRoomId, playerIdList));
+    });
+  }
+
 }
 
 function CloningWrapper(inner, funcNames) {

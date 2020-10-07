@@ -177,6 +177,26 @@ class FakeServer {
     return this.fakeDatabase.getReward(gameId, rewardId);
   }
 
+  createChatRoom(gameId, ownerId, chatName, allegianceFilter) {
+    const settings = new Settings({
+      addSelf: true,
+      addOthers: true,
+      removeSelf: true,
+      removeOthers: true,
+      autoAdd: false,
+      autoRemove: allegianceFilter !== Defaults.EMPTY_ALLEGIANCE_FILTER,
+      allegianceFilter: allegianceFilter
+    });
+    return FakeGroupUtils.createGroupAndChat(this.fakeDatabase, gameId, ownerId, chatName, settings);
+  }
+
+  addPlayersToChat(gameId, groupId, chatRoomId, playerIdList) {
+    const chatRoom = this.fakeDatabase.getChatRoom(gameId, chatRoomId);
+    for (let playerId of playerIdList) {
+      FakeChatUtils.addPlayerToChat(this.fakeDatabase, gameId, this.fakeDatabase.getPlayer(gameId, playerId), groupId, chatRoom);
+    }
+  }
+
   setAdminContact(args) {
     let { playerId } = args;
     this.writer.set(["adminContactPlayerId"], playerId);
@@ -252,17 +272,7 @@ class FakeServer {
       null,
       new Model.Marker(markerId, args));
   }
-  createChatRoom(args) {
-    let { chatRoomId, accessGroupId } = args;
-    this.writer.insert(
-      this.reader.getChatRoomPath(null),
-      null,
-      new Model.ChatRoom(chatRoomId, args));
-    let group = this.game.groupsById[accessGroupId];
-    for (let playerId of group.players) {
-      this.addPlayerToChatRoom_(chatRoomId, playerId);
-    }
-  }
+
   updateChatRoom(args) {
     throwError('Implement!');
   }

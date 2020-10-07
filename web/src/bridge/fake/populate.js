@@ -126,7 +126,7 @@ let zellaUserId;
 let zekeUserId;
 
 /** Function used by fake-app.html to populate user data. */
-function populateUsers(bridge, config) {
+async function populateUsers(bridge, config) {
   this.zellaUserId = 'user-' + config.fakeUserIds.zella;
   this.zekeUserId = 'user-' + config.fakeUserIds.zeke;
   this.reggieUserId = 'user-' + config.fakeUserIds.reggie;
@@ -269,59 +269,21 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.drakePlayerId, 'hoomans drool!');
   bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.drakePlayerId, 'monkeys eat stool!');
 
+  bridge.createChatRoom(gameId, this.zekePlayerId, /* name= */ "Zeds Internal Secret Police", /* allegianceFilter= */ "horde");
+  let secondZedChatRoomId = "chat-Zeds Internal Secret Police-5";
+  let secondZedGroupId = "group-Zeds Internal Secret Police-5";
+
+  bridge.addPlayersToChat(
+    gameId,
+    secondZedGroupId,
+    secondZedChatRoomId,
+    [this.drakePlayerId]
+  );
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), secondZedChatRoomId, this.drakePlayerId, 'lololol we be zed police');
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), secondZedChatRoomId, this.zekePlayerId, 'lololol oink oink');
+
   // TODO: SUPPORT THINGS BELOW THIS POINT.
   return;
-
-  var zedSecondChatRoomGroupId = bridge.idGenerator.newGroupId();
-  var zedSecondChatRoomId = bridge.idGenerator.newChatRoomId();
-  bridge.createGroup({
-    groupId: zedSecondChatRoomGroupId,
-    name: "Group for " + zedSecondChatRoomId,
-    gameId: gameId,
-    ownerPlayerId: zekePlayerId,
-    allegianceFilter: 'horde',
-    autoAdd: true,
-    autoRemove: true,
-    canAddOthers: true,
-    canRemoveOthers: true,
-    canAddSelf: true,
-    canRemoveSelf: true,
-  });
-  bridge.createChatRoom({
-    gameId: gameId,
-    chatRoomId: zedSecondChatRoomId,
-    accessGroupId: zedSecondChatRoomGroupId,
-    name: "Zeds Internal Secret Police",
-    withAdmins: false,
-  });
-
-  bridge.addPlayerToGroup({
-    gameId: gameId,
-    groupId: zedSecondChatRoomGroupId,
-    playerToAddId: zekePlayerId,
-    actingPlayerId: zekePlayerId,
-  });
-  bridge.addPlayerToGroup({
-    gameId: gameId,
-    groupId: zedSecondChatRoomGroupId,
-    playerToAddId: drakePlayerId,
-    actingPlayerId: zekePlayerId,
-  });
-  bridge.sendChatMessage({
-    gameId: gameId,
-    messageId: bridge.idGenerator.newMessageId(),
-    chatRoomId: zedSecondChatRoomId,
-    playerId: drakePlayerId,
-    message: 'lololol we be zed police'
-  });
-  bridge.sendChatMessage({
-    gameId: gameId,
-    messageId: bridge.idGenerator.newMessageId(),
-    chatRoomId: zedSecondChatRoomId,
-    playerId: zekePlayerId,
-    message: 'lololol oink oink'
-  });
-
   var resistanceSecondChatRoomGroupId = bridge.idGenerator.newGroupId();
   var resistanceSecondChatRoomId = bridge.idGenerator.newChatRoomId();
   bridge.createGroup({

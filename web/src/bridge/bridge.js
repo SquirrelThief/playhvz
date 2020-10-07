@@ -129,6 +129,14 @@ class Bridge {
   listenToReward(gameId, rewardId, callback) {
     return this.inner.listenToReward(gameId, rewardId, callback);
   }
+
+  createChatRoom(gameId, ownerId, chatName, allegianceFilter) {
+    return this.inner.createChatRoom(gameId, ownerId, chatName, allegianceFilter);
+  }
+
+  addPlayersToChat(gameId, groupId, chatRoomId, playerIdList) {
+    return this.inner.addPlayersToChat(gameId, groupId, chatRoomId, playerIdList);
+  }
   //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
   //////////////////////////////////////////////////////////////////////
@@ -455,14 +463,6 @@ class FakeIdGenerator extends IdGenerator {
     rewardCode: 'String',
   });
 
-
-  serverMethods.set('createChatRoom', {
-    chatRoomId: '!ChatRoomId',
-    accessGroupId: 'GroupId',
-    gameId: 'GameId',
-    name: 'String',
-    withAdmins: 'Boolean',
-  });
   serverMethods.set('updateChatRoom', {
     chatRoomId: 'ChatRoomId',
     gameId: 'GameId',
