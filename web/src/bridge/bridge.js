@@ -149,6 +149,10 @@ class Bridge {
   listenToMission(gameId, missionId, callback) {
     return this.inner.listenToMission(gameId, missionId, callback);
   }
+
+  listenToMissionList(gameId, playerId, callback) {
+    return this.inner.listenToMissionList(gameId, playerId, callback);
+  }
   //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
   //////////////////////////////////////////////////////////////////////

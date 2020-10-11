@@ -15,54 +15,67 @@
 -->
 
 <dom-module id="ghvz-missions-page">
-<script>
-  // Not sure why this HTMLImports.whenReady is really needed.
-  // Something about polymer initialization order.
-  // I think we're not supposed to need this.
-  HTMLImports.whenReady(() => {
-    Polymer({
-      is: 'ghvz-missions-page',
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-missions-page',
 
-      properties: {
-        bridge: Object,
+        properties: {
+          bridge: Object,
+          game: Object,
+          player: Object,
+          missionIds: Array,
+        },
 
-        game: Object,
+        observers: [
+          'onPlayerIdChanged_(bridge, game, player)',
+        ],
 
-        player: Object,
-      },
+        formatTime_: function (time) {
+          return Utils.formatTime(time);
+        },
 
-      formatTime_: function(time) {
-        return Utils.formatTime(time);
-      },
+        onPlayerIdChanged_() {
+          let self = this
+          let onMissionsUpdatedCallback = function (missions) {
+            let missionIds = [];
+            for (let mission of missions) {
+              missionIds.push(mission.id);
+            }
+            self.missionIds = missionIds;
+          }
+          this.bridge.listenToMissionList(this.game.id, this.player.id, onMissionsUpdatedCallback);
+        },
 
-      shorten(html) {
-        if (html.length > 20)
-          return html.slice(0, 17) + '...';
-        return html;
-      },
+        shorten(html) {
+          if (html.length > 20)
+            return html.slice(0, 17) + '...';
+          return html;
+        },
+      });
     });
-  });
-</script>
-<style>
-  paper-input {
-    display: block;
-    width: 100%;
-    --paper-input-container-underline: {
-      border-bottom-color: #C0C0C0;
+  </script>
+  <style>
+    paper-input {
+      display: block;
+      width: 100%;
+
+      --paper-input-container-underline: {
+        border-bottom-color: #C0C0C0;
+      }
+
+      margin-bottom: 4px;
     }
-    margin-bottom: 4px;
-  }
-</style>
-<template>
-  <template is="dom-repeat" items="[[player.private.missionMemberships]]" as="missionMembership">
-    <ghvz-card spaced>
-      <ghvz-mission
-          bridge="[[bridge]]"
-          player="[[player]]"
-          game="[[game]]"
-          mission-id="[[missionMembership.missionId]]">
-      </ghvz-mission>
-    </ghvz-card>
+  </style>
+  <template>
+    <template is="dom-repeat" items="[[missionIds]]" as="missionId">
+      <ghvz-card spaced>
+        <ghvz-mission bridge="[[bridge]]" player="[[player]]" game="[[game]]" mission-id="[[missionId]]">
+        </ghvz-mission>
+      </ghvz-card>
+    </template>
   </template>
-</template>
 </dom-module>

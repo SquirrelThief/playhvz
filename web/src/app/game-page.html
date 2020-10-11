@@ -14,146 +14,130 @@
   limitations under the License.
 -->
 <dom-module id="ghvz-game-page">
-<script>
-  // Not sure why this HTMLImports.whenReady is really needed.
-  // Something about polymer initialization order.
-  // I think we're not supposed to need this.
-  HTMLImports.whenReady(() => {
-    Polymer({
-      is: 'ghvz-game-page',
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-game-page',
 
-      properties: {
-        bridge: Object,
-        isAdmin: Boolean,
-        database: Object,
-        userId: String,
-        email: String,
-        game: Object,
-        player: Object,
-        path: Array,
-        isMobile: Boolean,
+        properties: {
+          bridge: Object,
+          isAdmin: Boolean,
+          database: Object,
+          userId: String,
+          email: String,
+          game: Object,
+          player: Object,
+          playerId: String,
+          path: Array,
+          isMobile: Boolean,
 
-        // Path, without the game/2017m in front
-        innerPath: {
-          type: Array,
-          computed: 'computeInnerPath_(path)',
+          // Path, without the game/2017m in front
+          innerPath: {
+            type: Array,
+            computed: 'computeInnerPath_(path)',
+          },
         },
-      },
 
-      listeners: {
-        'ghvz-open-drawer': 'openDrawer_',
-        'ghvz-close-drawer': 'closeDrawer_',
-        'ghvz-open-dialog': 'openDialog_',
-      },
+        listeners: {
+          'ghvz-open-drawer': 'openDrawer_',
+          'ghvz-close-drawer': 'closeDrawer_',
+          'ghvz-open-dialog': 'openDialog_',
+        },
 
-      computeInnerPath_(path) {
-        if (path.length >= 2 && path[0] == 'game') {
-          return path.slice(2);
-        } else if (path.length == 1 && path[0] == 'game') {
-          return [];
-        } else {
-          return path.slice();
-        }
-      },
+        computeInnerPath_(path) {
+          if (path.length >= 2 && path[0] == 'game') {
+            return path.slice(2);
+          } else if (path.length == 1 && path[0] == 'game') {
+            return [];
+          } else {
+            return path.slice();
+          }
+        },
 
-      computeResponsiveWidth_(isMobile) {
-        return this.isMobile ? "1000px" : null;
-      },
+        computeResponsiveWidth_(isMobile) {
+          return this.isMobile ? "1000px" : null;
+        },
 
-      openDrawer_() {
-        this.$$("#drawer").openDrawer();
-      },
+        openDrawer_() {
+          this.$$("#drawer").openDrawer();
+        },
 
-      closeDrawer_() {
-        this.$$("#drawer").closeDrawer();
-      },
+        closeDrawer_() {
+          this.$$("#drawer").closeDrawer();
+        },
 
-      openDialog_(e) {
-        // Move the dialog so it covers the whole screen
-        if (event.detail.dialog) {
-          this.appendChild(event.detail.dialog);
-          event.detail.dialog.openForCreate();
-        }
-      },
+        openDialog_(e) {
+          // Move the dialog so it covers the whole screen
+          if (event.detail.dialog) {
+            this.appendChild(event.detail.dialog);
+            event.detail.dialog.openForCreate();
+          }
+        },
+      });
     });
-  });
-</script>
-<style>
-  :host {
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  div[main] {
-    overflow-y: scroll; /* has to be scroll, not auto */
-    -webkit-overflow-scrolling: touch; /* momentum scrolling */
-  }
+  </script>
+  <style>
+    :host {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      width: 100%;
+      box-sizing: border-box;
+    }
 
-  div[main],
-  div[drawer] {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-  }
+    div[main] {
+      overflow-y: scroll;
+      /* has to be scroll, not auto */
+      -webkit-overflow-scrolling: touch;
+      /* momentum scrolling */
+    }
 
-  paper-material[drawer] {
-    /* momentum scrolling */
-    overflow-y: scroll; 
-    -webkit-overflow-scrolling: touch;
-  }
+    div[main],
+    div[drawer] {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
 
-  ghvz-drawer,
-  ghvz-desktop-app,
-  ghvz-mobile-app {
-    flex-grow: 1;
-  }
-</style>
-<template>
-  <template is="dom-if" if="[[game]]">
-    <!-- For webdrivers -->
-    <div name="gameLoaded"></div>
+    paper-material[drawer] {
+      /* momentum scrolling */
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+    }
 
-    <paper-drawer-panel id="drawer" disable-swipe responsive-width="[[computeResponsiveWidth_(isMobile)]]">
-      <paper-material drawer>
-        <ghvz-drawer
-            bridge="[[bridge]]"
-            is-admin="[[isAdmin]]"
-            database="[[database]]"
-            user-id="[[userId]]"
-            game="[[game]]"
-            player="[[player]]">
-        </ghvz-drawer>
-      </paper-material>
-      <div main>
-        <template is="dom-if" if="[[!isMobile]]">
-          <ghvz-desktop-app
-              bridge="[[bridge]]"
-              is-admin="[[isAdmin]]"
-              database="[[database]]"
-              user-id="[[userId]]"
-              email="[[email]]"
-              game="[[game]]"
-              player="[[player]]"
-              player-id="[[playerId]]"
-              path="[[innerPath]]">
-          </ghvz-desktop-app>
-        </template>
-        <template is="dom-if" if="[[isMobile]]">
-          <ghvz-mobile-app
-              bridge="[[bridge]]"
-              is-admin="[[isAdmin]]"
-              database="[[database]]"
-              email="[[email]]"
-              user-id="[[userId]]"
-              game="[[game]]"
-              player="[[player]]"
-              path="[[innerPath]]">
-          </ghvz-mobile-app>
-        </template>
-      </div>
-    </paper-drawer-panel>
+    ghvz-drawer,
+    ghvz-desktop-app,
+    ghvz-mobile-app {
+      flex-grow: 1;
+    }
+  </style>
+  <template>
+    <template is="dom-if" if="[[game]]">
+      <!-- For webdrivers -->
+      <div name="gameLoaded"></div>
+
+      <paper-drawer-panel id="drawer" disable-swipe responsive-width="[[computeResponsiveWidth_(isMobile)]]">
+        <paper-material drawer>
+          <ghvz-drawer bridge="[[bridge]]" is-admin="[[isAdmin]]" database="[[database]]" user-id="[[userId]]"
+            game="[[game]]" player="[[player]]">
+          </ghvz-drawer>
+        </paper-material>
+        <div main>
+          <template is="dom-if" if="[[!isMobile]]">
+            <ghvz-desktop-app bridge="[[bridge]]" is-admin="[[isAdmin]]" database="[[database]]" user-id="[[userId]]"
+              email="[[email]]" game="[[game]]" player="[[player]]" player-id="[[playerId]]" path="[[innerPath]]">
+            </ghvz-desktop-app>
+          </template>
+          <template is="dom-if" if="[[isMobile]]">
+            <ghvz-mobile-app bridge="[[bridge]]" is-admin="[[isAdmin]]" database="[[database]]" email="[[email]]"
+              user-id="[[userId]]" game="[[game]]" player="[[player]]" path="[[innerPath]]">
+            </ghvz-mobile-app>
+          </template>
+        </div>
+      </paper-drawer-panel>
+    </template>
   </template>
-</template>
 </dom-module>

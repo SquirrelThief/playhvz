@@ -186,6 +186,9 @@ class FakeBridge {
     callback(this.server.listenToMission(gameId, missionId));
   }
 
+  listenToMissionList(gameId, playerId, callback) {
+    callback(this.server.listenToMissionList(gameId, playerId));
+  }
 
 
 }

@@ -259,6 +259,41 @@ class FakeServer {
     return this.fakeDatabase.getMission(gameId, missionId);
   }
 
+  listenToMissionList(gameId, playerId) {
+    // Get all the group ids that are related to missions.
+    let allMissions = this.fakeDatabase.getAllMissionsOfGame(gameId);
+    let allMissionGroupIds = [];
+    for (let mission of allMissions) {
+      allMissionGroupIds.push(mission[MissionPath.FIELD__GROUP_ID])
+    }
+    // Check every mission-group to see if the player is a member of that group
+    let allGroups = this.fakeDatabase.getAllGroupsOfGame(gameId);
+    let missionGroupsPlayerIsIn = [];
+    for (let group of allGroups) {
+      if (allMissionGroupIds.includes(group.id) && group[GroupPath.FIELD__MEMBERS].includes(playerId)) {
+        missionGroupsPlayerIsIn.push(group.id);
+      }
+    }
+    // Get all the missions that the player is in (based on mission-group membership)
+    let playerMissions = []
+    for (let mission of allMissions) {
+      if (missionGroupsPlayerIsIn.includes(mission[MissionPath.FIELD__GROUP_ID])) {
+        playerMissions.push(mission);
+      }
+    }
+    // Sort missions by end time
+    let comparitor = function (mission1, mission2) {
+      if (mission1[MissionPath.FIELD__END_TIME] > mission2[MissionPath.FIELD__END_TIME]) {
+        return 1;
+      } else if (mission1[MissionPath.FIELD__END_TIME] < mission2[MissionPath.FIELD__END_TIME]) {
+        return -1;
+      }
+      return 0;
+    }
+    playerMissions.sort(comparitor);
+    return playerMissions
+  }
+
 
 
   setAdminContact(args) {

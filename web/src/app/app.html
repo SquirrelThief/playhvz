@@ -253,8 +253,6 @@
     }
   </style>
   <template>
-    <array-selector id="playerSelector" items="[[game.players]]" selected="{{player}}"></array-selector>
-
     <!--<ghvz-active active="{{userActive}}"></ghvz-active>
   <ghvz-inactive-dialog
       bridge="[[bridge]]"
@@ -275,7 +273,8 @@
 
     <template is="dom-if" if="[[userId]]">
       <ghvz-display-page config="[[config]]" bridge="[[bridge]]" email="[[email]]" path="[[path]]" game="[[game]]"
-        player="[[player]]" user-id="[[userId]]" is-mobile="[[isMobile]]" is-admin="[[isAdmin]]">
+        player="[[player]]" player-id="[[playerId]]" user-id="[[userId]]" is-mobile="[[isMobile]]"
+        is-admin="[[isAdmin]]">
       </ghvz-display-page>
     </template>
   </template>
