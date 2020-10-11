@@ -272,7 +272,6 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   bridge.createChatRoom(gameId, this.zekePlayerId, /* name= */ "Zeds Internal Secret Police", /* allegianceFilter= */ "horde");
   let secondZedChatRoomId = "chat-Zeds Internal Secret Police-5";
   let secondZedGroupId = "group-Zeds Internal Secret Police-5";
-
   bridge.addPlayersToChat(
     gameId,
     secondZedGroupId,
@@ -282,121 +281,95 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), secondZedChatRoomId, this.drakePlayerId, 'lololol we be zed police');
   bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), secondZedChatRoomId, this.zekePlayerId, 'lololol oink oink');
 
+  bridge.createChatRoom(gameId, this.zellaPlayerId, /* name= */ "My Chat Room!", /* allegianceFilter= */ "resistance");
+  let secondHumanChatRoomId = "chat-My Chat Room!-6";
+  let secondHumanGroupId = "group-My Chat Room!-6";
+  bridge.addPlayersToChat(
+    gameId,
+    secondHumanGroupId,
+    secondHumanChatRoomId,
+    [this.jackPlayerId]
+  );
+  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), secondHumanChatRoomId, this.zellaPlayerId, 'lololol i have a chat room!');
+
+
+  /*
+    bridge.updatePlayer({
+      gameId: gameId,
+      playerId: zellaPlayerId,
+      avatarUrl: 'https://lh3.googleusercontent.com/GoKTAX0zAEt6PlzUkTn7tMeK-q1hwKDpzWsMJHBntuyR7ZKVtFXjRkbFOEMqrqxPWJ-7dbCXD7NbVgHd7VmkYD8bDzsjd23XYk0KyALC3BElIk65vKajjjRD_X2_VkLPOVejrZLpPpa2ebQVUHJF5UXVlkst0m6RRqs2SumRzC7EMmEeq9x_TurwKUJmj7PhNBPCeoDEh51jAIc-ZqvRfDegLgq-HtoyJAo91lbD6jqA2-TFufJfiPd4nOWnKhZkQmarxA8LQT0kOu7r3M5F-GH3pCbQqpH1zraha8CqvKxMGLW1i4CbDs1beXatKTdjYhb1D_MVnJ6h7O4WX3GULwNTRSIFVOrogNWm4jWLMKfKt3NfXYUsCOMhlpAI3Q8o1Qgbotfud4_HcRvvs6C6i17X-oQm8282rFu6aQiLXOv55FfiMnjnkbTokOA1OGDQrkBPbSVumz9ZE3Hr-J7w_G8itxqThsSzwtK6p5YR_9lnepWe0HRNKfUZ2x-a2ndT9m6aRXC_ymWHQGfdGPvTfHOPxUpY8mtX2vknmj_dn4dIuir1PpcN0DJVVuyuww3sOn-1YRFh80gBFvwFuMnKwz8GY8IX5gZmbrrBsy_FmwFDIvBcwNjZKd9fH2gkK5rk1AlWv12LsPBsrRIEaLvcSq7Iim9XSsiivzcNrLFG=w294-h488-no'
+    });
+    bridge.updatePlayer({
+      gameId: gameId,
+      playerId: drakePlayerId,
+      avatarUrl: 'https://lh3.googleusercontent.com/WP1fewVG0CvERcnQnmxjf84IjnEBoDQBgdaxbNAECRa433neObfAjv_xI35DN67WhcCL9y-mgXmfYrZEBeJ2PYrtIeCK3KSdJ4HiEDUqxaaGsJAtu5C5ZjcABUHoySueEwO0yJWfhWPVbGoAFdP-ZquoXSF3yz4gnlN76W-ltDBglclLxKs-hR9dTjf_DiX9yGmmb5y8mp1Jb8BEw9Q-zx_j9EFkgTI0EA6T10pogxsfAWkrwXO7t37D0vI2OxzHJA51EQ4LZw1oZsIN7Uyqnh06LAJ_ykYhW2xuSCpu7QY7UPm9IbDcsDqj1eap7xvV9JW_EW2Y8Km5nS0ZoAd-Eo3zUe-2YFTc0OAVDwgbhowzo1gUeqfCEtxVHuT36Aq2LWayB6DzOL9TqubcF7qmjtNy_UIr-RY1d69xN-KqjFBoWLtS6rDhQurrfJNd5x-MYOEjCMrbsGmSXE8L7PskM3e_3-ZhIqfMn2I-4zeEZIUG8U2iHRWK-blaqsSY8uhmzNG6sqF-liyINagQF4l35oy7tpobueWs7aDjRrcJrGiQDrGHYV1E67J64Ae9FqXPHmORRpYcihQc6pI0JAmaiWwMJoqD0QMJF9koaDYANPEGbWlnWc_lFzhCO_L8yCkVtJIIItQv-loypR6XqILK32eoGeatnp5Q0x0OEm3W=s240-no'
+    });
+    bridge.updatePlayer({
+      gameId: gameId,
+      playerId: zekePlayerId,
+      avatarUrl: 'https://s-media-cache-ak0.pinimg.com/736x/31/92/2e/31922e8b045a7ada368f774ce34e20c0.jpg'
+    });
+    bridge.updatePlayer({
+      gameId: gameId,
+      playerId: moldaviPlayerId,
+      avatarUrl: 'https://katiekhau.files.wordpress.com/2012/05/scan-9.jpeg'
+    });
+    bridge.updatePlayer({
+      gameId: gameId,
+      playerId: jackPlayerId,
+      avatarUrl: 'https://sdl-stickershop.line.naver.jp/products/0/0/1/1009925/android/main.png'
+    });
+  
+    var resistanceMapId = bridge.idGenerator.newMapId();
+    bridge.createMap({ gameId: gameId, requestTrackingUntil: new Date().getTime() + gameStartOffset, mapId: resistanceMapId, accessGroupId: resistanceGroupId, name: "Resistance Players" });
+    bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "First Tower", color: "FF00FF", playerId: null, mapId: resistanceMapId, latitude: 37.423734, longitude: -122.092054 });
+    bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Second Tower", color: "00FFFF", playerId: null, mapId: resistanceMapId, latitude: 37.422356, longitude: -122.088078 });
+    bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Third Tower", color: "FFFF00", playerId: null, mapId: resistanceMapId, latitude: 37.422757, longitude: -122.081984 });
+    bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Fourth Tower", color: "FF8000", playerId: null, mapId: resistanceMapId, latitude: 37.420382, longitude: -122.083884 });
+  
+    bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: drakePlayerId, message: 'hi' });
+  
+    if (populateLotsOfPlayers) {
+      populatePlayersHeavy(bridge, gameId, gameStartOffset);
+    } else {
+      populatePlayersLight(bridge, gameId, gameStartOffset);
+    }
+  
+    let firstMissionRsvpersGroupId = bridge.idGenerator.newMissionId();
+    bridge.createGroup({
+      groupId: firstMissionRsvpersGroupId,
+      gameId: gameId,
+      ownerPlayerId: null,
+      allegianceFilter: 'resistance',
+      name: 'rsvpers for first human mission!',
+      autoAdd: false,
+      autoRemove: true,
+      canAddOthers: false,
+      canRemoveOthers: false,
+      canAddSelf: true,
+      canRemoveSelf: true,
+    });
+  
+    bridge.createChatRoom({
+      gameId: gameId,
+      chatRoomId: bridge.idGenerator.newChatRoomId(),
+      name: "RSVPers for first human mission!",
+      accessGroupId: firstMissionRsvpersGroupId,
+      withAdmins: false,
+    });
+  */
+
+  bridge.createMission(
+    gameId,
+    "first human mission!",
+    /* startTime= */ new Date().getTime() - 10 * 1000,
+    /* endTime= */ new Date().getTime() + 60 * 60 * 1000,
+    /* details= */ HUMAN_MISSION_HTML,
+    "resistance"
+  );
+
   // TODO: SUPPORT THINGS BELOW THIS POINT.
   return;
-  var resistanceSecondChatRoomGroupId = bridge.idGenerator.newGroupId();
-  var resistanceSecondChatRoomId = bridge.idGenerator.newChatRoomId();
-  bridge.createGroup({
-    groupId: resistanceSecondChatRoomGroupId,
-    name: "Group for " + resistanceSecondChatRoomId,
-    gameId: gameId,
-    ownerPlayerId: zellaPlayerId,
-    allegianceFilter: 'resistance',
-    autoAdd: false,
-    autoRemove: true,
-    canAddOthers: true,
-    canRemoveOthers: true,
-    canAddSelf: true,
-    canRemoveSelf: true,
-  });
-  bridge.createChatRoom({
-    gameId: gameId,
-    chatRoomId: resistanceSecondChatRoomId,
-    accessGroupId: resistanceSecondChatRoomGroupId,
-    name: "My Chat Room!",
-    withAdmins: false
-  });
-
-  bridge.addPlayerToGroup({
-    gameId: gameId,
-    groupId: resistanceSecondChatRoomGroupId,
-    playerToAddId: zellaPlayerId,
-    actingPlayerId: zellaPlayerId,
-  });
-  bridge.sendChatMessage({
-    gameId: gameId,
-    messageId: bridge.idGenerator.newMessageId(),
-    chatRoomId: resistanceSecondChatRoomId,
-    playerId: zellaPlayerId,
-    message: 'lololol i have a chat room!'
-  });
-
-  bridge.updatePlayer({
-    gameId: gameId,
-    playerId: zellaPlayerId,
-    avatarUrl: 'https://lh3.googleusercontent.com/GoKTAX0zAEt6PlzUkTn7tMeK-q1hwKDpzWsMJHBntuyR7ZKVtFXjRkbFOEMqrqxPWJ-7dbCXD7NbVgHd7VmkYD8bDzsjd23XYk0KyALC3BElIk65vKajjjRD_X2_VkLPOVejrZLpPpa2ebQVUHJF5UXVlkst0m6RRqs2SumRzC7EMmEeq9x_TurwKUJmj7PhNBPCeoDEh51jAIc-ZqvRfDegLgq-HtoyJAo91lbD6jqA2-TFufJfiPd4nOWnKhZkQmarxA8LQT0kOu7r3M5F-GH3pCbQqpH1zraha8CqvKxMGLW1i4CbDs1beXatKTdjYhb1D_MVnJ6h7O4WX3GULwNTRSIFVOrogNWm4jWLMKfKt3NfXYUsCOMhlpAI3Q8o1Qgbotfud4_HcRvvs6C6i17X-oQm8282rFu6aQiLXOv55FfiMnjnkbTokOA1OGDQrkBPbSVumz9ZE3Hr-J7w_G8itxqThsSzwtK6p5YR_9lnepWe0HRNKfUZ2x-a2ndT9m6aRXC_ymWHQGfdGPvTfHOPxUpY8mtX2vknmj_dn4dIuir1PpcN0DJVVuyuww3sOn-1YRFh80gBFvwFuMnKwz8GY8IX5gZmbrrBsy_FmwFDIvBcwNjZKd9fH2gkK5rk1AlWv12LsPBsrRIEaLvcSq7Iim9XSsiivzcNrLFG=w294-h488-no'
-  });
-  bridge.updatePlayer({
-    gameId: gameId,
-    playerId: drakePlayerId,
-    avatarUrl: 'https://lh3.googleusercontent.com/WP1fewVG0CvERcnQnmxjf84IjnEBoDQBgdaxbNAECRa433neObfAjv_xI35DN67WhcCL9y-mgXmfYrZEBeJ2PYrtIeCK3KSdJ4HiEDUqxaaGsJAtu5C5ZjcABUHoySueEwO0yJWfhWPVbGoAFdP-ZquoXSF3yz4gnlN76W-ltDBglclLxKs-hR9dTjf_DiX9yGmmb5y8mp1Jb8BEw9Q-zx_j9EFkgTI0EA6T10pogxsfAWkrwXO7t37D0vI2OxzHJA51EQ4LZw1oZsIN7Uyqnh06LAJ_ykYhW2xuSCpu7QY7UPm9IbDcsDqj1eap7xvV9JW_EW2Y8Km5nS0ZoAd-Eo3zUe-2YFTc0OAVDwgbhowzo1gUeqfCEtxVHuT36Aq2LWayB6DzOL9TqubcF7qmjtNy_UIr-RY1d69xN-KqjFBoWLtS6rDhQurrfJNd5x-MYOEjCMrbsGmSXE8L7PskM3e_3-ZhIqfMn2I-4zeEZIUG8U2iHRWK-blaqsSY8uhmzNG6sqF-liyINagQF4l35oy7tpobueWs7aDjRrcJrGiQDrGHYV1E67J64Ae9FqXPHmORRpYcihQc6pI0JAmaiWwMJoqD0QMJF9koaDYANPEGbWlnWc_lFzhCO_L8yCkVtJIIItQv-loypR6XqILK32eoGeatnp5Q0x0OEm3W=s240-no'
-  });
-  bridge.updatePlayer({
-    gameId: gameId,
-    playerId: zekePlayerId,
-    avatarUrl: 'https://s-media-cache-ak0.pinimg.com/736x/31/92/2e/31922e8b045a7ada368f774ce34e20c0.jpg'
-  });
-  bridge.updatePlayer({
-    gameId: gameId,
-    playerId: moldaviPlayerId,
-    avatarUrl: 'https://katiekhau.files.wordpress.com/2012/05/scan-9.jpeg'
-  });
-  bridge.updatePlayer({
-    gameId: gameId,
-    playerId: jackPlayerId,
-    avatarUrl: 'https://sdl-stickershop.line.naver.jp/products/0/0/1/1009925/android/main.png'
-  });
-
-  var resistanceMapId = bridge.idGenerator.newMapId();
-  bridge.createMap({ gameId: gameId, requestTrackingUntil: new Date().getTime() + gameStartOffset, mapId: resistanceMapId, accessGroupId: resistanceGroupId, name: "Resistance Players" });
-  bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "First Tower", color: "FF00FF", playerId: null, mapId: resistanceMapId, latitude: 37.423734, longitude: -122.092054 });
-  bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Second Tower", color: "00FFFF", playerId: null, mapId: resistanceMapId, latitude: 37.422356, longitude: -122.088078 });
-  bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Third Tower", color: "FFFF00", playerId: null, mapId: resistanceMapId, latitude: 37.422757, longitude: -122.081984 });
-  bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Fourth Tower", color: "FF8000", playerId: null, mapId: resistanceMapId, latitude: 37.420382, longitude: -122.083884 });
-
-  bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: drakePlayerId, message: 'hi' });
-
-  if (populateLotsOfPlayers) {
-    populatePlayersHeavy(bridge, gameId, gameStartOffset);
-  } else {
-    populatePlayersLight(bridge, gameId, gameStartOffset);
-  }
-
-  let firstMissionRsvpersGroupId = bridge.idGenerator.newMissionId();
-  bridge.createGroup({
-    groupId: firstMissionRsvpersGroupId,
-    gameId: gameId,
-    ownerPlayerId: null,
-    allegianceFilter: 'resistance',
-    name: 'rsvpers for first human mission!',
-    autoAdd: false,
-    autoRemove: true,
-    canAddOthers: false,
-    canRemoveOthers: false,
-    canAddSelf: true,
-    canRemoveSelf: true,
-  });
-
-  bridge.createChatRoom({
-    gameId: gameId,
-    chatRoomId: bridge.idGenerator.newChatRoomId(),
-    name: "RSVPers for first human mission!",
-    accessGroupId: firstMissionRsvpersGroupId,
-    withAdmins: false,
-  });
-
-  var firstMissionId = bridge.idGenerator.newMissionId();
-  bridge.addMission({
-    missionId: firstMissionId,
-    gameId: gameId,
-    beginTime: new Date().getTime() - 10 * 1000,
-    endTime: new Date().getTime() + 60 * 60 * 1000,
-    name: "first human mission!",
-    detailsHtml: HUMAN_MISSION_HTML,
-    accessGroupId: resistanceGroupId,
-    rsvpersGroupId: firstMissionRsvpersGroupId,
-  });
-
   let zedMissionRsvpersGroupId = bridge.idGenerator.newMissionId();
   bridge.createGroup({
     groupId: zedMissionRsvpersGroupId,

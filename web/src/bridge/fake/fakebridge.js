@@ -172,6 +172,22 @@ class FakeBridge {
     });
   }
 
+  createMission(gameId, missionName, startTime, endTime, details, allegianceFilter) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.createMission(gameId, missionName, startTime, endTime, details, allegianceFilter));
+    });
+  }
+
+  listenToLastMission(gameId, playerId, callback) {
+    callback(this.server.listenToLastMission(gameId, playerId));
+  }
+
+  listenToMission(gameId, missionId, callback) {
+    callback(this.server.listenToMission(gameId, missionId));
+  }
+
+
+
 }
 
 function CloningWrapper(inner, funcNames) {

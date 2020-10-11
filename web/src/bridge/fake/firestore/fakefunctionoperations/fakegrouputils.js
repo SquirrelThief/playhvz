@@ -80,6 +80,25 @@ FakeGroupUtils.getAdminGroupSettings = function (allegianceFilter) {
     });
 }
 
+FakeGroupUtils.createSettings = function (
+    addSelf,
+    addOthers,
+    removeSelf,
+    removeOthers,
+    autoAdd,
+    autoRemove,
+    allegianceFilter) {
+    return new Settings({
+        [GroupPath.FIELD__SETTINGS_ADD_SELF]: addSelf,
+        [GroupPath.FIELD__SETTINGS_ADD_OTHERS]: addOthers,
+        [GroupPath.FIELD__SETTINGS_REMOVE_SELF]: removeSelf,
+        [GroupPath.FIELD__SETTINGS_REMOVE_OTHERS]: removeOthers,
+        [GroupPath.FIELD__SETTINGS_AUTO_ADD]: autoAdd,
+        [GroupPath.FIELD__SETTINGS_AUTO_REMOVE]: autoRemove,
+        [GroupPath.FIELD__SETTINGS_ALLEGIANCE_FILTER]: allegianceFilter
+    });
+}
+
 FakeGroupUtils.updatePlayerMembershipInGroups = function (fakeDatabase, gameId, player) {
     FakeGroupUtils.addPlayerToManagedGroups(fakeDatabase, gameId, player, /* ignoreAllegiance= */ false)
     FakeGroupUtils.removePlayerFromGroups(fakeDatabase, gameId, player)
@@ -198,4 +217,71 @@ FakeGroupUtils.createPlayerOwnedGroup = function (ownerId, name, settings) {
         [GroupPath.FIELD__SETTINGS]: settings,
         [GroupPath.FIELD__MEMBERS]: []
     });
+}
+
+
+
+FakeGroupUtils.createGroupAndMission = function (
+    fakeDatabase,
+    gameId,
+    settings,
+    missionName,
+    startTime,
+    endTime,
+    details,
+    allegianceFilter
+) {
+    const group = FakeGroupUtils.createManagedGroup(missionName, settings)
+    const groupId = fakeDatabase.idGenerator.generateId("group", missionName)
+    group.id = groupId;
+    fakeDatabase.setGroup(gameId, groupId, group);
+    const mission = new Mission({
+        [MissionPath.FIELD__GROUP_ID]: groupId,
+        [MissionPath.FIELD__NAME]: missionName,
+        [MissionPath.FIELD__START_TIME]: startTime,
+        [MissionPath.FIELD__END_TIME]: endTime,
+        [MissionPath.FIELD__DETAILS]: details,
+        [MissionPath.FIELD__ALLEGIANCE_FILTER]: allegianceFilter
+    });
+    const missionId = fakeDatabase.idGenerator.generateId("mission", missionName)
+    mission.id = missionId;
+    fakeDatabase.setMission(gameId, missionId, mission);
+    FakeGroupUtils.updateMissionMembership(fakeDatabase, gameId, groupId)
+}
+
+// Handles Auto-adding and Auto-removing members
+FakeGroupUtils.updateMissionMembership = function (fakeDatabase, gameId, groupId) {
+    FakeGroupUtils.autoUpdateMembers(fakeDatabase, gameId, groupId)
+}
+
+// Replaces members with members of the correct allegiance if appropriate
+FakeGroupUtils.autoUpdateMembers = function (fakeDatabase, gameId, groupId) {
+    const group = fakeDatabase.getGroup(gameId, groupId);
+    if (group[GroupPath.FIELD__MANAGED] !== true
+        && group[GroupPath.FIELD__SETTINGS][GroupPath.FIELD__SETTINGS_AUTO_ADD] !== true) {
+        return
+    }
+    let players = fakeDatabase.getAllPlayersOfGame(gameId);
+    if (group[GroupPath.FIELD__SETTINGS][GroupPath.FIELD__SETTINGS_ALLEGIANCE_FILTER] != Defaults.EMPTY_ALLEGIANCE_FILTER) {
+        // Extract players of the right allegiance
+        let allegiancePlayerIds = []
+        for (let player of players) {
+            if (player[PlayerPath.FIELD__ALLEGIANCE] == group[GroupPath.FIELD__SETTINGS][GroupPath.FIELD__SETTINGS_ALLEGIANCE_FILTER]) {
+                allegiancePlayerIds.push(player.id);
+            }
+            players = allegiancePlayerIds;
+        }
+    } else {
+        let playerIds = []
+        for (let player of players) {
+            playerIds.push(player.id)
+        }
+        players = playerIds
+    }
+
+    const game = fakeDatabase.getGame(gameId);
+    players.push(game[GamePath.FIELD__FIGUREHEAD_ADMIN_PLAYER_ACCOUNT])
+    if (players.length > 0) {
+        group[GroupPath.FIELD__MEMBERS].push(...players)
+    }
 }

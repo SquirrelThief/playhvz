@@ -179,26 +179,24 @@
           </ghvz-card>
         </template>
 
-        <template is=" dom-if" if="[[isDeclared]]">
-              <ghvz-card spaced left padded name="next-mission-box">
-                <div class="header">Next Mission</div>
-                <ghvz-next-mission bridge="[[bridge]]" game="[[game]]" player="[[player]]">
-                </ghvz-next-mission>
-              </ghvz-card>
-        </template>
+          <ghvz-card spaced left padded name=" next-mission-box">
+              <div class="header">Next Mission</div>
+              <ghvz-next-mission bridge="[[bridge]]" game="[[game]]" player="[[player]]">
+              </ghvz-next-mission>
+          </ghvz-card>
 
-        <ghvz-card spaced left padded name="summary-box">
-          <div class="header">Game Summary</div>
-          <ghvz-game-summary is-mobile="[[isMobile]]" game="[[game]]">
-          </ghvz-game-summary>
-        </ghvz-card>
+          <ghvz-card spaced left padded name="summary-box">
+            <div class="header">Game Summary</div>
+            <ghvz-game-summary is-mobile="[[isMobile]]" game="[[game]]">
+            </ghvz-game-summary>
+          </ghvz-card>
 
-        <!-- <ghvz-card spaced scrolling left name="leaderboard-box">
+          <!-- <ghvz-card spaced scrolling left name="leaderboard-box">
           <div class="header">Leaderboard</div>
           <ghvz-leaderboard-summary game="[[game]]" limit="3">
           </ghvz-leaderboard-summary>
         </ghvz-card> -->
-        <!-- 
+          <!-- 
         <template is="dom-if" if="[[isDeclared]]">
           <ghvz-card spaced left fullscreen-page="stats" name="stats-box">
             <div class="header">Game Stats</div>
@@ -207,26 +205,26 @@
           </ghvz-card>
         </template> -->
 
-        <template is="dom-if" if="[[isDeclared]]">
-          <ghvz-card name="rewards-box" spaced left>
-            <div class="header">Rewards</div>
-            <ghvz-claim-reward bridge="[[bridge]]" game="[[game]]" player="[[player]]">
-            </ghvz-claim-reward>
-          </ghvz-card>
-        </template>
+          <template is="dom-if" if="[[isDeclared]]">
+            <ghvz-card name="rewards-box" spaced left>
+              <div class="header">Rewards</div>
+              <ghvz-claim-reward bridge="[[bridge]]" game="[[game]]" player="[[player]]">
+              </ghvz-claim-reward>
+            </ghvz-card>
+          </template>
 
-        <template is="dom-repeat" items="[[toArray_(player.chatRoomMemberships)]]" as="membership">
-          <div right>
-            <template is="dom-if" if="[[membership.value.isVisible]]">
-              <ghvz-card spaced>
-                <ghvz-chat-room small bridge="[[bridge]]" game="[[game]]" is-admin="[[isAdmin]]"
-                  current-player="[[player]]" chat-room-id="[[membership.key]]">
-                </ghvz-chat-room>
-              </ghvz-card>
-            </template>
-          </div>
+          <template is="dom-repeat" items="[[toArray_(player.chatRoomMemberships)]]" as="membership">
+            <div right>
+              <template is="dom-if" if="[[membership.value.isVisible]]">
+                <ghvz-card spaced>
+                  <ghvz-chat-room small bridge="[[bridge]]" game="[[game]]" is-admin="[[isAdmin]]"
+                    current-player="[[player]]" chat-room-id="[[membership.key]]">
+                  </ghvz-chat-room>
+                </ghvz-card>
+              </template>
+            </div>
+          </template>
         </template>
-      </template>
 
     </ghvz-dashboard>
   </template>

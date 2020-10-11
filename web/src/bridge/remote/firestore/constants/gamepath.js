@@ -20,10 +20,17 @@ limitations under the License.
 class GamePath { }
 
 GamePath.COLLECTION_PATH = "games";
-GamePath.FIELD__ADMIN_GROUP_ID = "adminGroupId";
-GamePath.FIELD__OWNERS = "owners";
+GamePath.FIELD__NAME = "name";
+GamePath.FIELD__START_TIME = "startTime";
+GamePath.FIELD__END_TIME = "endTime";
 GamePath.FIELD__CREATOR_USER_ID = "creatorUserId";
+GamePath.FIELD__RULES = "rules";
+GamePath.FIELD__FAQ = "faq";
+GamePath.FIELD__ADMIN_GROUP_ID = "adminGroupId";
 GamePath.FIELD__ADMIN_ON_CALL_PLAYER_ID = "adminOnCallPlayerId";
+GamePath.FIELD__FIGUREHEAD_ADMIN_PLAYER_ACCOUNT = "figureheadAdminPlayerAccount";
+GamePath.FIELD__INFECT_REWARD_ID = "infectRewardId";
+GamePath.FIELD__STAT_ID = "statId";
 
 GamePath.GAMES_COLLECTION = function (db) {
   return db.collection(GamePath.COLLECTION_PATH);

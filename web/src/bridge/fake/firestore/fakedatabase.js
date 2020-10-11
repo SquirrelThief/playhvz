@@ -87,6 +87,14 @@ class FakeDatabase {
         return this.fakeDb[GamePath.COLLECTION_PATH][gameId][RewardPath.COLLECTION_PATH][rewardId];
     }
 
+    getAllMissionsOfGame(gameId) {
+        return Object.values(this.fakeDb[GamePath.COLLECTION_PATH][gameId][MissionPath.COLLECTION_PATH])
+    }
+
+    getMission(gameId, missionId) {
+        return this.fakeDb[GamePath.COLLECTION_PATH][gameId][MissionPath.COLLECTION_PATH][missionId];
+    }
+
     setChatRoom(gameId, chatRoomId, chatRoom) {
         this.verifyId(gameId)
         this.verifyId(chatRoomId)
@@ -141,6 +149,14 @@ class FakeDatabase {
         this.verifyObject(claimCode)
         let path = [GamePath.COLLECTION_PATH, gameId, RewardPath.COLLECTION_PATH, rewardId, RewardPath.CLAIM_CODE_COLLECTION_PATH, claimCodeId]
         this.setItem(path, claimCode);
+    }
+
+    setMission(gameId, missionId, mission) {
+        this.verifyId(gameId)
+        this.verifyId(missionId)
+        this.verifyObject(mission)
+        let path = [GamePath.COLLECTION_PATH, gameId, MissionPath.COLLECTION_PATH, missionId]
+        this.setItem(path, mission);
     }
 
     setUser(userId, user) {

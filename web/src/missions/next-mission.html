@@ -25,31 +25,24 @@
 
         properties: {
           bridge: Object,
-
           game: Object,
           player: Object,
 
           nextMissionId: Object,
+          nextMission: Object,
         },
 
         observers: [
-          "updateNextMissionId_(game.missions.*, player.private.missionMemberships.*)",
+          "updateNextMissionId_(bridge, game, player)",
         ],
 
-        updateNextMissionId_: function() {
-          let nextMission = null;
-          // Of all the missions that end in the future, get the one that ends the soonest.
-          for (const missionMembership of this.player.private.missionMemberships) {
-            let missionId = missionMembership.missionId;
-            let mission = this.game.missionsById[missionId];
-            assert(mission);
-            if (new Date().getTime() < mission.endTime) {
-              if (!nextMission || mission.endTime < nextMission.endTime) {
-                nextMission = mission;
-              }
-            }
+        updateNextMissionId_: function () {
+          let self = this
+          let onMissionUpdatedCallback = function (mission) {
+            self.nextMissionId = mission.id;
+            self.nextMission = mission;
           }
-          this.nextMissionId = nextMission && nextMission.id;
+          this.bridge.listenToLastMission(this.game.id, this.player.id, onMissionUpdatedCallback);
         },
       });
     });
@@ -61,11 +54,7 @@
       }
     </style>
     <template is="dom-if" if="[[nextMissionId]]">
-      <ghvz-mission
-          player="[[player]]"
-          bridge="[[bridge]]"
-          game="[[game]]"
-          mission-id="[[nextMissionId]]">
+      <ghvz-mission player="[[player]]" bridge="[[bridge]]" game="[[game]]" mission-id="[[nextMissionId]]">
       </ghvz-mission>
     </template>
     <div id="comingSoon" hidden$="[[nextMissionId]]">

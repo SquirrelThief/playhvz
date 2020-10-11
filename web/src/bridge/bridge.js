@@ -137,6 +137,18 @@ class Bridge {
   addPlayersToChat(gameId, groupId, chatRoomId, playerIdList) {
     return this.inner.addPlayersToChat(gameId, groupId, chatRoomId, playerIdList);
   }
+
+  createMission(gameId, missionName, startTime, endTime, details, allegianceFilter) {
+    return this.inner.createMission(gameId, missionName, startTime, endTime, details, allegianceFilter);
+  }
+
+  listenToLastMission(gameId, playerId, callback) {
+    return this.inner.listenToLastMission(gameId, playerId, callback);
+  }
+
+  listenToMission(gameId, missionId, callback) {
+    return this.inner.listenToMission(gameId, missionId, callback);
+  }
   //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
   //////////////////////////////////////////////////////////////////////

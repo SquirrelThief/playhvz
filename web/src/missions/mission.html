@@ -15,81 +15,75 @@
 -->
 
 <dom-module id="ghvz-mission">
-<script>
-  // Not sure why this HTMLImports.whenReady is really needed.
-  // Something about polymer initialization order.
-  // I think we're not supposed to need this.
-  HTMLImports.whenReady(() => {
-    Polymer({
-      is: 'ghvz-mission',
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-mission',
 
-      properties: {
-        bridge: Object,
+        properties: {
+          bridge: Object,
+          game: Object,
+          player: Object,
+          missionId: String,
+          mission: Object,
+        },
 
-        game: Object,
+        observers: [
+          'onMissionIdChanged_(bridge, game, missionId)',
+        ],
 
-        player: Object,
+        attached() {
+          this.fire('ghvz-set-card-header', { headerElement: this.$.name });
+        },
 
-        missionId: String,
+        onMissionIdChanged_() {
+          let self = this
+          let onMissionUpdatedCallback = function (mission) {
+            self.mission = mission;
+          }
+          this.bridge.listenToMission(this.game.id, this.missionId, onMissionUpdatedCallback);
+        },
 
-        mission: Object,
-
-        inGroup: Boolean,
-      },
-
-      observers: [
-        'onMissionIdChanged_(game.missions.*, missionId)',
-        'onMissionHtmlChanged_(mission.detailsHtml)',
-      ],
-
-      attached() {
-        this.fire('ghvz-set-card-header', {headerElement: this.$.name});
-      },
-
-      onMissionIdChanged_() {
-        this.$.selector.select(this.game.missionsById[this.missionId]);
-      },
-
-      onMissionHtmlChanged_(detailsHtml) {
-        this.$.mission.innerHTML = detailsHtml;
-      },
-
-      formatTime_(time) {
-        return Utils.formatTime(time);
-      },
+        formatTime_(time) {
+          return Utils.formatTime(time);
+        },
+      });
     });
-  });
-</script>
-<style>
-  :host {
-    display: block;
-  }
-  #missionControls {
-    display: flex;
-    align-items: center;
-  }
-  #time {
-    flex-grow: 1;
-  }
-  ghvz-rsvp {
-    flex-shrink: 0;
-  }
-</style>
-<template>
-  <array-selector id="selector" items="[[game.missions]]" selected="{{mission}}"></array-selector>
+  </script>
+  <style>
+    :host {
+      display: block;
+    }
 
-  <div id="name">[[mission.name]]</div>
+    #missionControls {
+      display: flex;
+      align-items: center;
+    }
 
-  <!-- for webdrivers -->
-  <div style="height: 1px" name$="mission-[[mission.name]]"></div>
-  <div id="missionControls" name$="mission-controls-[[mission.name]]">
-    <div id="time">
-      Mission time:
-      <b>[[formatTime_(mission.beginTime)]]</b>
-      to
-      <b> [[formatTime_(mission.endTime)]]</b>
-    </div>
-    <!--ghvz-rsvp
+    #time {
+      flex-grow: 1;
+    }
+
+    ghvz-rsvp {
+      flex-shrink: 0;
+    }
+  </style>
+  <template>
+    <div id="name">[[mission.name]]</div>
+
+    <!-- for webdrivers -->
+    <div style="height: 1px" name$="mission-[[mission.name]]"></div>
+    <div id="missionControls" name$="mission-controls-[[mission.name]]">
+      <div id="time">
+        Mission time:
+        <b>[[formatTime_(mission.startTime)]]</b>
+        to
+        <b> [[formatTime_(mission.endTime)]]</b>
+      </div>
+      <!--ghvz-rsvp
         id="rsvp"
         bridge="[[bridge]]"
         game="[[game]]"
@@ -97,7 +91,7 @@
         mission-id="[[missionId]]"
         in-group="{{inGroup}}">
     </ghvz-rsvp-->
-  </div>
-  <div id="mission" name$="mission-text-[[mission.name]]"></div>
-</template>
+    </div>
+    <div id="mission" name$="mission-text-[[mission.name]]">[[mission.details]]</div>
+  </template>
 </dom-module>
