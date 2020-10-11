@@ -361,16 +361,14 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
 
   bridge.createMission(
     gameId,
-    "first human mission!",
+    "First Human Mission!",
     /* startTime= */ new Date().getTime() - 10 * 1000,
     /* endTime= */ new Date().getTime() + 60 * 60 * 1000,
-    /* details= */ HUMAN_MISSION_HTML,
+    /* details= */ HUMAN_MISSION_MARKDOWN,
     "resistance"
   );
 
-  // TODO: SUPPORT THINGS BELOW THIS POINT.
-  return;
-  let zedMissionRsvpersGroupId = bridge.idGenerator.newMissionId();
+  /*let zedMissionRsvpersGroupId = bridge.idGenerator.newMissionId();
   bridge.createGroup({
     groupId: zedMissionRsvpersGroupId,
     gameId: gameId,
@@ -391,20 +389,19 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
     name: "RSVPers for first zed mission!",
     accessGroupId: zedMissionRsvpersGroupId,
     withAdmins: false,
-  });
+  });*/
 
-  var zedMissionId = bridge.idGenerator.newMissionId();
-  bridge.addMission({
-    missionId: zedMissionId,
-    gameId: gameId,
-    beginTime: new Date().getTime() + 60 * 60 * 1000,
-    endTime: new Date().getTime() + 120 * 60 * 1000,
-    name: "first zed mission!",
-    detailsHtml: ZOMBIE_MISSION_HTML,
-    accessGroupId: hordeGroupId,
-    rsvpersGroupId: zedMissionRsvpersGroupId,
-  });
+  bridge.createMission(
+    gameId,
+    "First Zed Mission!",
+    /* startTime= */ new Date().getTime() + 60 * 60 * 1000,
+    /* endTime= */ new Date().getTime() + 120 * 60 * 1000,
+    /* details= */ ZOMBIE_MISSION_MARKDOWN,
+    "horde"
+  );
 
+  // TODO: SUPPORT THINGS BELOW THIS POINT.
+  return;
   var firstRewardCategoryId = bridge.idGenerator.newRewardCategoryId();
   bridge.addRewardCategory({
     rewardCategoryId: firstRewardCategoryId,
@@ -874,41 +871,31 @@ function populateQuiz(bridge, gameId) {
 // const RULES_HTML = 'i am rules';
 
 
-const HUMAN_MISSION_HTML = `
-<p>
-<b>TL;DR: Meet at charleston park!</b>
-</p>
-<p>
-Men and women of the Stradivarius! You all know the situation. The zeds have overrun the planet beneath us, and soon they'll overrun every planet in the sector. With the communication tower down, our loved ones back on the planets will certainly be overrun by the zeds.
-</p>
-<p>
+const HUMAN_MISSION_MARKDOWN = `
+### TL;DR: Meet at charleston park!
+
+Men and women of the __Stradivarius__! You all know the situation. The zeds have overrun the planet beneath us, and soon they'll overrun every planet in the sector. With the communication tower down, our loved ones back on the planets will certainly be overrun by the zeds.
+
 We are now in geosynchronous orbit above the sector’s communication tower. The area is completely crawling with zeds. Even if ships went down there to fix the tower, the zeds who have taken over the defense systems will shoot them down once they enter the atmosphere, and there’s certainly no chance that any ship will make it back into orbit afterwards.
-</p>
-<p>
-It's a suicide mission. But for our families, we do what we must.
-</p>
-<p>
-Once we get down to the surface, we must meet at the below location, a place the locals once called <b>Charleston Park</b>.
-<p>
+
+It's a ~~suicide~~ __*cough*__ noble __*cough*__ mission. But for our families, we do what we must.
+
+Once we get down to the surface, we must meet at the below location, a place the locals once called **Charleston Park**.
+
 <iframe style="width: 100%; height: 300px; border-width: 0;" src="https://www.google.com/maps/d/embed?mid=1_jSfVfafWm3IZ-txxSQ4rcSYrsA&ll=37.42155881938754%2C-122.08218634299163&z=17"></iframe>
 `;
 
-const ZOMBIE_MISSION_HTML = `
-<p>
-<b>TL;DR: Brns</b>
-</p>
-<p>
-Barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns
-</p>
-<p>
- barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns
-</p>
-<p>
+const ZOMBIE_MISSION_MARKDOWN = `
+### TL;DR: Brns
+
+Barns barns barns barns barns barns barns barns barns barns __barns__ barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns barns
+
+ barns barns barns barns **barns** barns barns barns **barns** barns barns barns barns barns barns barns barns barns barns barns barns
+
 brans
-</p>
-<p>
+
 arbs
-<p>
+
 <iframe style="width: 100%; height: 300px; border-width: 0;" src="https://www.google.com/maps/d/embed?mid=1_jSfVfafWm3IZ-txxSQ4rcSYrsA&ll=37.42155881938754%2C-122.08218634299163&z=17"></iframe>
 `;
 
