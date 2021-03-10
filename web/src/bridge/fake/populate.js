@@ -166,14 +166,11 @@ function populateFakeAppPlayers(bridge, gameName, gameId) {
   this.moldaviPlayerId = "player-5";
   bridge.joinGame(gameName, "MoldaviTheMoldavish")
   bridge.changePlayerAllegiance(gameId, this.moldaviPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
-  /*bridge.addAdmin({
-    gameId: gameId,
-    userId: moldaviUserId
-  });
-  bridge.setAdminContact({
-    gameId: gameId,
-    playerId: moldaviPlayerId
-  });*/
+  /*
+    bridge.setAdminContact({
+      gameId: gameId,
+      playerId: moldaviPlayerId
+    });*/
 
   bridge.signIn({ userId: this.jackUserId });
   this.jackPlayerId = "player-6";
@@ -200,6 +197,10 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
     endTime: 1483689600000,
   });
 
+  let globalChatRoomId = "chat-Global Chat-1";
+  let adminChatRoomId = "chat-Admins-2";
+  let resistanceChatRoomId = "chat-Resistance Chat-3";
+  let hordeChatRoomId = "chat-Horde Chat-4";
   /*
   // TODO: add support for this to firestore
     bridge.addDefaultProfileImage({
@@ -228,20 +229,10 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
     });
   */
 
-  /*
-    bridge.addAdmin({
-      gameId: gameId,
-      userId: minnyUserId
-    });
-  */
-
   this.populateFakeAppPlayers(bridge, gameName, gameId);
+  bridge.addPlayersToGroup(gameId, "group-Admins-2", [moldaviPlayerId]); // Sets admin players
   bridge.signIn({ userId: this.zellaUserId });
 
-  let globalChatRoomId = "chat-Global Chat-1";
-  let adminChatRoomId = "chat-Admins-2";
-  let resistanceChatRoomId = "chat-Resistance Chat-3";
-  let hordeChatRoomId = "chat-Horde Chat-4";
   bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.zellaPlayerId, 'Hello World!');
   bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.zekePlayerId, 'What up?');
   bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.zellaPlayerId, 'yo dawg i hear the zeds r comin!');
@@ -327,36 +318,11 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
     bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Third Tower", color: "FFFF00", playerId: null, mapId: resistanceMapId, latitude: 37.422757, longitude: -122.081984 });
     bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Fourth Tower", color: "FF8000", playerId: null, mapId: resistanceMapId, latitude: 37.420382, longitude: -122.083884 });
   
-    bridge.sendChatMessage({ gameId: gameId, messageId: bridge.idGenerator.newMessageId(), chatRoomId: zedChatRoomId, playerId: drakePlayerId, message: 'hi' });
-  
     if (populateLotsOfPlayers) {
       populatePlayersHeavy(bridge, gameId, gameStartOffset);
     } else {
       populatePlayersLight(bridge, gameId, gameStartOffset);
     }
-  
-    let firstMissionRsvpersGroupId = bridge.idGenerator.newMissionId();
-    bridge.createGroup({
-      groupId: firstMissionRsvpersGroupId,
-      gameId: gameId,
-      ownerPlayerId: null,
-      allegianceFilter: 'resistance',
-      name: 'rsvpers for first human mission!',
-      autoAdd: false,
-      autoRemove: true,
-      canAddOthers: false,
-      canRemoveOthers: false,
-      canAddSelf: true,
-      canRemoveSelf: true,
-    });
-  
-    bridge.createChatRoom({
-      gameId: gameId,
-      chatRoomId: bridge.idGenerator.newChatRoomId(),
-      name: "RSVPers for first human mission!",
-      accessGroupId: firstMissionRsvpersGroupId,
-      withAdmins: false,
-    });
   */
 
   bridge.createMission(
@@ -367,29 +333,6 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
     /* details= */ HUMAN_MISSION_MARKDOWN,
     "resistance"
   );
-
-  /*let zedMissionRsvpersGroupId = bridge.idGenerator.newMissionId();
-  bridge.createGroup({
-    groupId: zedMissionRsvpersGroupId,
-    gameId: gameId,
-    ownerPlayerId: null,
-    allegianceFilter: 'horde',
-    name: 'rsvpers for first zed mission',
-    autoAdd: false,
-    autoRemove: true,
-    canAddOthers: false,
-    canRemoveOthers: false,
-    canAddSelf: true,
-    canRemoveSelf: true,
-  });
-
-  bridge.createChatRoom({
-    gameId: gameId,
-    chatRoomId: bridge.idGenerator.newChatRoomId(),
-    name: "RSVPers for first zed mission!",
-    accessGroupId: zedMissionRsvpersGroupId,
-    withAdmins: false,
-  });*/
 
   bridge.createMission(
     gameId,

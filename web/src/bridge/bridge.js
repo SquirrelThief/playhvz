@@ -106,6 +106,10 @@ class Bridge {
     return this.inner.changePlayerAllegiance(gameId, playerId, newAllegiance)
   }
 
+  addPlayersToGroup(gameId, groupId, playerIdList) {
+    return this.inner.addPlayersToGroup(gameId, groupId, playerIdList)
+  }
+
   listenToGroup(gameId, groupId) {
     return this.inner.listenToGroup(gameId, groupId);
   }

@@ -208,6 +208,12 @@ class FakeBridge {
     });
   }
 
+  addPlayersToGroup(gameId, groupId, playerIdList) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.addPlayersToGroup(gameId, groupId, playerIdList));
+    });
+  }
+
 
 
 }

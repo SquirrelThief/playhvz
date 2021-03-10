@@ -352,6 +352,13 @@ class FakeServer {
     player.points += reward.points
   }
 
+  addPlayersToGroup(gameId, groupId, playerIdList) {
+    for (let playerId of playerIdList) {
+      let player = this.fakeDatabase.getPlayer(gameId, playerId);
+      FakeGroupUtils.addPlayerToGroup(this.fakeDatabase, gameId, groupId, player);
+    }
+  }
+
 
   setAdminContact(args) {
     let { playerId } = args;
