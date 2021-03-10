@@ -294,6 +294,29 @@ class FakeServer {
     return playerMissions
   }
 
+  createReward(gameId, shortName, longName, description, imageUrl, points) {
+    let reward = new Reward({
+      shortName: shortName,
+      longName: longName,
+      description: description,
+      imageUrl: imageUrl,
+      points: points,
+      claimCodes: {}
+    });
+    reward.id = this.fakeDatabase.idGenerator.generateId("reward", shortName);
+    return this.fakeDatabase.setReward(gameId, reward.id, reward);
+  }
+
+  generateClaimCodes(gameId, rewardId, numCodes) {
+    let existingClaimCodes = this.fakeDatabase.getAllClaimCodesForReward(gameId, rewardId);
+    for (let i = 0; i < numCodes; i++) {
+      let index = i + existingClaimCodes.length;
+      let shortName = rewardId.split("-", 2)[1]; // Extracts reward shortname from id
+      let claimCodeObject = FakeRewardUtils.createRewardClaimCode(shortName + "-claim-" + index);
+      claimCodeObject.id = claimCodeObject.code;
+      this.fakeDatabase.setClaimCode(gameId, rewardId, claimCodeObject.id, claimCodeObject);
+    }
+  }
 
 
   setAdminContact(args) {

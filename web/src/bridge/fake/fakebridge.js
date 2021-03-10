@@ -190,6 +190,18 @@ class FakeBridge {
     callback(this.server.listenToMissionList(gameId, playerId));
   }
 
+  createReward(gameId, shortName, longName, description, imageUrl, points) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.createReward(gameId, shortName, longName, description, imageUrl, points));
+    });
+  }
+
+  generateClaimCodes(gameId, rewardId, numCodes) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.generateClaimCodes(gameId, rewardId, numCodes));
+    });
+  }
+
 
 }
 

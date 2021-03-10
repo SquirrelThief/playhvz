@@ -15,201 +15,210 @@
 -->
 
 <dom-module id="ghvz-drawer">
-<script>
-  // Not sure why this HTMLImports.whenReady is really needed.
-  // Something about polymer initialization order.
-  // I think we're not supposed to need this.
-  HTMLImports.whenReady(() => {
-    Polymer({
-      is: 'ghvz-drawer',
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-drawer',
 
-      properties: {
-        bridge: Object,
-        database: Object,
+        properties: {
+          bridge: Object,
+          database: Object,
 
-        userId: String,
+          userId: String,
 
-        game: Object,
+          game: Object,
 
-        player: Object,
+          player: Object,
 
-        canRegister: {
-          type: Boolean,
-          computed: 'computeCanRegister_(game, player)',
-        },
-
-        isPlayer: {
-          type: Boolean,
-          computed: 'computeIsPlayer_(player)',
-        },
-        
-        isAdmin: Boolean,
-
-        canUseDevTools: {
-          type: Boolean,
-          value: function() {
-            return Utils.getParameterByName('devTools', false) !== false;
+          canRegister: {
+            type: Boolean,
+            computed: 'computeCanRegister_(game, player)',
           },
+
+          isPlayer: {
+            type: Boolean,
+            computed: 'computeIsPlayer_(player)',
+          },
+
+          isAdmin: Boolean,
+
+          canUseDevTools: {
+            type: Boolean,
+            value: function () {
+              return Utils.getParameterByName('devTools', false) !== false;
+            },
+          },
+
+          waitingToOpenChatRoomId: String,
+          adminChatExists: Boolean,
+          adminChatRoomId: String,
         },
 
-        waitingToOpenChatRoomId: String,
-        adminChatExists: Boolean,
-        adminChatRoomId: String,
-      },
+        listeners: {
+          'keydown': 'onKeyPress_',
+        },
 
-      listeners: {
-        'keydown': 'onKeyPress_',
-      },
+        observers: [
+          'onChatRoomsUpdated_(game, player.private.chatRoomMemberships.*)',
+        ],
 
-      observers: [
-        'onChatRoomsUpdated_(game, player.private.chatRoomMemberships.*)',
-      ],
+        onKeyPress_(e) {
+          if (e.keyCode == 27) {
+            this.fire('ghvz-close-drawer');
+          }
+        },
 
-      onKeyPress_(e) {
-        if (e.keyCode == 27) {
-          this.fire('ghvz-close-drawer');
-        }
-      },
+        attached() {
+          this.setAttribute('tabindex', 0); // So we can receive key events
+        },
 
-      attached() {
-        this.setAttribute('tabindex', 0); // So we can receive key events
-      },
+        computeCanRegister_(game, player) {
+          return game && !player;
+        },
 
-      computeCanRegister_(game, player) {
-        return game && !player;
-      },
+        computeIsPlayer_(player) {
+          return !!player;
+        },
 
-      computeIsPlayer_(player) {
-        return !!player;
-      },
+        signOut_(e) {
+          return (e) => {
+            this.fire('ghvz-sign-out');
+            e.stopPropagation();
+          }
+        },
 
-      signOut_(e) {
-        return (e) => {
-          this.fire('ghvz-sign-out');
-          e.stopPropagation();
-        }
-      },
-
-       onChatRoomsUpdated_() {
-        if (this.waitingToOpenChatRoomId && this.game.chatRoomsById[this.waitingToOpenChatRoomId]) {
-          this.fire('ghvz-close-drawer', {});
-          this.fire('ghvz-set-path', {
-            inGame: true,
-            path: ['chat', this.waitingToOpenChatRoomId],
-            replace: false,
-          });
-          this.waitingToOpenChatRoomId = null;
-        }
-        // Set whether or not the admin chat exists
-        for (let chatRoomMembership of this.player.private.chatRoomMemberships) {
-          let chatRoomId = chatRoomMembership.chatRoomId;
-          let chatRoom = this.game.chatRoomsById[chatRoomId];
-          if (chatRoom.withAdmins) {
-            this.adminChatRoomId = chatRoomId;
-            if (ChatUtils.chatIsVisible(chatRoom, chatRoomMembership)) {
-              this.adminChatExists = true;
-              return;
+        onChatRoomsUpdated_() {
+          if (this.waitingToOpenChatRoomId && this.game.chatRoomsById[this.waitingToOpenChatRoomId]) {
+            this.fire('ghvz-close-drawer', {});
+            this.fire('ghvz-set-path', {
+              inGame: true,
+              path: ['chat', this.waitingToOpenChatRoomId],
+              replace: false,
+            });
+            this.waitingToOpenChatRoomId = null;
+          }
+          // Set whether or not the admin chat exists
+          for (let chatRoomMembership of this.player.private.chatRoomMemberships) {
+            let chatRoomId = chatRoomMembership.chatRoomId;
+            let chatRoom = this.game.chatRoomsById[chatRoomId];
+            if (chatRoom.withAdmins) {
+              this.adminChatRoomId = chatRoomId;
+              if (ChatUtils.chatIsVisible(chatRoom, chatRoomMembership)) {
+                this.adminChatExists = true;
+                return;
+              }
             }
           }
-        }
-        this.adminChatExists = false;
-      },
+          this.adminChatExists = false;
+        },
 
-      createAdminChat_() {
-        return () => {
-          if (this.adminChatRoomId) {
-            // The admin chat already exists, update visibility and open it
-            this.waitingToOpenChatRoomId = this.adminChatRoomId;
-            this.bridge.updateChatRoomMembership({
-              gameId: this.game.id, 
-              chatRoomId: this.adminChatRoomId,
-              actingPlayerId: this.player.id,
-              lastHiddenTime: null,
-            });
-            return;
+        createAdminChat_() {
+          return () => {
+            if (this.adminChatRoomId) {
+              // The admin chat already exists, update visibility and open it
+              this.waitingToOpenChatRoomId = this.adminChatRoomId;
+              this.bridge.updateChatRoomMembership({
+                gameId: this.game.id,
+                chatRoomId: this.adminChatRoomId,
+                actingPlayerId: this.player.id,
+                lastHiddenTime: null,
+              });
+              return;
+            }
+            // The admin chat doesn't exist, create it and open it when ready
+            this.waitingToOpenChatRoomId = ChatUtils.createAdminChat(this.bridge, this.game, this.player);
           }
-          // The admin chat doesn't exist, create it and open it when ready
-          this.waitingToOpenChatRoomId = ChatUtils.createAdminChat(this.bridge, this.game, this.player);
-        }
-      },
+        },
 
-      createNewChat_() {
-        return () => {
-          this.fire('ghvz-open-dialog', {dialog: this.$.settings});
-        }
-      },
+        createNewChat_() {
+          return () => {
+            this.fire('ghvz-open-dialog', { dialog: this.$.settings });
+          }
+        },
 
-      getChatName_(chatRoomId) {
-        return this.game.chatRoomsById[chatRoomId].name;
-      },
+        getChatName_(chatRoomId) {
+          return this.game.chatRoomsById[chatRoomId].name;
+        },
+      });
     });
-  });
-</script>
-<style>
-  :host {
-    display: block;
-    overflow-y: auto;
-  }
-  .drawer-item {
-    display: flex;
-    align-items: center;
-    opacity: .6;
-    padding-left: 4px;
-    height: 40px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    color: black;
-    text-decoration: none;
+  </script>
+  <style>
+    :host {
+      display: block;
+      overflow-y: auto;
+    }
 
-    --ghvz-chat-room-name-label-icon: {
+    .drawer-item {
+      display: flex;
+      align-items: center;
+      opacity: .6;
+      padding-left: 4px;
+      height: 40px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      color: black;
+      text-decoration: none;
+
+      --ghvz-chat-room-name-label-icon: {
+        margin: 8px;
+        opacity: .8;
+      }
+    }
+
+    .drawer-item:active {
+      background-color: #e7e7e7;
+    }
+
+    .drawer-item:focus {
+      background-color: #e7e7e7;
+    }
+
+    .drawer-item iron-icon {
       margin: 8px;
       opacity: .8;
     }
-  }
-  .drawer-item:active {
-    background-color: #e7e7e7;
-  }
-  .drawer-item:focus {
-    background-color: #e7e7e7;
-  }
-  .drawer-item iron-icon {
-    margin: 8px;
-    opacity: .8;
-  }
-  .drawer-header {
-    display: flex;
-    align-items: center;
-    opacity: .6;
-    margin-left: 12px;
-    height: 48px;
-    font-size: 18px;
-    font-weight: 500;
-  }
-  .drawer-section {
-    border-top: 1px solid #ddd;
-    padding: 8px 0;
-  }
-  #confidential {
-    padding: 4px 12px 8px;
-    opacity: .5;
-    font-size: 90%;
-  }
-  #debugInfo {
-    padding: 8px;
-  }
-  .first + .drawer-section {
-    border-top-width: 0;
-  }
-</style>
-<template>
-  <div>
-    <div class="drawer-header">
-      Humans vs Zombies <img src="/favicon.png" aria-hidden="true" />
-    </div>
 
-    <div id="confidential">
-      Remember, don't post confidential info!</div>
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      opacity: .6;
+      margin-left: 12px;
+      height: 48px;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .drawer-section {
+      border-top: 1px solid #ddd;
+      padding: 8px 0;
+    }
+
+    #confidential {
+      padding: 4px 12px 8px;
+      opacity: .5;
+      font-size: 90%;
+    }
+
+    #debugInfo {
+      padding: 8px;
+    }
+
+    .first+.drawer-section {
+      border-top-width: 0;
+    }
+  </style>
+  <template>
+    <div>
+      <div class="drawer-header">
+        Humans vs Zombies <img src="/favicon.png" aria-hidden="true" />
+      </div>
+
+      <div id="confidential">
+        Remember, don't post confidential info!</div>
     </div>
 
     <div id="first"></div>
@@ -225,28 +234,19 @@
         <ghvz-drawer-item text="Dashboard" path='["main"]' icon="icons:dashboard"></ghvz-drawer-item>
         <ghvz-drawer-item text="My Profile" path='["profile"]' icon="icons:account-box"></ghvz-drawer-item>
         <ghvz-drawer-item text="Missions" path='["missions"]' icon="icons:group-work"></ghvz-drawer-item>
-        
+
         <template is="dom-repeat" items="[[player.private.chatRoomMemberships]]" as="membership">
-          <ghvz-drawer-chat-item 
-              game="[[game]]"
-              chat-room-membership="[[membership]]">
+          <ghvz-drawer-chat-item game="[[game]]" chat-room-membership="[[membership]]">
           </ghvz-drawer-chat-item>
         </template>
 
         <template is="dom-if" if="[[!adminChatExists]]">
-          <ghvz-drawer-item 
-              name="create-admin-chat-button" 
-              text="Chat with Admins" 
-              action="[[createAdminChat_()]]" 
-              icon="social:group">
+          <ghvz-drawer-item name="create-admin-chat-button" text="Chat with Admins" action="[[createAdminChat_()]]"
+            icon="social:group">
           </ghvz-drawer-item>
         </template>
 
-        <ghvz-drawer-item 
-            id="new-chat" 
-            text="New chat" 
-            action="[[createNewChat_()]]" 
-            icon="icons:add">
+        <ghvz-drawer-item id="new-chat" text="New chat" action="[[createNewChat_()]]" icon="icons:add">
         </ghvz-drawer-item>
 
         <ghvz-drawer-item text="Leaderboard" path='["leaderboard"]' icon="social:group"></ghvz-drawer-item>
@@ -260,24 +260,27 @@
       </div>
     </template>
 
-    <template is="dom-if" if="[[isAdmin]]">   
+    <template is="dom-if" if="[[isAdmin]]">
       <div id="adminPages" class="drawer-section">
         <ghvz-drawer-item text="Admin Dashboard" path='["adminMain"]' icon="icons:dashboard"></ghvz-drawer-item>
         <ghvz-drawer-item text="Admin Game Details" path='["adminGame"]' icon="icons:group-work"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Admin Game Summary" path='["adminGameSummary"]' icon="icons:language"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Admin Game Summary" path='["adminGameSummary"]' icon="icons:language">
+        </ghvz-drawer-item>
         <ghvz-drawer-item text="Admin Missions" path='["adminMissions"]' icon="icons:group-work"></ghvz-drawer-item>
         <ghvz-drawer-item text="Admin Players" path='["adminPlayers"]' icon="social:group"></ghvz-drawer-item>
         <ghvz-drawer-item text="Admin Dev Tools" path='["adminDevTools"]' icon="icons:build"></ghvz-drawer-item>
         <ghvz-drawer-item text="Admin Guns" path='["adminGuns"]' icon="icons:favorite"></ghvz-drawer-item>
         <ghvz-drawer-item text="Admin Rewards" path='["adminRewards"]' icon="icons:stars"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Admin Notifications" path='["adminNotifications"]' icon="notification:sms"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Admin Notifications" path='["adminNotifications"]' icon="notification:sms">
+        </ghvz-drawer-item>
         <ghvz-drawer-item text="Admin Chats" path='["adminChats"]' icon="communication:chat"></ghvz-drawer-item>
       </div>
     </template>
 
     <div class="drawer-section">
       <template is="dom-if" if="[[userId]]">
-        <ghvz-drawer-item text="Sign Out" action="[[signOut_()]]" icon="icons:account-circle" name="drawerSign Out"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Sign Out" action="[[signOut_()]]" icon="icons:account-circle" name="drawerSign Out">
+        </ghvz-drawer-item>
       </template>
     </div>
 
@@ -288,14 +291,10 @@
       <div>Player Number: [[player.number]]</div>
       <div>Player Name: [[player.name]]</div>
     </div>
-  </div>
+    </div>
 
-  <ghvz-chat-room-settings 
-    id="settings" 
-    bridge="[[bridge]]"
-    game="[[game]]"
-    player="[[player]]"
-    is-admin="[[isAdmin]]">
-  </ghvz-chat-room-settings>
-</template>
+    <ghvz-chat-room-settings id="settings" bridge="[[bridge]]" game="[[game]]" player="[[player]]"
+      is-admin="[[isAdmin]]">
+    </ghvz-chat-room-settings>
+  </template>
 </dom-module>

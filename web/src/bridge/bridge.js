@@ -153,6 +153,14 @@ class Bridge {
   listenToMissionList(gameId, playerId, callback) {
     return this.inner.listenToMissionList(gameId, playerId, callback);
   }
+
+  createReward(gameId, shortName, longName, description, imageUrl, points) {
+    return this.inner.createReward(gameId, shortName, longName, description, imageUrl, points);
+  }
+
+  generateClaimCodes(gameId, rewardId, numCodes) {
+    return this.inner.generateClaimCodes(gameId, rewardId, numCodes);
+  }
   //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
   //////////////////////////////////////////////////////////////////////

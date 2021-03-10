@@ -400,91 +400,26 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
     "horde"
   );
 
+  // Create rewards
+  let signInRewardId = "reward-signed-3";
+  let signInRewardShortName = "signed";
+  bridge.createReward(gameId, /* shortName= */ "signed", /* longName= */ "signed up!", /* description= */ 'signed up for the game!', 'https://maxcdn.icons8.com/Share/icon/ultraviolet/Baby//nerf_gun1600.png', /* points= */ 2)
+  let didTheThingRewardId = "reward-didthing-4";
+  bridge.createReward(gameId, /* shortName= */ "didthing", "did the thing!", 'soooo did the thing!', 'https://s-media-cache-ak0.pinimg.com/originals/94/9b/80/949b80956f246b74dc1f4f1f476eb9c1.png', /* points= */ 2)
+  let leafRewardId = "reward-foundleaf-5";
+  bridge.createReward(gameId, /* shortName= */ "foundleaf", "found a leaf!", 'i found a leaf when my allies were being ambushed!', 'http://static.tumblr.com/87e20377c9c37d0b07dcc10504c636a8/mteq5q3/k1Ynitn6h/tumblr_static_75lgqkjlvcw00cos8g8kko80k.png', /* points= */ 2)
+  let genoRewardId = "reward-knowgeno-6";
+  bridge.createReward(gameId, /* shortName= */ "knowgeno", "i know geno!", 'i know who geno is!', 'http://vignette2.wikia.nocookie.net/nintendo/images/0/02/Geno_Artwork_%28Super_Mario_RPG_-_Legend_of_the_Seven_Stars%29.png/revision/latest?cb=20121110130550&path-prefix=en', /* points= */ 2)
+
+  // Generate claim codes for the rewards we just created.
+  // Codes are of the form: <short name>-claim-# 
+  bridge.generateClaimCodes(gameId, signInRewardId, /* numCodes= */ 3);
+  bridge.generateClaimCodes(gameId, didTheThingRewardId, /* numCodes= */ 1);
+  bridge.generateClaimCodes(gameId, leafRewardId, /* numCodes= */ 1);
+  bridge.generateClaimCodes(gameId, genoRewardId, /* numCodes= */ 1);
+
   // TODO: SUPPORT THINGS BELOW THIS POINT.
   return;
-  var firstRewardCategoryId = bridge.idGenerator.newRewardCategoryId();
-  bridge.addRewardCategory({
-    rewardCategoryId: firstRewardCategoryId,
-    gameId: gameId,
-    name: "signed up!",
-    points: 2,
-    badgeImageUrl: 'https://maxcdn.icons8.com/Share/icon/ultraviolet/Baby//nerf_gun1600.png',
-    shortName: "signed",
-    description: 'signed up for the game!',
-    limitPerPlayer: 1
-  });
-  bridge.addReward({
-    gameId: gameId,
-    rewardId: bridge.idGenerator.newRewardId(),
-    rewardCategoryId: firstRewardCategoryId,
-    code: "signed-flarklebark",
-  });
-  bridge.addReward({
-    gameId: gameId,
-    rewardId: bridge.idGenerator.newRewardId(),
-    rewardCategoryId: firstRewardCategoryId,
-    code: null
-  });
-  bridge.addReward({
-    gameId: gameId,
-    rewardId: bridge.idGenerator.newRewardId(),
-    rewardCategoryId: firstRewardCategoryId,
-    code: null,
-  });
-
-  var secondRewardCategoryId = bridge.idGenerator.newRewardCategoryId();
-  bridge.addRewardCategory({
-    rewardCategoryId: secondRewardCategoryId,
-    gameId: gameId,
-    name: "did the thing!",
-    points: 2,
-    badgeImageUrl: 'https://s-media-cache-ak0.pinimg.com/originals/94/9b/80/949b80956f246b74dc1f4f1f476eb9c1.png',
-    shortName: "didthing",
-    description: 'soooo did the thing!',
-    limitPerPlayer: 1
-  });
-  bridge.addReward({
-    gameId: gameId,
-    rewardId: bridge.idGenerator.newRewardId(),
-    rewardCategoryId: secondRewardCategoryId,
-    code: "didthing-flarklebark",
-  });
-
-  var thirdRewardCategoryId = bridge.idGenerator.newRewardCategoryId();
-  bridge.addRewardCategory({
-    rewardCategoryId: thirdRewardCategoryId,
-    gameId: gameId,
-    name: "found a leaf!",
-    points: 2,
-    badgeImageUrl: 'http://static.tumblr.com/87e20377c9c37d0b07dcc10504c636a8/mteq5q3/k1Ynitn6h/tumblr_static_75lgqkjlvcw00cos8g8kko80k.png',
-    shortName: "foundleaf",
-    description: 'i found a leaf when my allies were being ambushed!',
-    limitPerPlayer: 1
-  });
-  bridge.addReward({
-    gameId: gameId,
-    rewardId: bridge.idGenerator.newRewardId(),
-    rewardCategoryId: thirdRewardCategoryId,
-    code: "foundleaf-flarklebark",
-  });
-
-  var fourthRewardCategoryId = bridge.idGenerator.newRewardCategoryId();
-  bridge.addRewardCategory({
-    rewardCategoryId: fourthRewardCategoryId,
-    gameId: gameId,
-    name: "i know geno!",
-    points: 2,
-    badgeImageUrl: 'http://vignette2.wikia.nocookie.net/nintendo/images/0/02/Geno_Artwork_%28Super_Mario_RPG_-_Legend_of_the_Seven_Stars%29.png/revision/latest?cb=20121110130550&path-prefix=en',
-    shortName: "knowgeno",
-    description: 'i know who geno is!',
-    limitPerPlayer: 1
-  });
-  bridge.addReward({
-    gameId: gameId,
-    rewardId: bridge.idGenerator.newRewardId(),
-    rewardCategoryId: fourthRewardCategoryId,
-    code: "knowgeno-flarklebark",
-  });
 
   bridge.claimReward({
     gameId: gameId,
