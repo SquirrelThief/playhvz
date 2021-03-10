@@ -57,6 +57,8 @@ FakeRewardUtils.createReward = function (shortName, longName, description, image
 FakeRewardUtils.createRewardClaimCode = function (code) {
     return new ClaimCode({
         code: code,
+        redeemer: null,
+        timestamp: null
     });
 }
 

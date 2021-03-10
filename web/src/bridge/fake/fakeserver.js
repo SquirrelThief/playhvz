@@ -318,6 +318,40 @@ class FakeServer {
     }
   }
 
+  redeemRewardCode(gameId, playerId, claimCode) {
+    // Check if claim code is associated with valid reward.
+    const shortName = FakeRewardUtils.extractShortNameFromCode(claimCode)
+    let reward = this.fakeDatabase.getRewardByShortName(gameId, shortName);
+    if (reward == null) {
+      return
+    }
+
+    // If the middle code matches the player id then this is a reward we're granting them. Let it be so.
+    const secondCode = FakeRewardUtils.extractPlayerIdFromCode(claimCode)
+    if (secondCode === playerId.toLowerCase()) {
+      let newClaimCodeObject = FakeRewardUtils.createRewardClaimCode(claimCode);
+      newClaimCodeObject.id = newClaimCodeObject.code;
+      this.fakeDatabase.setClaimCode(gameId, reward.id, newClaimCodeObject.id, newClaimCodeObject);
+    }
+
+    // Check if reward code is valid.
+    let claimCodeObject = this.fakeDatabase.getUnredeemedClaimCodeByCode(gameId, reward, claimCode);
+    if (claimCodeObject == null) {
+      return;
+    }
+
+    // Redeem claim code!
+    claimCodeObject.redeemer = playerId;
+    claimCodeObject.timestamp = this.getTime_({});
+    let player = this.fakeDatabase.getPlayer(gameId, playerId);
+    let count = 1;
+    if (player.rewards[reward.id] != undefined) {
+      count = player.rewards[reward.id] + 1
+    }
+    player.rewards[reward.id] = count; // Can't += 1 because ends up as NaN if undefined
+    player.points += reward.points
+  }
+
 
   setAdminContact(args) {
     let { playerId } = args;

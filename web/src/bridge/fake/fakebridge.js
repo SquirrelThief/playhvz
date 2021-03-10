@@ -202,6 +202,13 @@ class FakeBridge {
     });
   }
 
+  redeemRewardCode(gameId, playerId, claimCode) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.redeemRewardCode(gameId, playerId, claimCode));
+    });
+  }
+
+
 
 }
 

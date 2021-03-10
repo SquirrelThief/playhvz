@@ -161,6 +161,10 @@ class Bridge {
   generateClaimCodes(gameId, rewardId, numCodes) {
     return this.inner.generateClaimCodes(gameId, rewardId, numCodes);
   }
+
+  redeemRewardCode(gameId, playerId, claimCode) {
+    return this.inner.redeemRewardCode(gameId, playerId, claimCode);
+  }
   //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
   //////////////////////////////////////////////////////////////////////

@@ -87,6 +87,26 @@ class FakeDatabase {
         return this.fakeDb[GamePath.COLLECTION_PATH][gameId][RewardPath.COLLECTION_PATH][rewardId];
     }
 
+    getRewardByShortName(gameId, shortName) {
+        let rewards = this.getAllRewardsForGame(gameId);
+        for (let reward of rewards) {
+            if (reward.shortName == shortName) {
+                return reward
+            }
+        }
+        return null
+    }
+
+    getUnredeemedClaimCodeByCode(gameId, reward, claimCode) {
+        let claimCodeObjects = reward.claimCodes;
+        for (let claimCodeObject of Object.values(claimCodeObjects)) {
+            if (claimCodeObject.code == claimCode && claimCodeObject.redeemer == null) {
+                return claimCodeObject
+            }
+        }
+        return null
+    }
+
     getAllMissionsOfGame(gameId) {
         return Object.values(this.fakeDb[GamePath.COLLECTION_PATH][gameId][MissionPath.COLLECTION_PATH])
     }

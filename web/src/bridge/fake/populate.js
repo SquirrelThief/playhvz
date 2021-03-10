@@ -402,7 +402,6 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
 
   // Create rewards
   let signInRewardId = "reward-signed-3";
-  let signInRewardShortName = "signed";
   bridge.createReward(gameId, /* shortName= */ "signed", /* longName= */ "signed up!", /* description= */ 'signed up for the game!', 'https://maxcdn.icons8.com/Share/icon/ultraviolet/Baby//nerf_gun1600.png', /* points= */ 2)
   let didTheThingRewardId = "reward-didthing-4";
   bridge.createReward(gameId, /* shortName= */ "didthing", "did the thing!", 'soooo did the thing!', 'https://s-media-cache-ak0.pinimg.com/originals/94/9b/80/949b80956f246b74dc1f4f1f476eb9c1.png', /* points= */ 2)
@@ -418,32 +417,14 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   bridge.generateClaimCodes(gameId, leafRewardId, /* numCodes= */ 1);
   bridge.generateClaimCodes(gameId, genoRewardId, /* numCodes= */ 1);
 
+  bridge.redeemRewardCode(gameId, drakePlayerId, "signed-claim-0");
+  bridge.redeemRewardCode(gameId, drakePlayerId, "didthing-claim-0");
+  bridge.redeemRewardCode(gameId, drakePlayerId, "foundleaf-claim-0");
+  bridge.redeemRewardCode(gameId, drakePlayerId, "knowgeno-claim-0");
+
+
   // TODO: SUPPORT THINGS BELOW THIS POINT.
   return;
-
-  bridge.claimReward({
-    gameId: gameId,
-    playerId: drakePlayerId,
-    rewardCode: "signed-flarklebark",
-  });
-  bridge.claimReward({
-    gameId: gameId,
-    playerId: drakePlayerId,
-    rewardCode: "didthing-flarklebark",
-  });
-  bridge.claimReward({
-    gameId: gameId,
-    playerId: drakePlayerId,
-    rewardCode: "foundleaf-flarklebark",
-  });
-  bridge.claimReward({
-    gameId: gameId,
-    playerId: drakePlayerId,
-    rewardCode: "knowgeno-flarklebark",
-  });
-  /*for (let i = 0; i < 80; i++) {
-    bridge.addGun({ gameId: gameId, gunId: bridge.idGenerator.newGunId(), label: "" + (1404 + i) });
-  }*/
 
   bridge.queueNotification({
     gameId: gameId,
