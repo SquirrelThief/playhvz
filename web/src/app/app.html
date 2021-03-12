@@ -114,8 +114,8 @@
           })
             .then(() => window.location.reload())
             .catch((error) => {
-              return this.alertHandler("Error signing out! " + error);
               console.error(error);
+              return this.alertHandler("Error signing out! " + error);
             });
         },
 

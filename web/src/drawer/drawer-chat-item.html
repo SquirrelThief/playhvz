@@ -25,6 +25,7 @@
 
         properties: {
           game: Object,
+          player: Object,
           chatRoomMembership: Object,
           openInAdminChats: {
             type: Boolean,
@@ -36,36 +37,41 @@
           },
 
           hasUnseenMessages: Boolean,
-
-          chatRoom: Object, // Set by array-selector
-
+          chatRoom: Object,
           show: {
             type: Boolean,
-            computed: 'computeShow_(chatRoom.messages.*, chatRoomMembership.lastHiddenTime)',
+            computed: 'computeShow_(chatRoom.messages.*, chatRoomMembership)',
           }
         },
 
         observers: [
-          'onChatRoomMembershipUpdated_(game, game.chatRooms.length, chatRoomMembership.chatRoomId)',
-          'onChatRoomUpdated_(game, chatRoom.messages.*, chatRoomMembership.lastSeenTime)',
+          'onChatRoomMembershipUpdated_(bridge, game, player.chatRoomMemberships, chatRoomMembership)',
+          'onChatRoomUpdated_(chatRoom)',
         ],
 
         onChatRoomMembershipUpdated_() {
-          assert(this.game.chatRoomsById[this.chatRoomMembership.chatRoomId]);
-          this.$.chatRoomSelector.select(this.game.chatRoomsById[this.chatRoomMembership.chatRoomId]);
+          this.bridge.listenToChatRoom(this.game.id, this.chatRoomMembership.chatRoomId).then(chat => this.chatRoom = chat);
         },
 
         onChatRoomUpdated_() {
-          if (this.chatRoom.messages.length == 0) {
+          if (Object.keys(this.chatRoom.messages).length == 0) {
             this.hasUnseenMessages = false;
             return;
           }
-          let lastMessage = this.chatRoom.messages[this.chatRoom.messages.length - 1];
-          this.hasUnseenMessages = lastMessage.time > this.chatRoomMembership.lastSeenTime;
+          if (this.chatRoomMembership.lastSeenTime > 0) {
+            // Get the timestamp of the last message. There are a lot of probably wrong
+            // assumptions here. We're trusting that Firestore correctly sorted the
+            // messages in ascending order.
+            let messageArray = Object.keys(this.chatRoom.messages)
+            let lastMessage = this.chatRoom.messages[messageArray[messageArray.length - 1]];
+            this.hasUnseenMessages = lastMessage > this.chatRoomMembership.lastSeenTime;
+          } else {
+            this.hasUnseenMessages = true;
+          }
         },
 
         computeShow_() {
-          return this.ignoreHidden || ChatUtils.chatIsVisible(this.chatRoom, this.chatRoomMembership);
+          return this.ignoreHidden || ChatUtils.chatIsVisible(this.chatRoomMembership);
         },
 
         computePath_(openInAdminChats, chatRoomId) {
@@ -124,7 +130,6 @@
     }
   </style>
   <template>
-    <array-selector id="chatRoomSelector" items="[[game.chatRooms]]" selected="{{chatRoom}}"></array-selector>
     <div hidden$="[[!show]]" id$="drawerChatItem-[[chatRoom.name]]">
       <template is="dom-if" if="[[hasUnseenMessages]]">
         <div name="unseenIcon" class="unseenIcon"></div>

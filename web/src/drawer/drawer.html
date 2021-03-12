@@ -62,7 +62,7 @@
         },
 
         observers: [
-          'onChatRoomsUpdated_(game, player.private.chatRoomMemberships.*)',
+          'onChatRoomsUpdated_(bridge, game, player.chatRoomMemberships.*)',
         ],
 
         onKeyPress_(e) {
@@ -101,12 +101,12 @@
             this.waitingToOpenChatRoomId = null;
           }
           // Set whether or not the admin chat exists
-          for (let chatRoomMembership of this.player.private.chatRoomMemberships) {
-            let chatRoomId = chatRoomMembership.chatRoomId;
-            let chatRoom = this.game.chatRoomsById[chatRoomId];
+          for (let chatRoomId in this.player.chatRoomMemberships) {
+            let chatRoomMembership = this.player.chatRoomMemberships[chatRoomId]
+            let chatRoom = this.bridge.listenToChatRoom(this.game.id, chatRoomId);
             if (chatRoom.withAdmins) {
               this.adminChatRoomId = chatRoomId;
-              if (ChatUtils.chatIsVisible(chatRoom, chatRoomMembership)) {
+              if (ChatUtils.chatIsVisible(chatRoomMembership)) {
                 this.adminChatExists = true;
                 return;
               }
@@ -140,8 +140,19 @@
         },
 
         getChatName_(chatRoomId) {
-          return this.game.chatRoomsById[chatRoomId].name;
+          let chatRoom = this.bridge.listenToChatRoom(this.game.id, chatRoomId);
+          return chatRoom.name;
         },
+
+        chatMembershipAsArray_(membershipObject) {
+          // Add the chat room id as an actual object parameter to make life easier.
+          let array = [];
+          Object.keys(membershipObject).forEach(key => {
+            array.push({ chatRoomId: key, ...membershipObject[key] })
+            return array;
+          });
+          return array;
+        }
       });
     });
   </script>
@@ -235,8 +246,9 @@
         <ghvz-drawer-item text="My Profile" path='["profile"]' icon="icons:account-box"></ghvz-drawer-item>
         <ghvz-drawer-item text="Missions" path='["missions"]' icon="icons:group-work"></ghvz-drawer-item>
 
-        <template is="dom-repeat" items="[[player.private.chatRoomMemberships]]" as="membership">
-          <ghvz-drawer-chat-item game="[[game]]" chat-room-membership="[[membership]]">
+        <template is="dom-repeat" items="[[chatMembershipAsArray_(player.chatRoomMemberships)]]" as="membership">
+          <ghvz-drawer-chat-item game="[[game]]" bridge="[[bridge]]" player="[[player]]"
+            chat-room-membership="[[membership]]">
           </ghvz-drawer-chat-item>
         </template>
 

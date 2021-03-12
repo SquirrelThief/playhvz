@@ -121,7 +121,7 @@ ChatUtils.createAdminChat = function (bridge, game, player, chatRoomName) {
 */
 ChatUtils.chatIsVisible = function (membership) {
   return membership.isVisible;
-  if (!membership || !chatRoom) {
+  /*if (!membership || !chatRoom) {
     return false;
   }
   let lastHiddenTime = membership.lastHiddenTime;
@@ -139,6 +139,6 @@ ChatUtils.chatIsVisible = function (membership) {
   } else {
     // If we get here, we hid it before the last message, so we should show the room
     return true;
-  }
+  }*/
 }
 

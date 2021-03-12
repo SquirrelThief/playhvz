@@ -368,161 +368,161 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
 
   // TODO: SUPPORT THINGS BELOW THIS POINT.
   return;
-
-  bridge.queueNotification({
-    gameId: gameId,
-    queuedNotificationId: bridge.idGenerator.newQueuedNotificationId(),
-    previewMessage: "Mission 1 Details: the zeds have invaded!",
-    message: "oh god theyre everywhere run",
-    sendTime: null,
-    groupId: resistanceGroupId,
-    playerId: null,
-    email: true,
-    site: true,
-    mobile: true,
-    vibrate: true,
-    sound: "ping.wav",
-    destination: "missions/" + firstMissionId,
-    icon: null
-  });
-
-  let requestCategoryId = bridge.idGenerator.newRequestCategoryId();
-  let requestId = bridge.idGenerator.newRequestId();
-  bridge.addRequestCategory({
-    gameId: gameId,
-    requestCategoryId: requestCategoryId,
-    chatRoomId: resistanceChatRoomId,
-    playerId: moldaviPlayerId,
-    text: 'yee?',
-    type: 'ack',
-    dismissed: false
-  });
-  bridge.addRequest({
-    gameId: gameId,
-    requestId: requestId,
-    requestCategoryId: requestCategoryId,
-    playerId: jackPlayerId
-  });
-  bridge.addRequest({
-    gameId: gameId,
-    requestId: bridge.idGenerator.newRequestId(),
-    requestCategoryId: requestCategoryId,
-    playerId: zellaPlayerId
-  });
-  bridge.addResponse({
-    gameId: gameId,
-    requestId: requestId,
-    text: null
-  });
-  bridge.updateRequestCategory({
-    gameId: gameId,
-    requestCategoryId: requestCategoryId,
-    dismissed: true,
-  });
-
-  let secondRequestCategoryId = bridge.idGenerator.newRequestCategoryId();
-  let secondRequestId = bridge.idGenerator.newRequestId();
-  bridge.addRequestCategory({
-    gameId: gameId,
-    requestCategoryId: secondRequestCategoryId,
-    chatRoomId: resistanceChatRoomId,
-    playerId: moldaviPlayerId,
-    text: 'yee2?',
-    type: 'ack',
-    dismissed: false
-  });
-  bridge.addRequest({
-    gameId: gameId,
-    requestId: secondRequestId,
-    requestCategoryId: secondRequestCategoryId,
-    playerId: jackPlayerId
-  });
-  bridge.addRequest({
-    gameId: gameId,
-    requestId: bridge.idGenerator.newRequestId(),
-    requestCategoryId: secondRequestCategoryId,
-    playerId: zellaPlayerId
-  });
-  bridge.addResponse({
-    gameId: gameId,
-    requestId: secondRequestId,
-    text: null
-  });
-
-  let textRequestCategoryId = bridge.idGenerator.newRequestCategoryId();
-  let textRequestId = bridge.idGenerator.newRequestId();
-  bridge.addRequestCategory({
-    gameId: gameId,
-    requestCategoryId: textRequestCategoryId,
-    chatRoomId: resistanceChatRoomId,
-    playerId: moldaviPlayerId,
-    text: 'text?',
-    type: 'text',
-    dismissed: false
-  });
-  bridge.addRequest({
-    gameId: gameId,
-    requestId: textRequestId,
-    requestCategoryId: textRequestCategoryId,
-    playerId: jackPlayerId
-  });
-  bridge.addRequest({
-    gameId: gameId,
-    requestId: bridge.idGenerator.newRequestId(),
-    requestCategoryId: textRequestCategoryId,
-    playerId: zellaPlayerId
-  });
-  bridge.addResponse({
-    gameId: gameId,
-    requestId: textRequestId,
-    text: "responseText",
-  });
-
-
-  var withAdminsChatRoomGroupId = bridge.idGenerator.newGroupId();
-  var withAdminsChatRoomId = bridge.idGenerator.newChatRoomId();
-  bridge.createGroup({
-    groupId: withAdminsChatRoomGroupId,
-    name: "Group for " + withAdminsChatRoomId,
-    gameId: gameId,
-    ownerPlayerId: jackPlayerId,
-    allegianceFilter: 'none',
-    autoAdd: false,
-    autoRemove: false,
-    canAddOthers: false,
-    canRemoveOthers: false,
-    canAddSelf: true,
-    canRemoveSelf: true,
-  });
-  bridge.createChatRoom({
-    gameId: gameId,
-    chatRoomId: withAdminsChatRoomId,
-    accessGroupId: withAdminsChatRoomGroupId,
-    name: "JackSlayerTheBeanSlasher & HvZ CDC",
-    withAdmins: true,
-  });
-
-  bridge.addPlayerToGroup({
-    gameId: gameId,
-    groupId: withAdminsChatRoomGroupId,
-    playerToAddId: jackPlayerId,
-    actingPlayerId: jackPlayerId,
-  });
-  bridge.addPlayerToGroup({
-    gameId: gameId,
-    groupId: withAdminsChatRoomGroupId,
-    playerToAddId: moldaviPlayerId,
-    actingPlayerId: jackPlayerId,
-  });
-  bridge.sendChatMessage({
-    gameId: gameId,
-    messageId: bridge.idGenerator.newMessageId(),
-    chatRoomId: withAdminsChatRoomId,
-    playerId: jackPlayerId,
-    message: 'hey how do i know if im the possessed human'
-  });
-
-  populateQuiz(bridge, gameId);
+  /*
+    bridge.queueNotification({
+      gameId: gameId,
+      queuedNotificationId: bridge.idGenerator.newQueuedNotificationId(),
+      previewMessage: "Mission 1 Details: the zeds have invaded!",
+      message: "oh god theyre everywhere run",
+      sendTime: null,
+      groupId: resistanceGroupId,
+      playerId: null,
+      email: true,
+      site: true,
+      mobile: true,
+      vibrate: true,
+      sound: "ping.wav",
+      destination: "missions/" + firstMissionId,
+      icon: null
+    });
+  
+    let requestCategoryId = bridge.idGenerator.newRequestCategoryId();
+    let requestId = bridge.idGenerator.newRequestId();
+    bridge.addRequestCategory({
+      gameId: gameId,
+      requestCategoryId: requestCategoryId,
+      chatRoomId: resistanceChatRoomId,
+      playerId: moldaviPlayerId,
+      text: 'yee?',
+      type: 'ack',
+      dismissed: false
+    });
+    bridge.addRequest({
+      gameId: gameId,
+      requestId: requestId,
+      requestCategoryId: requestCategoryId,
+      playerId: jackPlayerId
+    });
+    bridge.addRequest({
+      gameId: gameId,
+      requestId: bridge.idGenerator.newRequestId(),
+      requestCategoryId: requestCategoryId,
+      playerId: zellaPlayerId
+    });
+    bridge.addResponse({
+      gameId: gameId,
+      requestId: requestId,
+      text: null
+    });
+    bridge.updateRequestCategory({
+      gameId: gameId,
+      requestCategoryId: requestCategoryId,
+      dismissed: true,
+    });
+  
+    let secondRequestCategoryId = bridge.idGenerator.newRequestCategoryId();
+    let secondRequestId = bridge.idGenerator.newRequestId();
+    bridge.addRequestCategory({
+      gameId: gameId,
+      requestCategoryId: secondRequestCategoryId,
+      chatRoomId: resistanceChatRoomId,
+      playerId: moldaviPlayerId,
+      text: 'yee2?',
+      type: 'ack',
+      dismissed: false
+    });
+    bridge.addRequest({
+      gameId: gameId,
+      requestId: secondRequestId,
+      requestCategoryId: secondRequestCategoryId,
+      playerId: jackPlayerId
+    });
+    bridge.addRequest({
+      gameId: gameId,
+      requestId: bridge.idGenerator.newRequestId(),
+      requestCategoryId: secondRequestCategoryId,
+      playerId: zellaPlayerId
+    });
+    bridge.addResponse({
+      gameId: gameId,
+      requestId: secondRequestId,
+      text: null
+    });
+  
+    let textRequestCategoryId = bridge.idGenerator.newRequestCategoryId();
+    let textRequestId = bridge.idGenerator.newRequestId();
+    bridge.addRequestCategory({
+      gameId: gameId,
+      requestCategoryId: textRequestCategoryId,
+      chatRoomId: resistanceChatRoomId,
+      playerId: moldaviPlayerId,
+      text: 'text?',
+      type: 'text',
+      dismissed: false
+    });
+    bridge.addRequest({
+      gameId: gameId,
+      requestId: textRequestId,
+      requestCategoryId: textRequestCategoryId,
+      playerId: jackPlayerId
+    });
+    bridge.addRequest({
+      gameId: gameId,
+      requestId: bridge.idGenerator.newRequestId(),
+      requestCategoryId: textRequestCategoryId,
+      playerId: zellaPlayerId
+    });
+    bridge.addResponse({
+      gameId: gameId,
+      requestId: textRequestId,
+      text: "responseText",
+    });
+  
+  
+    var withAdminsChatRoomGroupId = bridge.idGenerator.newGroupId();
+    var withAdminsChatRoomId = bridge.idGenerator.newChatRoomId();
+    bridge.createGroup({
+      groupId: withAdminsChatRoomGroupId,
+      name: "Group for " + withAdminsChatRoomId,
+      gameId: gameId,
+      ownerPlayerId: jackPlayerId,
+      allegianceFilter: 'none',
+      autoAdd: false,
+      autoRemove: false,
+      canAddOthers: false,
+      canRemoveOthers: false,
+      canAddSelf: true,
+      canRemoveSelf: true,
+    });
+    bridge.createChatRoom({
+      gameId: gameId,
+      chatRoomId: withAdminsChatRoomId,
+      accessGroupId: withAdminsChatRoomGroupId,
+      name: "JackSlayerTheBeanSlasher & HvZ CDC",
+      withAdmins: true,
+    });
+  
+    bridge.addPlayerToGroup({
+      gameId: gameId,
+      groupId: withAdminsChatRoomGroupId,
+      playerToAddId: jackPlayerId,
+      actingPlayerId: jackPlayerId,
+    });
+    bridge.addPlayerToGroup({
+      gameId: gameId,
+      groupId: withAdminsChatRoomGroupId,
+      playerToAddId: moldaviPlayerId,
+      actingPlayerId: jackPlayerId,
+    });
+    bridge.sendChatMessage({
+      gameId: gameId,
+      messageId: bridge.idGenerator.newMessageId(),
+      chatRoomId: withAdminsChatRoomId,
+      playerId: jackPlayerId,
+      message: 'hey how do i know if im the possessed human'
+    });
+  
+    populateQuiz(bridge, gameId); */
 }
 
 /************************************************************************
