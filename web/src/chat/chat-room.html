@@ -80,7 +80,7 @@
 
         observers: [
           'onChatRoomIdChange_(chatRoomId, game, bridge)',
-          'onChatRoomMembershipChange_(chatRoomId, currentPlayer.private.chatRoomMembershipsById.*)',
+          'onChatRoomMembershipChange_(chatRoomId, currentPlayer.chatRoomMemberships.*)',
           'onChatRoomNameChange_(chatRoom.name, isAttached)',
           'onMessageReceived_(messages.*)',
         ],
@@ -130,8 +130,8 @@
         },
 
         onChatRoomMembershipChange_: function () {
-          /*let membership = this.currentPlayer.private.chatRoomMembershipsById[this.chatRoomId];
-          this.isMemberOfChatRoom = membership ? true : false; */
+          let membership = this.currentPlayer.chatRoomMemberships[this.chatRoomId];
+          this.isMemberOfChatRoom = membership ? true : false;
         },
 
         onMessageReceived_() {
