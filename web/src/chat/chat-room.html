@@ -103,7 +103,6 @@
             self.members.set(playerId, player)
           }
 
-
           this.bridge.listenToChatRoom(this.game.id, chatRoomId).then(chatRoom => {
             this.chatRoom = chatRoom;
             // Listen to all the players in the chat room.

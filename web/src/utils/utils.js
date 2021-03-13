@@ -45,6 +45,19 @@ Utils.toArray = function (map) {
 }
 
 /*
+ * Util for converting a map to an array for dom-repeat. Array items are of the form:
+ * map[key].
+ */
+Utils.getValuesAsArray = function (obj) {
+  let array = [];
+  Object.keys(obj).forEach(key => {
+    array.push(obj[key])
+    return array;
+  });
+  return array;
+}
+
+/*
 * Only use for things you would send over the network, like
 * objects, strings, arrays, numbers, booleans, null, and undefined.
 * Won't work on Date, etc.

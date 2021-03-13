@@ -49,15 +49,19 @@
         },
 
         observers: [
-          'onChatRoomIdChanged_(chatRoomId, game.chatRooms, game.chatRoomsById)',
+          'onChatRoomIdChanged_(bridge, game, chatRoomId)',
           'onChatRoomPropertiesChanged_(currentPlayer, isAdmin, chatRoom, group)',
         ],
 
-        onChatRoomIdChanged_(chatRoomId) {
-          assert(this.game.chatRoomsById[chatRoomId]);
-          this.$.chatRoomSelector.select(this.game.chatRoomsById[chatRoomId]);
-          assert(this.game.groupsById[this.chatRoom.accessGroupId]);
-          this.$.groupsSelector.select(this.game.groupsById[this.chatRoom.accessGroupId]);
+        onChatRoomIdChanged_() {
+          assert(this.game.chatRooms[this.chatRoomId]);
+          this.bridge.listenToChatRoom(this.game.id, this.chatRoomId).then(serverChatRoom => {
+            this.chatRoom = serverChatRoom;
+            assert(this.game.groups[this.chatRoom.associatedGroupId]);
+            this.bridge.listenToGroup(this.game.id, this.chatRoom.associatedGroupId).then(serverGroup => {
+              this.group = serverGroup;
+            })
+          });
         },
 
         onChatRoomPropertiesChanged_() {
@@ -74,7 +78,7 @@
         },
 
         getPlayerName_(playerId) {
-          return this.game.playersById[playerId].name;
+          return this.game.players[playerId].name;
         },
 
         captureTap_(e) {
@@ -204,24 +208,24 @@
       </template>
 
       <div id="players-list" class="drawer-section">
-        <div class="info-label" name="num-players">[[group.players.length]] members</div>
-        <template is="dom-repeat" items="[[group.players]]" as="playerId">
-          <div name$="[[getPlayerName_(playerId)]]"">
+        <div class="info-label" name="num-players">[[group.members.length]] members</div>
+        <template is="dom-repeat" items="[[group.members]]" as="playerId">
+          <div name$="[[getPlayerName_(playerId)]]">
             <div class=" layout horizontal player-entry">
-            <div class="layout horizontal player-info" on-tap="captureTap_" data-action="profile"
-              data-player-id$="[[playerId]]">
-              <ghvz-player-avatar medium bridge="[[bridge]]" game="[[game]]" player-id="[[playerId]]">
-              </ghvz-player-avatar>
-              <div class='player-name'>
-                [[getPlayerName_(playerId)]]
+              <div class="layout horizontal player-info" on-tap="captureTap_" data-action="profile"
+                data-player-id$="[[playerId]]">
+                <ghvz-player-avatar medium bridge="[[bridge]]" game="[[game]]" player-id="[[playerId]]">
+                </ghvz-player-avatar>
+                <div class='player-name'>
+                  [[getPlayerName_(playerId)]]
+                </div>
               </div>
-            </div>
-            <template is="dom-if" if="[[showPlayerDropdown]]">
-              <i class="material-icons kick" id$="kick-[[getPlayerName_(playerId)]]" on-tap='captureTap_'
-                data-action="kick" data-player-id$="[[playerId]]">
-                clear
-              </i>
-              <!-- <paper-menu-button restore-focus-on-close="[[booleanFalse]]">
+              <template is="dom-if" if="[[showPlayerDropdown]]">
+                <i class="material-icons kick" id$="kick-[[getPlayerName_(playerId)]]" on-tap='captureTap_'
+                  data-action="kick" data-player-id$="[[playerId]]">
+                  clear
+                </i>
+                <!-- <paper-menu-button restore-focus-on-close="[[booleanFalse]]">
                   <paper-icon-button
                     class="dropdown-trigger" 
                     icon="icons:more-vert">
@@ -229,13 +233,13 @@
                   <paper-menu 
                     class="dropdown-content" 
                     selected="{{selectedMenuItem}}"> -->
-              <!-- <paper-item 
+                <!-- <paper-item 
                       on-tap="captureTap_" 
                       data-action="ping" 
                       data-player-id$="[[item.id]]">
                       ping
                     </paper-item> -->
-              <!--  <template is="dom-if" if="[[canRemoveOthers]]">
+                <!--  <template is="dom-if" if="[[canRemoveOthers]]">
                       <paper-item 
                         id$="kick-[[getPlayerName_(playerId)]]"
                         on-tap="captureTap_" 
@@ -246,11 +250,11 @@
                     </template>
                   </paper-menu>
                 </paper-menu-button> -->
-            </template>
+              </template>
+            </div>
           </div>
+        </template>
       </div>
-  </template>
-  </div>
-  </div>
+    </div>
   </template>
 </dom-module>

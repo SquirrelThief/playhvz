@@ -54,6 +54,7 @@
     :host {
       display: block;
     }
+
     .action {
       display: flex;
       align-items: center;
@@ -66,9 +67,11 @@
       color: black;
       text-decoration: none;
     }
+
     .frame {
       padding-right: 8px;
     }
+
     .list-item {
       padding-top: 8px;
       height: 48px;
@@ -76,10 +79,12 @@
       display: flex;
       padding-bottom: 8px;
     }
+
     .section {
       border-top: 1px solid #ddd;
       padding: 8px 0;
     }
+
     .name-label {
       height: 48px;
       align-items: center;
@@ -87,10 +92,12 @@
       color: black;
       text-decoration: none;
       text-overflow: ellipsis;
+
       --ghvz-chat-room-name-label-icon: {
         padding-right: 8px;
       }
     }
+
     iron-icon {
       flex-shrink: 0;
       padding-right: 8px;
@@ -100,13 +107,9 @@
   <template>
     <div class="frame">
       <template is="dom-repeat" items="[[game.chatRooms]]" as="chatRoom" filter="isAdminChat_">
-        <ghvz-admin-chat-list-item
-            game="[[game]]"
-            player="[[player]]"
-            chat-room="[[chatRoom]]"
-            on-tap="onTap_">
+        <ghvz-admin-chat-list-item game="[[game]]" player="[[player]]" chat-room="[[chatRoom]]" on-tap="onTap_">
         </ghvz-admin-chat-list-item>
       </template>
-    </div>    
+    </div>
   </template>
 </dom-module>
