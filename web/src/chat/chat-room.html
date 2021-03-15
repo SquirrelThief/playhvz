@@ -287,15 +287,6 @@
           this.chatInfoVisible = false;
         },
 
-        /* Captures taps when the drawer is open. */
-        captureTap_(e) {
-          if (e.srcElement.id == 'scrim') {
-            this.hideChatInfo();
-          }
-          e.preventDefault();
-          e.stopPropagation();
-        },
-
         /* 
         *  Catch action from drawer and pass to action executor.
         *  This is required because drawer can't open dialogs in full
@@ -627,7 +618,7 @@
                     </template>
                   </template>
                 </template>
-              </div> <!-- .request-category-text-column -->
+              </div>
               <paper-button raised name="dismiss-button" class="request" on-click="deleteAck">Dismiss</paper-button>
             </paper-material>
           </template>
@@ -644,7 +635,7 @@
                         [[requestCategory.text]]
                       </div>
                       <span hidden>[[request.time]]</span>
-                    </div> <!-- .request-category-text-column -->
+                    </div>
                     <paper-button raised name="ack-button" class="request request-button" on-click="acknowledge">
                       Ack
                     </paper-button>
@@ -660,7 +651,7 @@
                       <div class="request-message">
                         [[requestCategory.text]]
                       </div>
-                    </div> <!-- .request-category-text-column -->
+                    </div>
                     <div class="request-category-text-column">
                       <div class="request-input-container">
                         <paper-input no-label-float class="request-input" on-keydown="checkForEnterTextRequest_"
@@ -669,8 +660,8 @@
                         <paper-button raised class="request" id="textRequestSend" on-click="sendAckText">
                           Send
                         </paper-button>
-                      </div> <!-- .request-input-container -->
-                    </div> <!-- .request-category-text-column -->
+                      </div>
+                    </div>
                   </paper-material>
                 </template>
     </div>
@@ -721,16 +712,14 @@
     </ghvz-chat-room-input>
   </template>
 
-  <div on-tap="captureTap_">
-    <paper-drawer-panel id="drawer" class="drawer-panel" right-drawer disable-swipe force-narrow>
-      <paper-material drawer class="drawer-content">
-        <ghvz-chat-info-drawer bridge="[[bridge]]" game="[[game]]" is-admin="[[isAdmin]]" chat-room-id="[[chatRoomId]]"
-          current-player="[[currentPlayer]]">
-        </ghvz-chat-info-drawer>
-      </paper-material>
-      <div main></div>
-    </paper-drawer-panel>
-  </div>
+  <paper-drawer-panel id="drawer" class="drawer-panel" right-drawer disable-swipe force-narrow persistent>
+    <paper-material drawer class="drawer-content">
+      <ghvz-chat-info-drawer bridge="[[bridge]]" game="[[game]]" is-admin="[[isAdmin]]" chat-room-id="[[chatRoomId]]"
+        current-player="[[currentPlayer]]">
+      </ghvz-chat-info-drawer>
+    </paper-material>
+    <div main></div>
+  </paper-drawer-panel>
 
   <ghvz-chat-info-actions id="actions" bridge="[[bridge]]" game="[[game]]" player-id="[[currentPlayer.id]]"
     is-admin="[[isAdmin]]" chat-room="[[chatRoom]]">

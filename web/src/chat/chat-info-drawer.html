@@ -179,9 +179,6 @@
     }
   </style>
   <template>
-    <array-selector id="chatRoomSelector" items="[[game.chatRooms]]" selected="{{chatRoom}}"></array-selector>
-    <array-selector id="groupsSelector" items="[[game.groups]]" selected="{{group}}"></array-selector>
-
     <div name$="chat-drawer-[[chatRoom.name]]" on-tap="captureTap_">
       <div class="drawer-header">
         [[chatRoom.name]]
@@ -194,10 +191,10 @@
               Add player
             </a>
           </template>
-          <!-- <a href="javascript:void(0)" data-action="notifications" class="drawer-item">
+          <a href="javascript:void(0)" data-action="notifications" class="drawer-item">
             <iron-icon icon="social:notifications"></iron-icon>
             Notifications
-          </a> -->
+          </a>
           <template is="dom-if" if="[[canRemoveSelf]]">
             <a name="chat-drawer-leave" href="javascript:void(0)" data-action="leave" class="drawer-item">
               <iron-icon icon="communication:call-made"></iron-icon>

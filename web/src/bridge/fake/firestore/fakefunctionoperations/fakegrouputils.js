@@ -153,6 +153,7 @@ FakeGroupUtils.removePlayerFromGroups = function (fakeDatabase, gameId, player) 
 
 /** Adds player to group and updates chat memberships if there is a chat room associated with the group. */
 FakeGroupUtils.addPlayerToGroup = function (fakeDatabase, gameId, groupId, player) {
+
     // Check if group is associated with Chat
     let group = fakeDatabase.getGroup(gameId, groupId)
     let chats = fakeDatabase.getAllChatsOfGame(gameId)
@@ -161,6 +162,11 @@ FakeGroupUtils.addPlayerToGroup = function (fakeDatabase, gameId, groupId, playe
         if (chat[ChatPath.FIELD__ASSOCIATED_GROUP_ID] == group.id) {
             groupChatRoom = chat;
         }
+    }
+    // Check if player is already in group
+    if (group[GroupPath.FIELD__MEMBERS].includes(player.id)) {
+        // Do nothing.
+        return;
     }
     if (groupChatRoom == null) {
         // Group is not associated with any chat rooms, just update membership directly

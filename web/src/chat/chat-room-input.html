@@ -59,21 +59,21 @@
           }
           let message = this.$.messageInput.value;
 
-          try {
+          /* try {
             this.parseAndSendNotifications_(message);
           }
           catch (e) {
             this.fire('ghvz-alert', { message: e });
             return;
-          }
+          } */
 
-          this.bridge.sendChatMessage({
-            gameId: this.game.id,
-            messageId: this.bridge.newMessageId(),
-            chatRoomId: this.chatRoom.id,
-            playerId: this.currentPlayer.id,
-            message: message,
-          }).catch((e) => {
+          this.bridge.sendChatMessage(
+            this.game.id,
+            this.bridge.newMessageId(),
+            this.chatRoom.id,
+            this.currentPlayer.id,
+            message,
+          ).catch((e) => {
             this.fire('ghvz-alert', { message: e });
           });
           this.$.messageInput.value = "";
