@@ -8,3 +8,7 @@ test/serviceAccountKey.json
 typings/
 
 node_modules/
+lib/
+
+tsconfig.dev.json
+tsconfig.json

@@ -199,14 +199,14 @@ FakeGroupUtils.removePlayerFromGroup = function (fakeDatabase, gameId, groupId, 
     FakeChatUtils.removePlayerFromChat(fakeDatabase, gameId, player, groupId, groupChatRoom)
 }
 
-FakeGroupUtils.createGroupAndChat = function (fakeDatabase, gameId, playerId, chatName, settings) {
+FakeGroupUtils.createGroupAndChat = function (fakeDatabase, gameId, playerId, chatName, settings, withAdmins = false) {
     const group = FakeGroupUtils.createPlayerOwnedGroup(playerId, chatName, settings)
     group.id = fakeDatabase.idGenerator.generateId("group", chatName)
     fakeDatabase.setGroup(gameId, group.id, group);
     const chatRoom = new ChatRoom({
         [ChatPath.FIELD__ASSOCIATED_GROUP_ID]: group.id,
         [ChatPath.FIELD__NAME]: chatName,
-        [ChatPath.FIELD__WITH_ADMINS]: false
+        [ChatPath.FIELD__WITH_ADMINS]: withAdmins
     });
     chatRoom.id = fakeDatabase.idGenerator.generateId("chat", chatName)
     fakeDatabase.setChatRoom(gameId, chatRoom.id, chatRoom)

@@ -3,4 +3,6 @@ config.json
 bower_components
 database.rules.json
 node_modules
-firebase-debug.log
+*-debug.log
+firestore.rules
+firestore.indexes.json

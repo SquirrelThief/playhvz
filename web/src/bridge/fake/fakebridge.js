@@ -214,6 +214,11 @@ class FakeBridge {
     });
   }
 
+  createOrGetChatWithAdmin(gameId, playerId) {
+    return new Promise((resolve, reject) => {
+      resolve(this.server.createOrGetChatWithAdmin(gameId, playerId));
+    });
+  }
 
 
 }

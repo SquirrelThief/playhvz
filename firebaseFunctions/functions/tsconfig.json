@@ -10,7 +10,6 @@
   },
   "compileOnSave": true,
   "include": [
-    "src",
-    "test"
+    "src"
   ]
 }

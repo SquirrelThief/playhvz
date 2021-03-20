@@ -63,6 +63,23 @@ class FakeDatabase {
         return Object.values(this.fakeDb[GamePath.COLLECTION_PATH][gameId][ChatPath.COLLECTION_PATH])
     }
 
+    getAdminChatFromListOfChatRooms(gameId, chatRoomIdList) {
+        let chats = this.getAllChatsOfGame(gameId);
+        let adminChats = [];
+        chats.forEach(chatRoom => {
+            if (chatRoom.withAdmins == true) {
+                adminChats.push(chatRoom);
+            }
+        });
+        let intersection = adminChats.filter(chat => chatRoomIdList.includes(chat.id));
+        if (intersection.length > 0) {
+            // Should only be 1, but in case we mess up just always use the first one.
+            return intersection[0].id;
+        } else {
+            return null;
+        }
+    }
+
     getChatRoom(gameId, chatRoomId) {
         return this.fakeDb[GamePath.COLLECTION_PATH][gameId][ChatPath.COLLECTION_PATH][chatRoomId];
     }

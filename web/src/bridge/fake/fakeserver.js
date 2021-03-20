@@ -190,6 +190,36 @@ class FakeServer {
     return FakeGroupUtils.createGroupAndChat(this.fakeDatabase, gameId, ownerId, chatName, settings);
   }
 
+  /* Returns a valid chat room id. */
+  createOrGetChatWithAdmin(gameId, playerId) {
+    let player = this.fakeDatabase.getPlayer(gameId, playerId);
+    let playerChatRoomIds = Object.keys(player.chatRoomMemberships);
+    let game = this.fakeDatabase.getGame(gameId);
+    let adminPlayerId = game.figureheadAdminPlayerAccount
+    let existingAdminChatId = this.fakeDatabase.getAdminChatFromListOfChatRooms(gameId, playerChatRoomIds);
+    if (existingAdminChatId) {
+      // Admin chat already exists, reusing the existing chat. Make sure it's visible to everyone
+      player.chatRoomMemberships[existingAdminChatId].isVisible = true;
+      // "Add" the admin to the chat. Even if they are already in it, this resets their notification
+      // and visibility settings so the chat reappears for them.
+      let adminChatRoom = this.fakeDatabase.getChatRoom(gameId, existingAdminChatId);
+      FakeChatUtils.addPlayerToChat(this.fakeDatabase, gameId, this.fakeDatabase.getPlayer(gameId, adminPlayerId), adminChatRoom.associatedGroupId, adminChatRoom);
+      return existingAdminChatId
+    }
+    // Create admin chat since it doesn't exist.
+    const chatName = player.name + " & " + Defaults.FIGUREHEAD_ADMIN_NAME;
+    const settings = FakeGroupUtils.createSettings(
+    /* addSelf= */ true,
+    /* addOthers= */ false,
+    /* removeSelf= */ true,
+    /* removeOthers= */ false,
+    /* autoAdd= */ false,
+    /* autoRemove= */ false,
+      Defaults.EMPTY_ALLEGIANCE_FILTER);
+    let createdChatId = FakeGroupUtils.createGroupAndChat(this.fakeDatabase, gameId, playerId, chatName, settings, /* withAdmins= */ true);
+    return createdChatId;
+  }
+
   addPlayersToChat(gameId, groupId, chatRoomId, playerIdList) {
     const chatRoom = this.fakeDatabase.getChatRoom(gameId, chatRoomId);
     for (let playerId of playerIdList) {

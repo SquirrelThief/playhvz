@@ -63,6 +63,7 @@
 
         observers: [
           'onChatRoomsUpdated_(bridge, game, player.chatRoomMemberships.*)',
+          'openChatWeWereWaitingOn_(bridge, game, waitingToOpenChatRoomId)',
         ],
 
         onKeyPress_(e) {
@@ -91,14 +92,8 @@
         },
 
         onChatRoomsUpdated_() {
-          if (this.waitingToOpenChatRoomId && this.game.chatRoomsById[this.waitingToOpenChatRoomId]) {
-            this.fire('ghvz-close-drawer', {});
-            this.fire('ghvz-set-path', {
-              inGame: true,
-              path: ['chat', this.waitingToOpenChatRoomId],
-              replace: false,
-            });
-            this.waitingToOpenChatRoomId = null;
+          if (this.waitingToOpenChatRoomId && this.game.chatRooms[this.waitingToOpenChatRoomId]) {
+            openChatWeWereWaitingOn_();
           }
           // Set whether or not the admin chat exists
           for (let chatRoomId in this.player.chatRoomMemberships) {
@@ -115,6 +110,18 @@
           this.adminChatExists = false;
         },
 
+        openChatWeWereWaitingOn_(bridge, game, waitingToOpenChatRoomId) {
+          if (this.waitingToOpenChatRoomId && this.game.chatRooms[this.waitingToOpenChatRoomId]) {
+            this.fire('ghvz-close-drawer', {});
+            this.fire('ghvz-set-path', {
+              inGame: true,
+              path: ['chat', this.waitingToOpenChatRoomId],
+              replace: false,
+            });
+            this.waitingToOpenChatRoomId = null;
+          }
+        },
+
         createAdminChat_() {
           return () => {
             if (this.adminChatRoomId) {
@@ -129,7 +136,9 @@
               return;
             }
             // The admin chat doesn't exist, create it and open it when ready
-            this.waitingToOpenChatRoomId = ChatUtils.createAdminChat(this.bridge, this.game, this.player);
+            this.bridge.createOrGetChatWithAdmin(this.game.id, this.player.id).then(adminChatId => {
+              this.waitingToOpenChatRoomId = adminChatId;
+            });
           }
         },
 

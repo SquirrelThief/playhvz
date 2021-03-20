@@ -138,6 +138,10 @@ class Bridge {
     return this.inner.createChatRoom(gameId, ownerId, chatName, allegianceFilter);
   }
 
+  createOrGetChatWithAdmin(gameId, playerId) {
+    return this.inner.createOrGetChatWithAdmin(gameId, playerId);
+  }
+
   addPlayersToChat(gameId, groupId, chatRoomId, playerIdList) {
     return this.inner.addPlayersToChat(gameId, groupId, chatRoomId, playerIdList);
   }
