@@ -26,7 +26,7 @@
 class Bridge {
   constructor(idGenerator, inner) {
     this.inner = inner;
-
+    this.firestoreOperations = new FirestoreOperations();
     this.idGenerator = idGenerator;
 
     this.requestTimeOffset = null;
@@ -62,45 +62,237 @@ class Bridge {
     }
   }
 
-  signIn(...args) {
+  getSignedInUserId() {
+    return this.inner.getSignedInUserId();
+  }
+
+  async signIn(...args) {
     return this.inner.signIn(...args);
   }
-  signOut(...args) {
+  async signOut(...args) {
     return this.inner.signOut(...args);
   }
-  getSignedInPromise(...args) {
+  async getSignedInPromise(...args) {
     return this.inner.getSignedInPromise(...args);
   }
-  listenToGame(...args) {
-    return this.inner.listenToGame(...args);
-  }
-  setPlayerId(playerId) {
+  async setPlayerId(playerId) {
     return this.inner.setPlayerId(playerId);
+  }
+
+  setAuthChangeCallback(authChangedCallback) {
+    return this.inner.setAuthChangeCallback(authChangedCallback);
   }
 
   //////////////////////////////////////////////////////////////////////
   // Start of new Firestore supporting functions.
   //////////////////////////////////////////////////////////////////////
+  /* Creates the game and returns the game id if it succeeded. */
+  async createGame(creatorUserId, name, startTime, endTime) {
+    var createGame = firebase.functions().httpsCallable("createGame");
+    return await createGame({
+      creatorUserId: creatorUserId, name: name, startTime: startTime, endTime: endTime
+    }).then(
+      result => { return result.data; }
+    ).catch(error => {
+      console.log("Warning: " + error.message + ", doing nothing.");
+      return null;
+    });
+  }
+
+  async checkGameExists(gameName) {
+    var exists = firebase.functions().httpsCallable("checkGameExists");
+    return await exists({ name: gameName }).then(
+      result => { return result.data; }
+    ).catch(error => {
+      console.log("Warning: " + error.message + ", doing nothing.");
+      return null;
+    });
+  }
+
   /** Returns an array of Game objects. */
-  getGameList(userId) {
-    return this.inner.getGameList(userId);
+  async getGameList(userId) {
+    // Get all the game ids for which this user has a player, then
+    // get all of those games.
+    return this.firestoreOperations.getGamesByPlayer(userId).then(querySnapshot => {
+      let gameDocSnapshotPromises = [];
+      for (let doc of querySnapshot.docs) {
+        const gameId = doc.ref.parent.parent.id
+        const promise = this.getGameOnce(gameId)
+        gameDocSnapshotPromises.push(promise);
+      }
+      // Once we have all the game docs, we can now render the data.
+      return Promise.all(gameDocSnapshotPromises).then(snapshots => {
+        let gameArray = []
+        for (let gameSnapshot of snapshots) {
+          if (gameSnapshot) {
+            gameArray.push(gameSnapshot);
+          }
+        }
+        return gameArray;
+      });
+    });
+  }
+
+  /* Returns a current snapshot of the game, converted to an object js understands. */
+  async getGameOnce(gameId) {
+    return this.firestoreOperations.getGameOnce(gameId).then(docSnapshot => {
+      if (!docSnapshot.exists) {
+        return null
+      }
+      return DataConverterUtils.convertSnapshotToGame(docSnapshot);
+    });
   }
 
   listenToGame(gameId, callback) {
-    return this.inner.listenToGame(gameId, callback);
+    this.firestoreOperations.getListenableGame(gameId).onSnapshot(docSnapshot => {
+      let game = null;
+      if (docSnapshot.exists) {
+        game = DataConverterUtils.convertSnapshotToGame(docSnapshot);
+      }
+      callback(game);
+    });
   }
 
-  joinGame(gameName, playerName) {
-    return this.inner.joinGame(gameName, playerName);
+  async joinGame(gameName, playerName, callback = null) {
+    var joinGame = firebase.functions().httpsCallable("joinGame");
+    await joinGame({ gameName: gameName, playerName: playerName }).then((result) => {
+      console.log("Joined: " + result.data)
+      var gameId = result.data;
+      if (callback != null) {
+        callback(gameId);
+      }
+    })
+      .catch(error => console.log("Error: " + error.message));
   }
 
-  getPlayer(userId, gameId) {
-    return this.inner.getPlayer(userId, gameId);
+  async getPlayer(userId, gameId) {
+    return this.firestoreOperations.getUserPlayer(userId, gameId).then(querySnapshot => {
+      if (querySnapshot.docs.length > 1) {
+        return null
+      }
+      return DataConverterUtils.convertSnapshotToPlayer(querySnapshot.docs[0]);
+    });
+  }
+
+  async getPlayerOnce(gameId, playerId) {
+    return this.firestoreOperations.getPlayerOnce(gameId, playerId).then(docSnapshot => {
+      if (docSnapshot == undefined || !docSnapshot.exists) {
+        return null;
+      }
+      return DataConverterUtils.convertSnapshotToPlayer(docSnapshot);
+    });
   }
 
   listenToPlayer(gameId, playerId, callback) {
-    return this.inner.listenToPlayer(gameId, playerId, callback);
+    this.firestoreOperations.getListenablePlayer(gameId, playerId).onSnapshot(docSnapshot => {
+      let player = null;
+      if (docSnapshot.exists) {
+        player = DataConverterUtils.convertSnapshotToPlayer(docSnapshot);
+      }
+      callback(player)
+    });
   }
+
+  getPlayersInGroup(gameId, group) {
+    let playerDocSnapshotPromises = [];
+    for (let playerId of group.members) {
+      const promise = this.getPlayerOnce(gameId, playerId);
+      playerDocSnapshotPromises.push(promise);
+    }
+    // Once we have all the player docs, we can now render the data.
+    return Promise.all(playerDocSnapshotPromises).then(snapshots => {
+      let playerMap = {}
+      for (let playerSnapshot of snapshots) {
+        if (playerSnapshot) {
+          playerMap[playerSnapshot.id] = playerSnapshot;
+        }
+      }
+      return playerMap;
+    });
+  }
+
+  listenToGroup(gameId, groupId, callback) {
+    return this.firestoreOperations.getListenableGroup(gameId, groupId).onSnapshot(docSnapshot => {
+      let group = null;
+      if (docSnapshot.exists) {
+        group = DataConverterUtils.convertSnapshotToGroup(docSnapshot);
+      }
+      callback(group);
+    });
+  }
+
+  listenToChatRoom(gameId, chatRoomId, callback, onErrorCallback = null) {
+    return this.firestoreOperations.getListenableChatRoom(gameId, chatRoomId)
+      .onSnapshot(docSnapshot => {
+        let chatRoom = null;
+        if (docSnapshot.exists) {
+          chatRoom = DataConverterUtils.convertSnapshotToChatRoom(docSnapshot);
+        }
+        callback(chatRoom);
+      }, (error) => {
+        if (onErrorCallback != null) {
+          onErrorCallback();
+        }
+      });
+  }
+
+  listenToChatRoomMessages(gameId, chatRoomId, callback) {
+    return this.firestoreOperations.getListenableChatRoomMessages(gameId, chatRoomId).onSnapshot(querySnapshot => {
+      let messageArray = [];
+      for (let doc of querySnapshot.docs) {
+        let message = DataConverterUtils.convertSnapshotToMessage(doc);
+        if (message != null) {
+          messageArray.push(message);
+        }
+      }
+      callback(messageArray);
+    });
+  }
+
+  async sendChatMessage(gameId, messageId, chatRoomId, playerId, message) {
+    return this.firestoreOperations.sendChatMessage(gameId, messageId, chatRoomId, playerId, message);
+  }
+
+
+  listenToLastMission(gameId, playerId, callback) {
+    /*// Get all the group ids that are related to missions.
+    let allMissions = this.fakeDatabase.getAllMissionsOfGame(gameId);
+    let allMissionGroupIds = [];
+    for (let mission of allMissions) {
+      allMissionGroupIds.push(mission[MissionPath.FIELD__GROUP_ID])
+    }
+    // Check every mission-group to see if the player is a member of that group
+    let allGroups = this.fakeDatabase.getAllGroupsOfGame(gameId);
+    let missionGroupsPlayerIsIn = [];
+    for (let group of allGroups) {
+      if (allMissionGroupIds.includes(group.id) && group[GroupPath.FIELD__MEMBERS].includes(playerId)) {
+        missionGroupsPlayerIsIn.push(group.id);
+      }
+    }
+    // Get all the missions that the player is in (based on mission-group membership)
+    let playerMissions = []
+    for (let mission of allMissions) {
+      if (missionGroupsPlayerIsIn.includes(mission[MissionPath.FIELD__GROUP_ID])) {
+        playerMissions.push(mission);
+      }
+    }
+    // Sort missions by end time
+    let comparitor = function (mission1, mission2) {
+      if (mission1[MissionPath.FIELD__END_TIME] > mission2[MissionPath.FIELD__END_TIME]) {
+        return 1;
+      } else if (mission1[MissionPath.FIELD__END_TIME] < mission2[MissionPath.FIELD__END_TIME]) {
+        return -1;
+      }
+      return 0;
+    }
+    playerMissions.sort(comparitor);
+    // Return the last mission
+    return playerMissions[playerMissions.length - 1]*/
+    return null;
+  }
+
+
+
 
   changePlayerAllegiance(gameId, playerId, newAllegiance) {
     return this.inner.changePlayerAllegiance(gameId, playerId, newAllegiance)
@@ -108,22 +300,6 @@ class Bridge {
 
   addPlayersToGroup(gameId, groupId, playerIdList) {
     return this.inner.addPlayersToGroup(gameId, groupId, playerIdList)
-  }
-
-  listenToGroup(gameId, groupId) {
-    return this.inner.listenToGroup(gameId, groupId);
-  }
-
-  listenToChatRoom(gameId, chatRoomId) {
-    return this.inner.listenToChatRoom(gameId, chatRoomId);
-  }
-
-  listenToChatRoomMessages(gameId, chatRoomId) {
-    return this.inner.listenToChatRoomMessages(gameId, chatRoomId);
-  }
-
-  sendChatMessage(gameId, messageId, chatRoomId, playerId, message) {
-    return this.inner.sendChatMessage(gameId, messageId, chatRoomId, playerId, message);
   }
 
   infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode) {
@@ -150,9 +326,6 @@ class Bridge {
     return this.inner.createMission(gameId, missionName, startTime, endTime, details, allegianceFilter);
   }
 
-  listenToLastMission(gameId, playerId, callback) {
-    return this.inner.listenToLastMission(gameId, playerId, callback);
-  }
 
   listenToMission(gameId, missionId, callback) {
     return this.inner.listenToMission(gameId, missionId, callback);
@@ -175,6 +348,18 @@ class Bridge {
   }
   //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
+  //////////////////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////////////////////////
+  // Start dev supporting functions. These should crash if tried by prod.
+  //////////////////////////////////////////////////////////////////////
+
+  async getAllChatsInGame(gameId) {
+    return this.inner.getAllChatsInGame(gameId);
+  }
+
+  //////////////////////////////////////////////////////////////////////
+  // End dev supporting functions.
   //////////////////////////////////////////////////////////////////////
 
 
@@ -292,7 +477,7 @@ class FakeIdGenerator extends IdGenerator {
   }); */
 
   // Games
-  serverMethods.set('createGame', {
+  /*serverMethods.set('createGame', {
     gameId: '!GameId',
     creatorUserId: 'UserId',
     name: 'String',
@@ -301,13 +486,13 @@ class FakeIdGenerator extends IdGenerator {
     summaryHtml: 'String',
     stunTimer: 'Number',
     infectPoints: 'Number',
-    isActive: 'Boolean', */
+    isActive: 'Boolean', *
     startTime: 'Timestamp',
     endTime: 'Timestamp',
     /*registrationEndTime: 'Timestamp',
     declareResistanceEndTime: 'Timestamp',
-    declareHordeEndTime: 'Timestamp', */
-  });
+    declareHordeEndTime: 'Timestamp', *
+  }); */
   serverMethods.set('updateGame', {
     gameId: 'GameId',
     adminOnCallPlayerId: "String",

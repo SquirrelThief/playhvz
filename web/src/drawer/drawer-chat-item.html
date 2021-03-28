@@ -50,11 +50,16 @@
         ],
 
         onChatRoomMembershipUpdated_() {
-          this.bridge.listenToChatRoom(this.game.id, this.chatRoomMembership.chatRoomId).then(chat => this.chatRoom = chat);
+          let self = this;
+          let chatUpdatedCallback = function (serverChatRoom) {
+            self.set('chatRoom', serverChatRoom);
+          };
+          this.bridge.listenToChatRoom(this.game.id, this.chatRoomMembership.chatRoomId, chatUpdatedCallback);
         },
 
         onChatRoomUpdated_() {
-          if (Object.keys(this.chatRoom.messages).length == 0) {
+          this.hasUnseenMessages = false;
+          /*if (Object.keys(this.chatRoom.messages).length == 0) {
             this.hasUnseenMessages = false;
             return;
           }
@@ -67,7 +72,7 @@
             this.hasUnseenMessages = lastMessage > this.chatRoomMembership.lastSeenTime;
           } else {
             this.hasUnseenMessages = true;
-          }
+          }*/
         },
 
         computeShow_() {

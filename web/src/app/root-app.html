@@ -29,16 +29,14 @@
               var defaultBridgeType = null;
               if (window.location.hostname.includes("localhost") ||
                 window.location.hostname.includes("127.0.0.1")) {
-                defaultBridgeType = 'fake';
+                defaultBridgeType = 'dev';
               } else {
                 defaultBridgeType = 'remote';
               }
-              // TODO: Remove this when we're ready to support the fake server again.
-              //defaultBridgeType = 'remote';
               var bridgeType = Utils.getParameterByName('bridge', defaultBridgeType);
-              if (bridgeType != 'fake' && bridgeType != 'remote') {
-                this.fire('ghvz-alert', { message: "'bridge' must either be 'fake' or 'remote'! Falling back to fake." });
-                bridgeType = 'fake';
+              if (bridgeType != 'dev' && bridgeType != 'remote') {
+                this.fire('ghvz-alert', { message: "'bridge' must either be 'dev' or 'remote'! Falling back to dev." });
+                bridgeType = 'dev';
               }
               return bridgeType;
             },
@@ -58,7 +56,7 @@
           return bridgeType == 'remote';
         },
 
-        isFakeEnv(bridgeType) {
+        isDevEnv(bridgeType) {
           return !this.isRealEnv(bridgeType);
         },
 
@@ -121,7 +119,7 @@
     <template is="dom-if" if="[[isRealEnv(bridgeType)]]">
       <ghvz-real-app id="realApp" config="[[config]]"></ghvz-real-app>
     </template>
-    <template is="dom-if" if="[[isFakeEnv(bridgeType)]]">
+    <template is="dom-if" if="[[isDevEnv(bridgeType)]]">
       <ghvz-fake-app config="[[config]]"></ghvz-fake-app>
     </template>
   </template>

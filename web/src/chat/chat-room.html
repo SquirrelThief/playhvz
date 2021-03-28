@@ -65,6 +65,14 @@
           members: {
             type: Map,
             value: new Map(),
+            notify: true,
+          },
+
+          playerData: {
+            type: Object,
+            value: {},
+            notify: true,
+            reflectToAttribute: true,
           },
 
           pendingLastSeenTime: Number,
@@ -95,29 +103,28 @@
           assert(chatRoomId)
           this.showLoadingSpinner = true;
           let self = this;
-          let playerUpdatedCallback = function (playerId, player) {
-            if (player == null && self.members.has(playerId)) {
-              self.members.delete(playerId)
-              return;
-            }
-            self.members.set(playerId, player)
-          }
-
-          this.bridge.listenToChatRoom(this.game.id, chatRoomId).then(chatRoom => {
-            this.chatRoom = chatRoom;
+          let playerUpdatedCallback = function (player) {
+            self.set("playerData." + player.id, player);
+          };
+          let groupUpdatedCallback = function (serverGroup) {
+            self.set('group', serverGroup);
             // Listen to all the players in the chat room.
-            this.bridge.listenToGroup(this.game.id, this.chatRoom[ChatPath.FIELD__ASSOCIATED_GROUP_ID]).then(group => {
-              for (let playerId of group[GroupPath.FIELD__MEMBERS]) {
-                this.bridge.listenToPlayer(this.game.id, playerId, playerUpdatedCallback);
-              }
+            for (let playerId of serverGroup[GroupPath.FIELD__MEMBERS]) {
+              self.bridge.listenToPlayer(self.game.id, playerId, playerUpdatedCallback);
+            }
+          };
+          let chatUpdatedCallback = function (serverChatRoom) {
+            self.set('chatRoom', serverChatRoom);
+            self.bridge.listenToGroup(self.game.id, serverChatRoom[ChatPath.FIELD__ASSOCIATED_GROUP_ID], groupUpdatedCallback);
 
-              // Once we have all the necessary player data, load all the chat messages.
-              this.bridge.listenToChatRoomMessages(this.game.id, chatRoomId).then(messages => {
-                this.showLoadingSpinner = false;
-                this.messages = messages;
-              });
-            });
-          });
+          };
+          let chatMessagesUpdatedCallback = function (messageArray) {
+            self.set('showLoadingSpinner', false);
+            self.set('messages', messageArray);
+          };
+          this.bridge.listenToChatRoom(this.game.id, chatRoomId, chatUpdatedCallback);
+
+          this.bridge.listenToChatRoomMessages(this.game.id, chatRoomId, chatMessagesUpdatedCallback);
           this.hideChatInfo();
           this.pendingLastSeenTime = null;
         },
@@ -235,15 +242,18 @@
           }
         },
 
-        getName_(playerId) {
-          let player = this.members.get(playerId)
-          // TODO: handle getting name for player that isn't in the chat room
-          return player && player[PlayerPath.FIELD__NAME];
+        getPlayerName_(playerId) {
+          if (!this.playerData[playerId]) {
+            return "....";
+          }
+          return this.playerData[playerId].name
         },
 
         getProfilePic_(playerId) {
-          let player = this.members.get(playerId)
-          return player && player[PlayerPath.FIELD__AVATAR_URL];
+          if (!this.playerData[playerId]) {
+            return "....";
+          }
+          return this.playerData[playerId][PlayerPath.FIELD__AVATAR_URL];
         },
 
         openPlayerProfile_(e) {
@@ -679,7 +689,7 @@
         class$="[[computeMessageDisplayClass_(item.senderId, currentPlayer.id)]] [[displaySenderInfo(item)]]">
         <div class="display-message">
           <div class="player-name">
-            [[getName_(item.senderId)]]
+            [[getPlayerName_(item.senderId, playerData.*)]]
           </div>
           <div class="message-text-container">
             <template is="dom-if" if="[[item.message]]">

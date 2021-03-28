@@ -33,6 +33,7 @@ class FirestoreOperations {
    */
   getGamesByPlayer(uid) {
     return PlayerPath.PLAYERS_QUERY(this.db).where("userId", "==", uid).get();
+    //return await CacheUtils.optimizedGet(PlayerPath.PLAYERS_QUERY(this.db).where("userId", "==", uid));
   }
 
   /**
@@ -40,8 +41,8 @@ class FirestoreOperations {
   *
   * @param gameId gameId of the game to get
   */
-  getGame(gameId) {
-    return GamePath.GAME_DOC_REF(this.db, gameId).get();
+  getGameOnce(gameId) {
+    return this.getListenableGame(gameId).get();
   }
 
   getListenableGame(gameId) {
@@ -58,18 +59,44 @@ class FirestoreOperations {
     return PlayerPath.PLAYER_IN_GAME_QUERY(this.db, userId, gameId).get();
   }
 
-  getPlayer(gameId, playerId) {
+  getPlayerOnce(gameId, playerId) {
+    return CacheUtils.optimizedGet(this.getListenablePlayer(gameId, playerId));
+  }
+
+  getListenablePlayer(gameId, playerId) {
     return PlayerPath.PLAYER_DOC_REF(this.db, gameId, playerId);
   }
 
-  getGroup(gameId, groupId) {
-    return GroupPath.GROUP_DOC_REF(this.db, gameId, groupId).get();
-  }
-  getChatRoom(gameId, chatRoomId) {
-    return ChatPath.CHAT_ROOM_DOC_REF(this.db, gameId, chatRoomId).get();
+  getGroupOnce(gameId, groupId) {
+    return CacheUtils.optimizedGet(this.getListenableGroup(gameId, groupId));
   }
 
-  getChatRoomMessages(gameId, chatRoomId) {
-    return ChatPath.MESSAGES_COLLECTION(this.db, gameId, chatRoomId).get();
+  getListenableGroup(gameId, groupId) {
+    return GroupPath.GROUP_DOC_REF(this.db, gameId, groupId);
+  }
+
+  getChatRoomOnce(gameId, chatRoomId) {
+    return CacheUtils.optimizedGet(this.getListenableChatRoom(gameId, chatRoomId));
+  }
+
+  getListenableChatRoom(gameId, chatRoomId) {
+    return ChatPath.CHAT_ROOM_DOC_REF(this.db, gameId, chatRoomId);
+  }
+
+  getChatRoomMessagesOnce(gameId, chatRoomId) {
+    return this.getListenableChatRoomMessages(gameId, chatRoomId).get();
+  }
+
+  getListenableChatRoomMessages(gameId, chatRoomId) {
+    return ChatPath.MESSAGES_COLLECTION(this.db, gameId, chatRoomId).orderBy("timestamp");
+  }
+
+  sendChatMessage(gameId, messageId, chatRoomId, playerId, message) {
+    let dbMessage = {
+      senderId: playerId,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      message: message
+    }
+    return ChatPath.MESSAGES_COLLECTION(this.db, gameId, chatRoomId).doc(messageId).set(dbMessage);
   }
 }

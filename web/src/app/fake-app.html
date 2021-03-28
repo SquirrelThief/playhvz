@@ -110,34 +110,37 @@
 
           let idGenerator = new FakeIdGenerator();
 
-          this.userOptions = [
-            { loaded: false, focused: false, url: '', name: 'reggie', userId: 'user-' + this.config.fakeUserIds.reggie, description: 'Registered, not admin, not joined' },
-            { loaded: false, focused: false, url: '', name: 'minny', userId: 'user-' + this.config.fakeUserIds.minny, description: 'Registered, admin, not joined' },
-            { loaded: false, focused: false, url: '', name: 'zella', userId: 'user-' + this.config.fakeUserIds.zella, description: 'Registered, admin, joined, human' },
-            { loaded: false, focused: false, url: '', name: 'deckerd', userId: 'user-' + this.config.fakeUserIds.deckerd, description: 'Registered, admin, joined, undeclared' },
-            { loaded: false, focused: false, url: '', name: 'moldavi', userId: 'user-' + this.config.fakeUserIds.moldavi, description: 'Registered, admin, joined, human, is keeper of the owls' },
-            { loaded: false, focused: false, url: '', name: 'drake', userId: 'user-' + this.config.fakeUserIds.drake, description: 'Registered, not admin, joined, zombie' },
-            { loaded: false, focused: false, url: '', name: 'zeke', userId: 'user-' + this.config.fakeUserIds.zeke, description: 'Registered, not admin, joined, zombie' },
-            { loaded: false, focused: false, url: '', name: 'jack', userId: 'user-' + this.config.fakeUserIds.jack, description: 'Registered, not admin, joined, human' },
-          ];
-
           this.bridge =
             new Bridge(
               idGenerator,
-              new FakeBridge(idGenerator, (e) => this.fire('ghvz-alert', { message: e })));
+              new FakeBridge(this.config, (e) => this.fire('ghvz-alert', { message: e })));
 
           let populate = Utils.getParameterByName('populate', 'light');
           assert(populate == 'light' || populate == 'heavy' || populate == 'none', "populate must be light, heavy, or none");
-          if (populate != 'none') {
-            populateUsers(this.bridge, this.config);
-            populateGame(
-              this.bridge,
-              this.bridge.idGenerator.newGameId("poptest"), // Makes "poptest-1"
-              this.config,
-              populate == 'heavy');
-          }
+          let population = async () => {
+            if (populate != 'none') {
+              var userIds = await populateUsers(this.bridge, this.config);
+              await populateGame(
+                this.bridge,
+                this.bridge.idGenerator.newGameId("poptest"), // Makes "poptest-1"
+                this.config,
+                populate == 'heavy');
+            }
+            this.userOptions = [
+              { loaded: false, focused: false, url: '', name: 'reggie', userId: userIds[this.config.fakeUserIds.reggie], description: 'Registered, not admin, not joined' },
+              { loaded: false, focused: false, url: '', name: 'minny', userId: userIds[this.config.fakeUserIds.minny], description: 'Registered, admin, not joined' },
+              { loaded: false, focused: false, url: '', name: 'zella', userId: userIds[this.config.fakeUserIds.zella], description: 'Registered, admin, joined, human' },
+              { loaded: false, focused: false, url: '', name: 'deckerd', userId: userIds[this.config.fakeUserIds.deckerd], description: 'Registered, admin, joined, undeclared' },
+              { loaded: false, focused: false, url: '', name: 'moldavi', userId: userIds[this.config.fakeUserIds.moldavi], description: 'Registered, admin, joined, human, is keeper of the owls' },
+              { loaded: false, focused: false, url: '', name: 'drake', userId: userIds[this.config.fakeUserIds.drake], description: 'Registered, not admin, joined, zombie' },
+              { loaded: false, focused: false, url: '', name: 'zeke', userId: userIds[this.config.fakeUserIds.zeke], description: 'Registered, not admin, joined, zombie' },
+              { loaded: false, focused: false, url: '', name: 'jack', userId: userIds[this.config.fakeUserIds.jack], description: 'Registered, not admin, joined, human' },
+            ];
+          };
 
-          this.navigateFromUrl_();
+          population().then(() => {
+            this.navigateFromUrl_();
+          });
         },
 
         handlePopState_(e) {
@@ -153,7 +156,8 @@
             pathString = pathString.startsWith('/') ? pathString.slice(1) : pathString;
             pathString = pathString.endsWith('/') ? pathString.slice(0, pathString.length - 1) : pathString;
             let path = pathString ? pathString.split('/') : [];
-            this.loadUser_(userOption.userId, path);
+            var userIndex = this.userOptions.findIndex((option) => option.name == userName);
+            this.loadUser_(this.userOptions[userIndex].userId, path);
           }
         },
 
@@ -161,10 +165,10 @@
           this.loadUser_(e.model.option.userId, ['game', 'game-poptest-1']);
         },
 
-        loadUser_(userId, path) {
-          this.bridge.signIn({ userId: userId })
-          let optionIndex = this.userOptions.findIndex((option) => option.userId == userId);
-          let option = this.userOptions[optionIndex];
+        async loadUser_(userId, path) {
+          var userIndex = this.userOptions.findIndex((option) => option.userId == userId);
+          let option = this.userOptions[userIndex];
+          await this.bridge.signIn({ user: option.name })
 
           if (option.focused) {
             this.appsByUserId[this.focusedUserId].setPath_(path, true);
@@ -180,20 +184,20 @@
             let app = document.createElement('ghvz-app');
             app.config = this.config;
             app.path = path;
-            app.userId = userId;
+            app.userId = option.userId;
             app.bridge = this.bridge;
             app.id = option.name + "App";
-            this.appsByUserId[userId] = app;
+            this.appsByUserId[option.userId] = app;
             this.$.apps.appendChild(app);
           }
-          this.appsByUserId[userId].style.display = '';
+          this.appsByUserId[option.userId].style.display = '';
 
           if (option.loaded) {
             this.appsByUserId[this.focusedUserId].setPath_(path, true);
           }
-          this.set('userOptions.' + optionIndex + '.loaded', true);
-          this.set('userOptions.' + optionIndex + '.focused', true);
-          this.focusedUserId = userId;
+          this.set('userOptions.' + userIndex + '.loaded', true);
+          this.set('userOptions.' + userIndex + '.focused', true);
+          this.focusedUserId = option.userId;
 
           this.setUrl_(true);
         },
@@ -242,7 +246,7 @@
     }
 
     .option[focused] paper-button {
-      background-color: black;
+      background-color: darkturquoise;
     }
 
     paper-icon-button {

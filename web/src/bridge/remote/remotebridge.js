@@ -177,7 +177,7 @@ class RemoteBridge {
       if (docSnapshot.exists) {
         player = DataConverterUtils.convertSnapshotToPlayer(docSnapshot);
       }
-      callback(playerId, player)
+      callback(player)
     });
   }
 

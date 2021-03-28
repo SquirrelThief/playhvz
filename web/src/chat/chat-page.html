@@ -41,7 +41,7 @@
         },
 
         observers: [
-          'onPathChanged_(bridge, path, game.chatRooms.*, player.chatRoomMemberships.*)',
+          'onPathChanged_(bridge, path, player.chatRoomMemberships.*)',
           'onChatRoomsUpdated_(bridge, game, currentChatRoom, player.chatRoomMemberships.*)',
           'onCurrentChatRoomUpdated_(currentChatRoom)',
         ],
@@ -50,15 +50,20 @@
           if (this.path[0] != 'chat') {
             return;
           }
+          let self = this;
           var chatRoomId = decodeURI(this.path[1]);
+          let chatUpdatedCallback = function (serverChatRoom) {
+            if (serverChatRoom != null && serverChatRoom.id == chatRoomId) {
+              self.set('currentChatRoom', serverChatRoom);
+            } else {
+              self.set('currentChatRoom', null);
+            }
+          };
+          let onErrorCallback = function () {
+            self.set('currentChatRoom', null);
+          }
           if (chatRoomId) {
-            this.bridge.listenToChatRoom(this.game.id, chatRoomId).then(serverChatRoom => {
-              this.currentChatRoom = serverChatRoom;
-            }).finally(() => {
-              if (this.currentChatRoom == undefined || this.currentChatRoom.id != chatRoomId) {
-                this.currentChatRoom = null;
-              }
-            });
+            this.bridge.listenToChatRoom(this.game.id, chatRoomId, chatUpdatedCallback, onErrorCallback);
           } else {
             this.navigateToDefaultChatPage_();
           }

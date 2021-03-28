@@ -10,7 +10,7 @@
     "lint": "tslint --project tsconfig.json",
     "build": "tsc --build ../firebaseFunctions/functions/tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm run build && firebase emulators:start --only hosting",
+    "serve": "npm run build && firebase emulators:start --only hosting",
     "deploy-deprecated": "firebase-bolt database.rules.bolt && firebase deploy",
     "deploy-rules": "firebase-bolt database.rules.bolt && firebase deploy --only database"
   },
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@polymer/app-layout": "^3.1.0",
-    "firebase": "^7.24.0",
+    "firebase": "^8.3.1",
     "firebase-admin": "^9.5.0",
     "firebase-functions": "^3.13.2"
   }

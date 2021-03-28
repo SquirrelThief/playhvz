@@ -77,6 +77,16 @@
             type: Boolean,
             value: true,
           },
+
+          gettingGame: {
+            type: Boolean,
+            value: false,
+          },
+
+          gettingPlayer: {
+            type: Boolean,
+            value: false,
+          },
         },
 
         observers: [
@@ -93,17 +103,24 @@
         },
 
         onBridgeSet_() {
+          let self = this;
+          var onAuthChanged = function ({ userId, email }) {
+            self.showSignInButton = false;
+            // TODO: remove game id hint
+            self.showGameIdHint = false;
+            // The promise resolves once the *first* sign-in succeeds, but with the dev server
+            // we could now be signed in as someone else so get the current uid instead of
+            // relying on the promise userId.
+            self.userId = self.bridge.getSignedInUserId();
+            self.email = email;
+            // If there is no path set, default the user to the game list view.
+            if (self.path.length == 0) {
+              self.setPath_(self.path.slice().concat(['gameList']), true);
+            }
+          };
           this.bridge.getSignedInPromise()
             .then(({ userId, email }) => {
-              this.showSignInButton = false;
-              // TODO: remove game id hint
-              this.showGameIdHint = false;
-              this.userId = userId;
-              this.email = email;
-              // If there is no path set, default the user to the game list view.
-              if (this.path.length == 0) {
-                this.setPath_(this.path.slice().concat(['gameList']), true);
-              }
+              onAuthChanged({ userId: userId, email: email })
             });
         },
 
@@ -150,13 +167,18 @@
         },
 
         loadGameInPath_() {
+          if (this.gettingGame) {
+            // We're already getting the game, just wait
+            return;
+          }
           // If we have no game ID, but there's one in the path, load it.
-          if (this.userId && !this.gameId && this.path.length >= 2 && this.path[0] == 'game') {
+          if (this.userId && !this.gameId && !this.game && this.path.length >= 2 && this.path[0] == 'game') {
             let trimmedGameId = this.path[1];
             this.gameId = trimmedGameId;
             this.showLoadingSpinner = true;
             let self = this
             let gameUpdatedCallback = function (game) {
+              self.gettingGame = false;
               if (!game) {
                 // If the game doesn't exist then navigate to the user's game list.
                 self.setPath_(["gameList"], /* replace= */ true);
@@ -166,21 +188,24 @@
               self.set('game', game);
               self.listenToPlayer_();
             }
+            this.gettingGame = true;
             this.bridge.listenToGame(this.gameId, gameUpdatedCallback);
-          } else if (this.userId && this.gameId && !this.player) {
+          } else if (this.userId && this.gameId && this.game && !this.player && !this.gettingPlayer) {
             this.listenToPlayer_();
           }
         },
 
         computeIsAdmin_: function () {
-          this.bridge.listenToGroup(this.game.id, this.game[GamePath.FIELD__ADMIN_GROUP_ID]).then(group => {
-            if (!this.player) {
-              this.isAdmin = false;
-              return;
+          let self = this;
+          let groupUpdatedCallback = function (serverGroup) {
+            if (!self.player) {
+              self.set('isAdmin', false);
             } else {
-              this.isAdmin = group[GroupPath.FIELD__MEMBERS].includes(this.player.id)
+              var isAdmin = serverGroup[GroupPath.FIELD__MEMBERS].includes(self.player.id);
+              self.set('isAdmin', isAdmin);
             }
-          })
+          };
+          this.bridge.listenToGroup(this.gameId, this.game[GamePath.FIELD__ADMIN_GROUP_ID], groupUpdatedCallback);
         },
 
         signIn_: function () {
@@ -207,13 +232,25 @@
         },
 
         listenToPlayer_() {
+          this.gettingPlayer = true;
           let self = this;
           this.bridge.getPlayer(this.userId, this.game.id).then(player => {
             if (player) {
               self.playerId = player.id
             }
             self.showLoadingSpinner = false;
-            self.set('player', player);
+
+            // Now that we have the player id, listen for continuous updates on this player
+            let playerUpdatedCallback = function (serverPlayer) {
+              if (!serverPlayer) {
+                // If the player doesn't exist then navigate to the user's game list.
+                self.setPath_(["gameList"], /* replace= */ true);
+                return;
+              }
+              self.gettingPlayer = false;
+              self.set('player', serverPlayer);
+            }
+            this.bridge.listenToPlayer(this.game.id, player.id, playerUpdatedCallback);
           });
         }
       });

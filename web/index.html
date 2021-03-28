@@ -38,9 +38,10 @@
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script type="text/javascript">google.charts.load('current', { 'packages': ['corechart'] });</script>
 
-  <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.21.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.3.1/firebase-functions.js"></script>
 
   <script src="/bower_components/webcomponentsjs/webcomponents.js"></script>
 
@@ -145,6 +146,7 @@
   <script src="/src/bridge/pathfindingreader.js"></script>
 
   <!-- Firestore items -->
+  <script src="/src/bridge/fake/firestore/devfirestoreoperations.js"></script>
   <script src="/src/bridge/remote/firestore/classmodels/chatroom.js"></script>
   <script src="/src/bridge/remote/firestore/classmodels/claimcode.js"></script>
   <script src="/src/bridge/remote/firestore/classmodels/game.js"></script>
@@ -155,6 +157,7 @@
   <script src="/src/bridge/remote/firestore/classmodels/reward.js"></script>
   <script src="/src/bridge/remote/firestore/classmodels/user.js"></script>
   <script src="/src/bridge/remote/firestore/firestoreoperations.js"></script>
+  <script src="/src/bridge/remote/firestore/utils/cacheutils.js"></script>
   <script src="/src/bridge/remote/firestore/utils/dataconverterutils.js"></script>
   <script src="/src/bridge/remote/firestore/constants/chatpath.js"></script>
   <script src="/src/bridge/remote/firestore/constants/gamepath.js"></script>

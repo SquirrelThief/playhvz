@@ -49,6 +49,11 @@ DataConverterUtils.convertSnapshotToChatRoom = function (documentSnapshot) {
 
 DataConverterUtils.convertSnapshotToMessage = function (documentSnapshot) {
   const message = new Message(documentSnapshot.data())
+  if (message.timestamp == null) {
+    // When we first send a message the time isn't set and will be null.
+    // Once firebase sets the timestamp we'll actually process the message.
+    return null;
+  }
   message.id = documentSnapshot.id
   // Firebase Timestamps are objects... which is not what we're expecting.
   message.timestamp = message.timestamp.toMillis()

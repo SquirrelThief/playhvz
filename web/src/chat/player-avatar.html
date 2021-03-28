@@ -40,7 +40,7 @@
 
         onPlayerIdChanged_(playerId) {
           let self = this;
-          let playerUpdatedCallback = function (playerId, player) {
+          let playerUpdatedCallback = function (player) {
             self.player = player;
           }
           this.bridge.listenToPlayer(this.game.id, this.playerId, playerUpdatedCallback);

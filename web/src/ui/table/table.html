@@ -46,7 +46,7 @@
 
           items: {
             type: Array,
-            value: function() { return []; },
+            value: function () { return []; },
           },
 
           selection: {
@@ -79,7 +79,7 @@
           'ghvz-table-summon-checkbox': 'summonTravelingCheckbox_',
         },
 
-        attached: function() {
+        attached: function () {
           assert(this.blueprint.itemsRepeater);
           this.itemsRepeater = this.blueprint.itemsRepeater;
 
@@ -151,11 +151,11 @@
         //   }
         // },
 
-        computeHasControlCell_: function(selectable, numActions) {
+        computeHasControlCell_: function (selectable, numActions) {
           return selectable || numActions;
         },
 
-        getModel_: function(item, columnIndex) {
+        getModel_: function (item, columnIndex) {
           let column = this.columns[columnIndex];
           if (column.getModel) {
             let result = column.getModel(item, column.property);
@@ -169,24 +169,24 @@
           }
         },
 
-        onBulkActionTapped_: function(e) {
+        onBulkActionTapped_: function (e) {
           let action = e.target.dataHost.dataHost.itemForElement(e.target);
           this.$.travelingMenu.close();
           var matchingItems =
-              this.items
-                  .filter((item) => this.isItemSelected(item))
-                  .filter(this.filter_.bind(this));
+            this.items
+              .filter((item) => this.isItemSelected(item))
+              .filter(this.filter_.bind(this));
           action.handler(matchingItems);
         },
 
-        onActionTapped_: function(e) {
+        onActionTapped_: function (e) {
           let action = e.model.dataHost.itemForElement(e.target);
           let item = this.itemsRepeater.itemForElement(e.target);
           this.$.travelingMenu.close();
           action.handler([item]);
         },
 
-        computeSortIcon_: function(sorting, ascending) {
+        computeSortIcon_: function (sorting, ascending) {
           if (!sorting) {
             return "icons:swap-vert";
           } else {
@@ -205,10 +205,10 @@
             this.sortingColumns.push(column);
           }
           this.itemsRepeater.sort =
-              this.sortingColumns.length ? this.sort_.bind(this) : null;
+            this.sortingColumns.length ? this.sort_.bind(this) : null;
         },
 
-        onSortButtonTapped_: function(e) {
+        onSortButtonTapped_: function (e) {
           const columnIndex = e.currentTarget.dataset.columnIndex;
           const column = this.columns[columnIndex];
           let sorting;
@@ -226,7 +226,7 @@
           this.setColumnSorting(columnIndex, sorting, ascending);
         },
 
-        sort_: function(a, b) {
+        sort_: function (a, b) {
           for (const column of this.sortingColumns) {
             if (column.comparator) {
               const diff = column.comparator(a, b);
@@ -243,7 +243,7 @@
           return 0;
         },
 
-        onFilterButtonTapped_: function(e) {
+        onFilterButtonTapped_: function (e) {
           const columnIndex = e.currentTarget.dataset.columnIndex;
           const column = this.columns[columnIndex];
           const filteringPath = 'columns.' + columnIndex + '.filtering';
@@ -258,14 +258,14 @@
           this.resetRepeaterFilter_();
         },
 
-        resetRepeaterFilter_: function() {
+        resetRepeaterFilter_: function () {
           const anyFiltering =
-              this.globalFilter || !!this.columns.filter(c => c.filtering).length;
+            this.globalFilter || !!this.columns.filter(c => c.filtering).length;
           this.itemsRepeater.filter =
-              anyFiltering ? this.filter_.bind(this) : null;
+            anyFiltering ? this.filter_.bind(this) : null;
         },
 
-        filter_: function(item) {
+        filter_: function (item) {
           if (this.globalFilter) {
             if (!this.globalFilter(item)) {
               return false;
@@ -288,7 +288,7 @@
           return true;
         },
 
-        filterKeyUp_: function() {
+        filterKeyUp_: function () {
           this.itemsRepeater.render();
         },
 
@@ -330,7 +330,7 @@
           }
         },
 
-        onSelectAllChanged_: function(e) {
+        onSelectAllChanged_: function (e) {
           let selected = e.target.checked;
           for (let item of this.items) {
             this.setItemSelected(item, selected);
@@ -347,11 +347,13 @@
       display: block;
       overflow-x: auto;
     }
+
     #travelingMenu,
     #travelingCheckbox {
       background-color: white;
       padding: 0;
     }
+
     #table {
       border-spacing: 0;
       font-size: 13pt;
@@ -361,66 +363,84 @@
       width: 100%;
       border-bottom: 1px solid #C0C0C0;
     }
+
     thead {
       background-color: #F0F0F0;
     }
+
     th {
       font-size: 12pt;
       font-weight: bold;
       text-align: left;
     }
+
     .property-header {
       color: rgba(0, 0, 0, .54);
     }
+
     tbody td {
       border-top: 1px solid #d8d8d8;
       border-bottom: 1px solid #f0f0f0;
     }
+
     th {
       border-bottom: 1px solid #f0f0f0;
     }
-    th, td {
+
+    th,
+    td {
       padding: 0 8px;
       min-height: 40px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     td {
       @apply(--ghvz-table-td);
     }
+
     .control-cell {
       padding: 0 0 0 12px;
     }
+
     .control-cell paper-menu-button {
       padding: 0;
     }
+
     tr[data-selected] {
       background-color: rgba(0, 0, 0, .1);
     }
+
     tr[data-selected] td {
       border-bottom: 1px solid #d8d8d8;
     }
+
     ghvz-echo {
       display: flex;
       min-height: 40px;
       align-items: center;
     }
+
     .column-header {
       min-height: 40px;
       display: flex;
       flex-wrap: wrap;
       flex-direction: column;
       justify-content: center;
-      position: relative; /* for filter-input's absolute to grab width from */
+      position: relative;
+      /* for filter-input's absolute to grab width from */
     }
+
     .column-header-top {
       display: flex;
     }
+
     .column-name {
       order: 1;
       margin-right: 4px;
     }
+
     .sort-button {
       flex-shrink: 0;
       order: 2;
@@ -428,6 +448,7 @@
       height: 24px;
       padding: 0px;
     }
+
     .filter-button {
       flex-shrink: 0;
       order: 3;
@@ -435,9 +456,12 @@
       height: 24px;
       padding: 0px;
     }
+
     .column-header-bottom {
-      height: 28px; /* enough room for filter-input */
+      height: 28px;
+      /* enough room for filter-input */
     }
+
     .filter-input {
       position: absolute;
       bottom: 0;
@@ -445,28 +469,35 @@
       right: 0;
       height: 28px;
     }
+
     .action-menu-button {
       padding: 0;
       width: 24px;
       height: 24px;
     }
+
     .select-checkbox {
       --paper-checkbox-label: {
         padding: 0;
       }
     }
+
     #table {
       display: table;
     }
+
     #thead {
       display: table-row-group;
     }
-    :host > #travelingMenu {
+
+    :host>#travelingMenu {
       display: none;
     }
-    :host > #travelingCheckbox {
+
+    :host>#travelingCheckbox {
       display: none;
     }
+
     #travelingCheckbox {
       --paper-checkbox-label: {
         padding: 0;
@@ -474,9 +505,7 @@
     }
   </style>
   <template>
-    <paper-checkbox
-        id="travelingCheckbox"
-        on-change="onTravelingCheckboxChanged_">
+    <paper-checkbox id="travelingCheckbox" on-change="onTravelingCheckboxChanged_">
     </paper-checkbox>
     <paper-menu-button id="travelingMenu">
       <paper-icon-button icon="menu" class="action-menu-button dropdown-trigger"></paper-icon-button>
@@ -492,11 +521,8 @@
           <template is="dom-if" if="[[computeHasControlCell_(selectable, actions.length)]]">
             <th class="control-cell">
               <template is="dom-if" if="[[selectable]]">
-                <paper-checkbox
-                    id="selectAll"
-                    class="select-checkbox"
-                    on-change="onSelectAllChanged_"
-                    on-mouseover="recallTravelingCheckbox_">
+                <paper-checkbox id="selectAll" class="select-checkbox" on-change="onSelectAllChanged_"
+                  on-mouseover="recallTravelingCheckbox_">
                 </paper-checkbox>
               </template>
               <paper-menu-button>
@@ -517,30 +543,20 @@
                     [[column.name]]
                   </div>
                   <template is="dom-if" if="[[column.sortable]]">
-                    <paper-icon-button
-                        class="sort-button"
-                        icon="[[computeSortIcon_(column.sorting, column.ascending)]]"
-                        data-column-index$="[[column.index]]"
-                        on-tap="onSortButtonTapped_">
+                    <paper-icon-button class="sort-button" icon="[[computeSortIcon_(column.sorting, column.ascending)]]"
+                      data-column-index$="[[column.index]]" on-tap="onSortButtonTapped_">
                     </paper-icon-button>
                   </template>
                   <template is="dom-if" if="[[column.filterable]]">
-                    <paper-icon-button
-                        name="icon-search"
-                        class="filter-button"
-                        icon="icons:search"
-                        data-column-index$="[[column.index]]"
-                        on-tap="onFilterButtonTapped_">
+                    <paper-icon-button name="icon-search" class="filter-button" icon="icons:search"
+                      data-column-index$="[[column.index]]" on-tap="onFilterButtonTapped_">
                     </paper-icon-button>
                   </template>
                 </div>
                 <template is="dom-if" if="[[column.filtering]]">
                   <div class="column-header-bottom">
-                    <paper-input
-                        no-label-float
-                        class="filter-input"
-                        on-keyup="filterKeyUp_"
-                        value="{{column.filterText}}"></paper-input>
+                    <paper-input no-label-float class="filter-input" on-keyup="filterKeyUp_"
+                      value="{{column.filterText}}"></paper-input>
                   </div>
                 </template>
               </div>
@@ -548,7 +564,7 @@
           </template>
         </tr>
       </div>
-      <content/>
+      <content />
     </div>
   </template>
 </dom-module>

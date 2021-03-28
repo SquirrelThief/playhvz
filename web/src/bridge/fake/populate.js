@@ -127,80 +127,119 @@ let zekeUserId;
 
 /** Function used by fake-app.html to populate user data. */
 async function populateUsers(bridge, config) {
-  this.zellaUserId = 'user-' + config.fakeUserIds.zella;
-  this.zekeUserId = 'user-' + config.fakeUserIds.zeke;
-  this.reggieUserId = 'user-' + config.fakeUserIds.reggie;
-  this.minnyUserId = 'user-' + config.fakeUserIds.minny;
-  this.deckerdUserId = 'user-' + config.fakeUserIds.deckerd;
-  this.drakeUserId = 'user-' + config.fakeUserIds.drake;
-  this.moldaviUserId = 'user-' + config.fakeUserIds.moldavi;
-  this.jackUserId = 'user-' + config.fakeUserIds.jack;
+  this.zekeUserId = await bridge.signIn({ user: config.fakeUserIds.zeke });
+  this.reggieUserId = await bridge.signIn({ user: config.fakeUserIds.reggie });
+  this.minnyUserId = await bridge.signIn({ user: config.fakeUserIds.minny });
+  this.deckerdUserId = await bridge.signIn({ user: config.fakeUserIds.deckerd });
+  this.drakeUserId = await bridge.signIn({ user: config.fakeUserIds.drake });
+  this.moldaviUserId = await bridge.signIn({ user: config.fakeUserIds.moldavi });
+  this.jackUserId = await bridge.signIn({ user: config.fakeUserIds.jack });
+  // Sign in with Zella last so that's the account that stays signed in.
+  this.zellaUserId = await bridge.signIn({ user: config.fakeUserIds.zella });
 
-  bridge.register({ userId: this.zekeUserId });
-  bridge.register({ userId: this.reggieUserId });
-  bridge.register({ userId: this.minnyUserId });
-  bridge.register({ userId: this.drakeUserId });
-  bridge.register({ userId: this.moldaviUserId });
-  bridge.register({ userId: this.jackUserId });
-  bridge.register({ userId: this.deckerdUserId });
-  bridge.register({ userId: this.zellaUserId });
+  return {
+    [config.fakeUserIds.zeke]: this.zekeUserId,
+    [config.fakeUserIds.reggie]: this.reggieUserId,
+    [config.fakeUserIds.minny]: this.minnyUserId,
+    [config.fakeUserIds.deckerd]: this.deckerdUserId,
+    [config.fakeUserIds.drake]: this.drakeUserId,
+    [config.fakeUserIds.moldavi]: this.moldaviUserId,
+    [config.fakeUserIds.jack]: this.jackUserId,
+    [config.fakeUserIds.zella]: this.zellaUserId
+  }
 }
 
-function populateFakeAppPlayers(bridge, gameName, gameId) {
+async function populateFakeAppPlayers(config, bridge, gameName, gameId) {
   let self = this;
-  bridge.signIn({ userId: this.zellaUserId });
-  this.zellaPlayerId = "player-2";
-  bridge.joinGame(gameName, "ZellaTheUltimate")
-  bridge.changePlayerAllegiance(gameId, this.zellaPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+  await bridge.signIn({ user: config.fakeUserIds.zella });
+  this.zellaPlayerId = await bridge.joinGame(gameName, "ZellaTheUltimate")
+  //await bridge.changePlayerAllegiance(gameId, this.zellaPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
-  bridge.signIn({ userId: this.zekeUserId });
-  this.zekePlayerId = "player-3";
-  bridge.joinGame(gameName, "Zeke");
-  bridge.changePlayerAllegiance(gameId, this.zekePlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+  await bridge.signIn({ user: config.fakeUserIds.zeke });
+  this.zekePlayerId = await bridge.joinGame(gameName, "Zeke");
+  //await bridge.changePlayerAllegiance(gameId, this.zekePlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
-  bridge.signIn({ userId: this.deckerdUserId });
-  this.deckerdPlayerId = "player-4";
-  bridge.joinGame(gameName, "DeckerdTheHesitant")
+  await bridge.signIn({ user: config.fakeUserIds.deckerd });
+  this.deckerdPlayerId = await bridge.joinGame(gameName, "DeckerdTheHesitant")
 
-  bridge.signIn({ userId: this.moldaviUserId });
-  this.moldaviPlayerId = "player-5";
-  bridge.joinGame(gameName, "MoldaviTheMoldavish")
-  bridge.changePlayerAllegiance(gameId, this.moldaviPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+  await bridge.signIn({ user: config.fakeUserIds.moldavi });
+  this.moldaviPlayerId = await bridge.joinGame(gameName, "MoldaviTheMoldavish")
+  //await bridge.changePlayerAllegiance(gameId, this.moldaviPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
   /*
     bridge.setAdminContact({
       gameId: gameId,
       playerId: moldaviPlayerId
     });*/
 
-  bridge.signIn({ userId: this.jackUserId });
-  this.jackPlayerId = "player-6";
-  bridge.joinGame(gameName, "JackSlayerTheBeanSlasher")
-  bridge.changePlayerAllegiance(gameId, this.jackPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+  await bridge.signIn({ user: config.fakeUserIds.jack });
+  this.jackPlayerId = await bridge.joinGame(gameName, "JackSlayerTheBeanSlasher")
+  //await bridge.changePlayerAllegiance(gameId, this.jackPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
-  bridge.signIn({ userId: this.drakeUserId });
-  this.drakePlayerId = "player-7";
-  bridge.joinGame(gameName, "Drackan")
-  bridge.changePlayerAllegiance(gameId, this.drakePlayerId, Defaults.ZOMBIE_ALLEGIANCE_FILTER)
+  await bridge.signIn({ user: config.fakeUserIds.drake });
+  this.drakePlayerId = await bridge.joinGame(gameName, "Drackan")
+  //await bridge.changePlayerAllegiance(gameId, this.drakePlayerId, Defaults.ZOMBIE_ALLEGIANCE_FILTER)
+
+  // Make sure we get all the player ids in case we're remaking an existing game.
+  if (!this.zellaPLayerId) {
+    this.zellaPlayerId = (await bridge.getPlayer(this.zellaUserId, this.gameId)).id;
+  }
+  if (!this.zekePLayerId) {
+    this.zekePlayerId = (await bridge.getPlayer(this.zekeUserId, this.gameId)).id;
+  }
+  if (!this.deckerdPlayerId) {
+    this.deckerdPlayerId = (await bridge.getPlayer(this.deckerdUserId, this.gameId)).id;
+  }
+  if (!this.moldaviPlayerId) {
+    this.moldaviPlayerId = (await bridge.getPlayer(this.moldaviUserId, this.gameId)).id;
+  }
+  if (!this.jackPlayerId) {
+    this.jackPlayerId = (await bridge.getPlayer(this.jackUserId, this.gameId)).id;
+  }
+  if (!this.drakePlayerId) {
+    this.drakePlayerId = (await bridge.getPlayer(this.drakeUserId, this.gameId)).id;
+  }
 }
 
 /** Function used by fake-app.html to populate game data. */
-function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
+async function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   let gameStartOffset = - 6 * 24 * 60 * 60 * 1000; // 6 days ago
   bridge.setRequestTimeOffset(gameStartOffset);
 
+  // Setup the initial game
   let gameName = "Test game"
-  bridge.createGame({
-    gameId: gameId,
-    creatorUserId: this.zellaUserId,
-    name: gameName,
-    startTime: 1483344000000,
-    endTime: 1483689600000,
-  });
+  this.gameId = await bridge.createGame(
+    /* creatorUserId= */ this.zellaUserId,
+    /* name= */ gameName,
+    /* startTime= */ 1483344000000,
+    /* endTime= */ 1483689600000
+  );
+  if (!this.gameId) {
+    // The game already exists, get the id.
+    this.gameId = await bridge.checkGameExists(gameName);
+  }
 
-  let globalChatRoomId = "chat-Global Chat-1";
-  let adminChatRoomId = "chat-Admins-2";
-  let resistanceChatRoomId = "chat-Resistance Chat-3";
-  let hordeChatRoomId = "chat-Horde Chat-4";
+  await this.populateFakeAppPlayers(config, bridge, gameName, this.gameId);
+  this.zellaUserId = await bridge.signIn({ user: config.fakeUserIds.zella });
+
+
+  // Initialize chat rooms with some data
+  let globalChatRoomId = "";
+  let resistanceChatRoomId = "";
+  let hordeChatRoomId = "";
+  let adminChatRoomId = "";
+
+  let chatRooms = await bridge.getAllChatsInGame(this.gameId);
+  for (let chatRoom of chatRooms) {
+    if (chatRoom.name === Defaults.globalChatName) {
+      globalChatRoomId = chatRoom.id;
+    } else if (chatRoom.name === Defaults.globalHumanChatName) {
+      resistanceChatRoomId = chatRoom.id;
+    } else if (chatRoom.name === Defaults.globalZombieChatName) {
+      hordeChatRoomId = chatRoom.id;
+    } else if (chatRoom.name === Defaults.gameAdminChatName) {
+      adminChatRoomId = chatRoom.id;
+    }
+  }
   /*
   // TODO: add support for this to firestore
     bridge.addDefaultProfileImage({
@@ -228,25 +267,23 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
       profileImageUrl: 'https://cdn4.iconfinder.com/data/icons/miscellaneous-icons-3/200/monster_zombie_hand-512.png',
     });
   */
+  //bridge.addPlayersToGroup(gameId, "group-Admins-2", [moldaviPlayerId]); // Sets admin players
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.zellaPlayerId, 'Hello World!');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.zekePlayerId, 'What up?');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.zellaPlayerId, 'yo dawg i hear the zeds r comin!');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.zekePlayerId, 'they are hereeee!!');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), adminChatRoomId, this.zellaPlayerId, 'FOR GLORY!');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'yee!');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'man what i would do for some garlic rolls!');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'https://www.youtube.com/watch?v=GrHPTWTSFgc');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.jackPlayerId, 'yee!');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.jackPlayerId, 'yee!');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'yee!');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.jackPlayerId, 'yee!');
 
-  this.populateFakeAppPlayers(bridge, gameName, gameId);
-  bridge.addPlayersToGroup(gameId, "group-Admins-2", [moldaviPlayerId]); // Sets admin players
-  bridge.signIn({ userId: this.zellaUserId });
 
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.zellaPlayerId, 'Hello World!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.zekePlayerId, 'What up?');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.zellaPlayerId, 'yo dawg i hear the zeds r comin!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.zekePlayerId, 'they are hereeee!!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), adminChatRoomId, this.zellaPlayerId, 'FOR GLORY!');
-
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'yee!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'man what i would do for some garlic rolls!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'https://www.youtube.com/watch?v=GrHPTWTSFgc');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.jackPlayerId, 'yee!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.jackPlayerId, 'yee!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'yee!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.jackPlayerId, 'yee!');
-
+  console.log("Finished populating game.")
+  return;
 
   let self = this
   let callback = function (playerId, player) {
@@ -256,11 +293,11 @@ function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
   }
   bridge.listenToPlayer(gameId, this.zekePlayerId, callback);
 
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.zekePlayerId, 'zeds rule!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.drakePlayerId, 'hoomans drool!');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.drakePlayerId, 'monkeys eat stool!');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.zekePlayerId, 'zeds rule!');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.drakePlayerId, 'hoomans drool!');
+  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.drakePlayerId, 'monkeys eat stool!');
 
-  bridge.createChatRoom(gameId, this.zekePlayerId, /* name= */ "Zeds Internal Secret Police", /* allegianceFilter= */ "horde");
+  bridge.createChatRoom(this.gameId, this.zekePlayerId, /* name= */ "Zeds Internal Secret Police", /* allegianceFilter= */ "horde");
   let secondZedChatRoomId = "chat-Zeds Internal Secret Police-5";
   let secondZedGroupId = "group-Zeds Internal Secret Police-5";
   bridge.addPlayersToChat(

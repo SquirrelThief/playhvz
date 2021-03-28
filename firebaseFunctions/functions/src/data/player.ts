@@ -45,15 +45,15 @@ export const FIELD__LIFE_CODE_TIMESTAMP = "created";
 export const FIELD__REWARDS = "rewards";
 
 export function create(userId: string, name: string): { [key: string]: any; } {
-  return {
-    [FIELD__USER_ID]: userId,
-    [FIELD__NAME]: name,
-    [FIELD__AVATAR_URL]: getDefaultProfilePic(name),
-    [FIELD__POINTS]: 0,
-    [FIELD__ALLEGIANCE]: Defaults.allegiance,
-    [FIELD__CHAT_MEMBERSHIPS]: {},
-    [FIELD__LIVES]: {}
-  };
+	return {
+		[FIELD__USER_ID]: userId,
+		[FIELD__NAME]: name,
+		[FIELD__AVATAR_URL]: getDefaultProfilePic(name),
+		[FIELD__POINTS]: 0,
+		[FIELD__ALLEGIANCE]: Defaults.allegiance,
+		[FIELD__CHAT_MEMBERSHIPS]: {},
+		[FIELD__LIVES]: {}
+	};
 }
 
 function getDefaultProfilePic(name: string) {
@@ -62,34 +62,34 @@ function getDefaultProfilePic(name: string) {
 	}
 
 	const defaultProfilePics = [
-		'https://goo.gl/WMMjhe',
-		'https://goo.gl/haNJsE',
-		'https://goo.gl/rRHGus',
-		'https://goo.gl/RfK87d',
-		'https://goo.gl/0WvZKs',
-		'https://goo.gl/aEI2Uj',
-		'https://goo.gl/tJ0HSe',
-		'https://goo.gl/bbJGzW',
-		'https://goo.gl/HcmpLi',
-		'https://goo.gl/pEjp5M',
-		'https://goo.gl/kNH2ov',
-		'https://goo.gl/gBQ1Kx',
-		'https://goo.gl/ExqDyF',
-		'https://goo.gl/Aj3pPs',
-		'https://goo.gl/TjCmuh',
-		'https://goo.gl/zxDxMU',
-		'https://goo.gl/tGCRrj',
-		'https://goo.gl/ogxpAV',
-		'https://goo.gl/QNwVag',
-		'https://goo.gl/4rC7x6',
-		'https://goo.gl/WpYtzt',
-		'https://goo.gl/eNMPd1',
-		'https://goo.gl/dEDG56',
-		'https://goo.gl/o12QaU',
-		'https://goo.gl/T3HFne',
-		'https://goo.gl/8aRqJ4',
-		'https://goo.gl/dqPjE2',
-		'https://goo.gl/cHqQwU',
+		'https://bit.ly/3ct8ewW',
+		'https://bit.ly/2P5f5UN',
+		'https://bit.ly/3lYOFA3',
+		'https://bit.ly/2QLFDuA',
+		'https://bit.ly/3fmceRJ',
+		'https://bit.ly/39nXdvb',
+		'https://bit.ly/2PD9JzD',
+		'https://bit.ly/2PynTlV',
+		'https://bit.ly/3lXs4n8',
+		'https://bit.ly/3u04XLz',
+		'https://bit.ly/3lZKbcs',
+		'https://bit.ly/3degYpT',
+		'https://bit.ly/39kL4XY',
+		'https://bit.ly/39gTXBJ',
+		'https://bit.ly/3rCzjCx',
+		'https://bit.ly/3svDT6K',
+		'https://bit.ly/3w71pcb',
+		'https://bit.ly/3swdVjl',
+		'https://bit.ly/3lVsZon',
+		'https://bit.ly/3sH4SfP',
+		'https://bit.ly/3sy9qov',
+		'https://bit.ly/2QLy0Ev',
+		'https://bit.ly/3cqG4mu',
+		'https://bit.ly/2P5gHOl',
+		'https://bit.ly/3swiha6',
+		'https://bit.ly/3fhjvT3',
+		'https://bit.ly/3w8iQJo',
+		'https://bit.ly/2QGqNp3',
 	];
 
 	const hash = Math.abs(GeneralUtils.hashString(name));

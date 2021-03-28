@@ -26,11 +26,8 @@
         properties: {
           bridge: Object,
           database: Object,
-
           userId: String,
-
           game: Object,
-
           player: Object,
 
           canRegister: {
@@ -96,17 +93,17 @@
             openChatWeWereWaitingOn_();
           }
           // Set whether or not the admin chat exists
-          for (let chatRoomId in this.player.chatRoomMemberships) {
-            let chatRoomMembership = this.player.chatRoomMemberships[chatRoomId]
-            let chatRoom = this.bridge.listenToChatRoom(this.game.id, chatRoomId);
-            if (chatRoom.withAdmins) {
-              this.adminChatRoomId = chatRoomId;
-              if (ChatUtils.chatIsVisible(chatRoomMembership)) {
-                this.adminChatExists = true;
-                return;
-              }
-            }
-          }
+          /* for (let chatRoomId in this.player.chatRoomMemberships) {
+             let chatRoomMembership = this.player.chatRoomMemberships[chatRoomId]
+             let chatRoom = this.bridge.listenToChatRoom(this.game.id, chatRoomId);
+             if (chatRoom.withAdmins) {
+               this.adminChatRoomId = chatRoomId;
+               if (ChatUtils.chatIsVisible(chatRoomMembership)) {
+                 this.adminChatExists = true;
+                 return;
+               }
+             }
+           } */
           this.adminChatExists = false;
         },
 
