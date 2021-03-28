@@ -165,10 +165,10 @@
           this.loadUser_(e.model.option.userId, ['gameList']);
         },
 
-        loadUser_(userId, path) {
+        async loadUser_(userId, path) {
           var userIndex = this.userOptions.findIndex((option) => option.userId == userId);
           let option = this.userOptions[userIndex];
-          this.bridge.signIn({ userName: option.name })
+          await this.bridge.signIn({ userName: option.name })
 
           if (option.focused) {
             this.appsByUserId[this.focusedUserId].setPath_(path, true);

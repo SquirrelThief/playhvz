@@ -153,18 +153,30 @@ async function populateFakeAppPlayers(config, bridge, gameName, gameId) {
   let self = this;
   await bridge.signIn({ userName: config.fakeUserIds.zella });
   this.zellaPlayerId = await bridge.joinGame(gameName, "ZellaTheUltimate")
-  //await bridge.changePlayerAllegiance(gameId, this.zellaPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+  if (!this.zellaPLayerId) {
+    this.zellaPlayerId = (await bridge.getPlayer(this.zellaUserId, this.gameId)).id;
+  }
+  await bridge.changePlayerAllegiance(gameId, this.zellaPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
   await bridge.signIn({ userName: config.fakeUserIds.zeke });
   this.zekePlayerId = await bridge.joinGame(gameName, "Zeke");
-  //await bridge.changePlayerAllegiance(gameId, this.zekePlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+  if (!this.zekePLayerId) {
+    this.zekePlayerId = (await bridge.getPlayer(this.zekeUserId, this.gameId)).id;
+  }
+  await bridge.changePlayerAllegiance(gameId, this.zekePlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
 
   await bridge.signIn({ userName: config.fakeUserIds.deckerd });
   this.deckerdPlayerId = await bridge.joinGame(gameName, "DeckerdTheHesitant")
+  if (!this.deckerdPlayerId) {
+    this.deckerdPlayerId = (await bridge.getPlayer(this.deckerdUserId, this.gameId)).id;
+  }
 
   await bridge.signIn({ userName: config.fakeUserIds.moldavi });
   this.moldaviPlayerId = await bridge.joinGame(gameName, "MoldaviTheMoldavish")
-  //await bridge.changePlayerAllegiance(gameId, this.moldaviPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+  if (!this.moldaviPlayerId) {
+    this.moldaviPlayerId = (await bridge.getPlayer(this.moldaviUserId, this.gameId)).id;
+  }
+  await bridge.changePlayerAllegiance(gameId, this.moldaviPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
   /*
     bridge.setAdminContact({
       gameId: gameId,
@@ -173,31 +185,20 @@ async function populateFakeAppPlayers(config, bridge, gameName, gameId) {
 
   await bridge.signIn({ userName: config.fakeUserIds.jack });
   this.jackPlayerId = await bridge.joinGame(gameName, "JackSlayerTheBeanSlasher")
-  //await bridge.changePlayerAllegiance(gameId, this.jackPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
-
-  await bridge.signIn({ userName: config.fakeUserIds.drake });
-  this.drakePlayerId = await bridge.joinGame(gameName, "Drackan")
-  //await bridge.changePlayerAllegiance(gameId, this.drakePlayerId, Defaults.ZOMBIE_ALLEGIANCE_FILTER)
-
-  // Make sure we get all the player ids in case we're remaking an existing game.
-  if (!this.zellaPLayerId) {
-    this.zellaPlayerId = (await bridge.getPlayer(this.zellaUserId, this.gameId)).id;
-  }
-  if (!this.zekePLayerId) {
-    this.zekePlayerId = (await bridge.getPlayer(this.zekeUserId, this.gameId)).id;
-  }
-  if (!this.deckerdPlayerId) {
-    this.deckerdPlayerId = (await bridge.getPlayer(this.deckerdUserId, this.gameId)).id;
-  }
-  if (!this.moldaviPlayerId) {
-    this.moldaviPlayerId = (await bridge.getPlayer(this.moldaviUserId, this.gameId)).id;
-  }
   if (!this.jackPlayerId) {
     this.jackPlayerId = (await bridge.getPlayer(this.jackUserId, this.gameId)).id;
   }
+  await bridge.changePlayerAllegiance(gameId, this.jackPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
+
+  await bridge.signIn({ userName: config.fakeUserIds.drake });
+  this.drakePlayerId = await bridge.joinGame(gameName, "Drackan")
   if (!this.drakePlayerId) {
     this.drakePlayerId = (await bridge.getPlayer(this.drakeUserId, this.gameId)).id;
   }
+  await bridge.changePlayerAllegiance(gameId, this.drakePlayerId, Defaults.ZOMBIE_ALLEGIANCE_FILTER)
+
+  // Make sure we get all the player ids in case we're remaking an existing game.  
+
 }
 
 /** Function used by fake-app.html to populate game data. */

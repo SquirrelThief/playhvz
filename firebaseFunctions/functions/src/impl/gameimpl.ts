@@ -51,11 +51,11 @@ export async function createGame(
   await RewardUtils.createManagedRewards(db, gameId)
 
   const adminGroupQuery = await db.collection(Game.COLLECTION_PATH)
-      .doc(gameId)
-      .collection(Group.COLLECTION_PATH)
-      .where(Group.FIELD__MANAGED, "==", true)
-      .where(Group.FIELD__NAME, "==", Defaults.gameAdminChatName)
-      .get()
+    .doc(gameId)
+    .collection(Group.COLLECTION_PATH)
+    .where(Group.FIELD__MANAGED, "==", true)
+    .where(Group.FIELD__NAME, "==", Defaults.gameAdminChatName)
+    .get()
   if (!adminGroupQuery.empty && adminGroupQuery.docs.length === 1) {
     const adminGroupId = adminGroupQuery.docs[0].id
     await gameRef.update({
@@ -66,14 +66,15 @@ export async function createGame(
   // Create admin on call player
   const figureheadPlayerData = Player.create("", Defaults.FIGUREHEAD_ADMIN_NAME);
   const figureheadPlayerRef = await db.collection(Game.COLLECTION_PATH)
-      .doc(gameId)
-      .collection(Player.COLLECTION_PATH)
-      .add(figureheadPlayerData);
+    .doc(gameId)
+    .collection(Player.COLLECTION_PATH)
+    .add(figureheadPlayerData);
 
   await GroupUtils.addPlayerToManagedGroups(db, gameId, figureheadPlayerRef, /* ignoreAllegiance= */ true)
   await gameRef.update({
     [Game.FIELD__FIGUREHEAD_ADMIN_PLAYER_ACCOUNT]: figureheadPlayerRef.id
   })
+  await StatUtils.createGameStats(db, gameId, (await gameRef.get()).data())
   return gameId;
 }
 
@@ -94,10 +95,10 @@ export async function updateGame(
     await StatUtils.invalidateGameStats(db, gameId)
   }
   await gameRef.update({
-      [Game.FIELD__ADMIN_ON_CALL_PLAYER_ID]: adminOnCallPlayerId,
-      [Game.FIELD__START_TIME]: startTime,
-      [Game.FIELD__END_TIME]: endTime
-    });
+    [Game.FIELD__ADMIN_ON_CALL_PLAYER_ID]: adminOnCallPlayerId,
+    [Game.FIELD__START_TIME]: startTime,
+    [Game.FIELD__END_TIME]: endTime
+  });
 }
 
 
@@ -138,7 +139,7 @@ export async function joinGame(
 
   const playerNameQuerySnapshot = await PlayerUtils.getPlayersWithNameQuery(db, gameId, playerName).get();
   if (!playerNameQuerySnapshot.empty) {
-      throw new functions.https.HttpsError('failed-precondition', 'Player name already taken.');
+    throw new functions.https.HttpsError('failed-precondition', 'Player name already taken.');
   }
 
   const playerData = Player.create(uid, playerName);
@@ -163,19 +164,19 @@ export async function joinGame(
  * @param {string} data.path the document or collection path to delete.
  */
 export async function deleteGame(
-   db: any,
-   uid: string,
-   gameId: string
+  db: any,
+  uid: string,
+  gameId: string
 ) {
-    console.log(`User ${uid} has requested to delete game ${gameId}`);
-    // Run a recursive delete on the game document path.
-    const gameRef = db.collection(Game.COLLECTION_PATH).doc(gameId);
-    await gameRef.listCollections().then(async (collections: any) => {
-      for (const collection of collections) {
-        await GeneralUtils.deleteCollection(db, collection)
-      }
-      await gameRef.delete()
-    });
+  console.log(`User ${uid} has requested to delete game ${gameId}`);
+  // Run a recursive delete on the game document path.
+  const gameRef = db.collection(Game.COLLECTION_PATH).doc(gameId);
+  await gameRef.listCollections().then(async (collections: any) => {
+    for (const collection of collections) {
+      await GeneralUtils.deleteCollection(db, collection)
+    }
+    await gameRef.delete()
+  });
 }
 
 

@@ -65,6 +65,7 @@ describe('Game Collection Tests', () => {
         assert.notEqual(gameData!["infectRewardId"], "")
         assert.notEqual(gameData!["adminGroupId"], "")
         assert.notEqual(gameData!["figureheadAdminPlayerAccount"], "")
+        assert.notEqual(gameData!["statId"], "")
         await GeneralUtils.deleteDocument(db, querySnapshot.docs[0].ref)
     });
 

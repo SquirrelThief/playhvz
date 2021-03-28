@@ -63,7 +63,7 @@ export function verifyIsGameOwner(context: any) {
 export function verifyStringArgs(args: any[]) {
   args.forEach((arg, index) => {
     if (!(typeof arg === 'string')) {
-      throw new functions.https.HttpsError('invalid-argument', "Expected value to be type string.");
+      throw new functions.https.HttpsError('invalid-argument', "Expected value at " + index + " to be type string.");
     }
     if (arg.length === 0) {
       throw new functions.https.HttpsError('invalid-argument', "The function must be called with a non-empty string arg at position " + index + ".");

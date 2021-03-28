@@ -291,12 +291,19 @@ class Bridge {
     return null;
   }
 
-
-
-
-  changePlayerAllegiance(gameId, playerId, newAllegiance) {
-    return this.inner.changePlayerAllegiance(gameId, playerId, newAllegiance)
+  async changePlayerAllegiance(gameId, playerId, newAllegiance) {
+    var changePlayerAllegiance = firebase.functions().httpsCallable("changePlayerAllegiance");
+    await changePlayerAllegiance({ gameId: gameId, playerId: playerId, allegiance: newAllegiance })
+      .then((result) => {
+        console.log("Changed " + playerId + " to " + newAllegiance)
+      })
+      .catch(error => console.log("Error: " + error.message));
   }
+
+
+
+
+
 
   addPlayersToGroup(gameId, groupId, playerIdList) {
     return this.inner.addPlayersToGroup(gameId, groupId, playerIdList)

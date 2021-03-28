@@ -159,16 +159,6 @@ class FakeBridge {
     });
   }
 
-
-
-
-
-  changePlayerAllegiance(gameId, playerId, newAllegiance) {
-    return new Promise((resolve, reject) => {
-      resolve(this.server.changePlayerAllegiance(gameId, playerId, newAllegiance));
-    });
-  }
-
   sendChatMessage(gameId, messageId, chatRoomId, playerId, message) {
     return new Promise((resolve, reject) => {
       resolve(this.server.sendChatMessage(gameId, messageId, chatRoomId, playerId, message));
