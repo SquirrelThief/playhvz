@@ -75,15 +75,15 @@ class FakeBridge {
     this.authChangedCallback = authChangedCallback
   }
 
-  async signIn({ user }) {
-    if (user == this.userName) {
+  async signIn({ userName }) {
+    if (userName == this.userName) {
       return this.userId;
     }
     await this.signOut();
     await firebase.auth().signInWithCredential(firebase.auth.GoogleAuthProvider.credential(
-      `{"sub": "${user}", "email": "${user}@somewebsite.lol", "email_verified": true}`
+      `{"sub": "${userName}", "email": "${userName}@somewebsite.lol", "email_verified": true}`
     ));
-    this.userName = user
+    this.userName = userName
     this.userId = firebase.auth().currentUser.uid;
     return firebase.auth().currentUser.uid;
   }

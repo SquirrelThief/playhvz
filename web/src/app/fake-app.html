@@ -122,7 +122,7 @@
               var userIds = await populateUsers(this.bridge, this.config);
               await populateGame(
                 this.bridge,
-                this.bridge.idGenerator.newGameId("poptest"), // Makes "poptest-1"
+                this.bridge.idGenerator.newGameId("poptest"),
                 this.config,
                 populate == 'heavy');
             }
@@ -162,13 +162,13 @@
         },
 
         loadUserTapped_(e) {
-          this.loadUser_(e.model.option.userId, ['game', 'game-poptest-1']);
+          this.loadUser_(e.model.option.userId, ['gameList']);
         },
 
-        async loadUser_(userId, path) {
+        loadUser_(userId, path) {
           var userIndex = this.userOptions.findIndex((option) => option.userId == userId);
           let option = this.userOptions[userIndex];
-          await this.bridge.signIn({ user: option.name })
+          this.bridge.signIn({ userName: option.name })
 
           if (option.focused) {
             this.appsByUserId[this.focusedUserId].setPath_(path, true);
