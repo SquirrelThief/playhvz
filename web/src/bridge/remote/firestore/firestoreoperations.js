@@ -99,4 +99,36 @@ class FirestoreOperations {
     }
     return ChatPath.MESSAGES_COLLECTION(this.db, gameId, chatRoomId).doc(messageId).set(dbMessage);
   }
+
+  getMissionOnce(gameId, missionId) {
+    return CacheUtils.optimizedGet(this.getListenableMission(gameId, missionId));
+  }
+
+  getListenableMission(gameId, missionId) {
+    return MissionPath.MISSION_DOC_REF(this.db, gameId, missionId);
+  }
+
+  getAllGroupsPlayerIsMemberOf(gameId, playerId) {
+    return GroupPath.GROUPS_COLLECTION(this.db, gameId).where("members", "array-contains", playerId).get();
+  }
+
+  /** 
+   * Gets all the missions in the game that are associated with the given group ids.
+   * Optionally can take in a limit and will only return the latest <limit> number of missions.
+   * Use -1 or leave the limit off to query all the relevant missions.
+   */
+  getMissionsFromGroups(gameId, groupIdList, limit = -1) {
+    if (limit > 0) {
+      return MissionPath.MISSION_COLLECTION(this.db, gameId)
+        .where(MissionPath.FIELD__GROUP_ID, "in", groupIdList)
+        .orderBy(MissionPath.FIELD__END_TIME, "desc")
+        .limit(limit)
+        .get();
+    } else {
+      return MissionPath.MISSION_COLLECTION(this.db, gameId)
+        .where(MissionPath.FIELD__GROUP_ID, "in", groupIdList)
+        .orderBy(MissionPath.FIELD__END_TIME, "desc")
+        .get();
+    }
+  }
 }

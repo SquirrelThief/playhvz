@@ -119,12 +119,9 @@
           assert(populate == 'light' || populate == 'heavy' || populate == 'none', "populate must be light, heavy, or none");
           let population = async () => {
             if (populate != 'none') {
-              var userIds = await populateUsers(this.bridge, this.config);
-              await populateGame(
-                this.bridge,
-                this.bridge.idGenerator.newGameId("poptest"),
-                this.config,
-                populate == 'heavy');
+              let populator = new Populator();
+              var userIds = await populator.populateUsers(this.bridge);
+              await populator.populateGame(this.bridge, populate == 'heavy');
             }
             this.userOptions = [
               { loaded: false, focused: false, url: '', name: 'reggie', userId: userIds[this.config.fakeUserIds.reggie], description: 'Registered, not admin, not joined' },

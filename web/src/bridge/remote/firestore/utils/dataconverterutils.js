@@ -65,3 +65,9 @@ DataConverterUtils.convertSnapshotToReward = function (documentSnapshot) {
   reward.id = documentSnapshot.id
   return reward
 };
+
+DataConverterUtils.convertSnapshotToMission = function (documentSnapshot) {
+  const mission = new Mission(documentSnapshot.data())
+  mission.id = documentSnapshot.id
+  return mission
+};

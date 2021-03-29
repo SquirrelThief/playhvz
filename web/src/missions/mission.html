@@ -42,7 +42,7 @@
         onMissionIdChanged_() {
           let self = this
           let onMissionUpdatedCallback = function (mission) {
-            self.mission = mission;
+            self.set("mission", mission);
           }
           this.bridge.listenToMission(this.game.id, this.missionId, onMissionUpdatedCallback);
         },

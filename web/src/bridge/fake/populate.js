@@ -122,445 +122,482 @@ function populatePlayersHeavy(bridge, gameId, gameStartOffset) {
 /************************************************************************
  * START OF FUNCTIONS FOR POPULATING FAKE SERVER (for fake-app.html).
  ************************************************************************/
-let zellaUserId;
-let zekeUserId;
 
-/** Function used by fake-app.html to populate user data. */
-async function populateUsers(bridge, config) {
-  this.zekeUserId = await bridge.signIn({ userName: config.fakeUserIds.zeke });
-  this.reggieUserId = await bridge.signIn({ userName: config.fakeUserIds.reggie });
-  this.minnyUserId = await bridge.signIn({ userName: config.fakeUserIds.minny });
-  this.deckerdUserId = await bridge.signIn({ userName: config.fakeUserIds.deckerd });
-  this.drakeUserId = await bridge.signIn({ userName: config.fakeUserIds.drake });
-  this.moldaviUserId = await bridge.signIn({ userName: config.fakeUserIds.moldavi });
-  this.jackUserId = await bridge.signIn({ userName: config.fakeUserIds.jack });
-  // Sign in with Zella last so that's the account that stays signed in.
-  this.zellaUserId = await bridge.signIn({ userName: config.fakeUserIds.zella });
+const Users = {
+  ZEKE: "zeke",
+  DRAKE: "drake",
+  REGGIE: "reggie",
+  MINNY: "minny",
+  MOLDAVI: "moldavi",
+  JACK: "jack",
+  DECKERD: "deckerd",
+  ZELLA: "zella",
+};
 
-  return {
-    [config.fakeUserIds.zeke]: this.zekeUserId,
-    [config.fakeUserIds.reggie]: this.reggieUserId,
-    [config.fakeUserIds.minny]: this.minnyUserId,
-    [config.fakeUserIds.deckerd]: this.deckerdUserId,
-    [config.fakeUserIds.drake]: this.drakeUserId,
-    [config.fakeUserIds.moldavi]: this.moldaviUserId,
-    [config.fakeUserIds.jack]: this.jackUserId,
-    [config.fakeUserIds.zella]: this.zellaUserId
+class Populator {
+  constructor() { }
+  players = {
+    [Users.ZELLA]: {
+      userId: null, // Will be set during init
+      userName: Users.ZELLA,
+      playerId: null, // Will be set during init
+      playerName: "ZellaTheUltimate",
+      startAllegiance: Defaults.HUMAN_ALLEGIANCE_FILTER
+    },
+    [Users.ZEKE]: {
+      userId: null,
+      userName: Users.ZEKE,
+      playerId: null,
+      playerName: "Zeke",
+      startAllegiance: Defaults.HUMAN_ALLEGIANCE_FILTER
+    },
+    [Users.DRAKE]: {
+      userId: null,
+      userName: Users.DRAKE,
+      playerId: null,
+      playerName: "Drackan",
+      startAllegiance: Defaults.ZOMBIE_ALLEGIANCE_FILTER
+    },
+    [Users.REGGIE]: {
+      userId: null,
+      userName: Users.REGGIE,
+      playerId: null,
+      playerName: null, // Skipping creating a player initially
+      startAllegiance: null
+    },
+    [Users.MINNY]: {
+      userId: null,
+      userName: Users.MINNY,
+      playerId: null,
+      playerName: null, // Skipping creating a player initially
+      startAllegiance: null
+    },
+    [Users.MOLDAVI]: {
+      userId: null,
+      userName: Users.MOLDAVI,
+      playerId: null,
+      playerName: "MoldaviTheMoldavish",
+      startAllegiance: Defaults.HUMAN_ALLEGIANCE_FILTER
+    },
+    [Users.JACK]: {
+      userId: null,
+      userName: Users.JACK,
+      playerId: null,
+      playerName: "JackSlayerTheBeanSlasher",
+      startAllegiance: Defaults.HUMAN_ALLEGIANCE_FILTER
+    },
+    [Users.DECKERD]: {
+      userId: null,
+      userName: Users.DECKERD,
+      playerId: null,
+      playerName: "DeckerdTheHesitant",
+      startAllegiance: null // Start with the default allegiance
+    }
   }
-}
-
-async function populateFakeAppPlayers(config, bridge, gameName, gameId) {
-  let self = this;
-  await bridge.signIn({ userName: config.fakeUserIds.zella });
-  this.zellaPlayerId = await bridge.joinGame(gameName, "ZellaTheUltimate")
-  if (!this.zellaPLayerId) {
-    this.zellaPlayerId = (await bridge.getPlayer(this.zellaUserId, this.gameId)).id;
-  }
-  await bridge.changePlayerAllegiance(gameId, this.zellaPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
-
-  await bridge.signIn({ userName: config.fakeUserIds.zeke });
-  this.zekePlayerId = await bridge.joinGame(gameName, "Zeke");
-  if (!this.zekePLayerId) {
-    this.zekePlayerId = (await bridge.getPlayer(this.zekeUserId, this.gameId)).id;
-  }
-  await bridge.changePlayerAllegiance(gameId, this.zekePlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
-
-  await bridge.signIn({ userName: config.fakeUserIds.deckerd });
-  this.deckerdPlayerId = await bridge.joinGame(gameName, "DeckerdTheHesitant")
-  if (!this.deckerdPlayerId) {
-    this.deckerdPlayerId = (await bridge.getPlayer(this.deckerdUserId, this.gameId)).id;
+  /** Function used by fake-app.html to populate user data. */
+  async populateUsers(bridge) {
+    let userIds = {};
+    for (let userName of Object.values(Users)) {
+      let userId = await bridge.signIn({ userName: userName })
+      this.players[userName].userId = userId;
+      userIds[userName] = userId;
+    }
+    return userIds;
   }
 
-  await bridge.signIn({ userName: config.fakeUserIds.moldavi });
-  this.moldaviPlayerId = await bridge.joinGame(gameName, "MoldaviTheMoldavish")
-  if (!this.moldaviPlayerId) {
-    this.moldaviPlayerId = (await bridge.getPlayer(this.moldaviUserId, this.gameId)).id;
+  async populateFakeAppPlayers(bridge, gameName, gameId) {
+    for (let userName of Object.values(Users)) {
+      let playerName = this.players[userName].playerName
+      if (playerName == null) {
+        // This user doesn't start with a player in the game, skip them.
+        continue;
+      }
+      // Sign in so that all the firebase commands we run are run for the current user.
+      await bridge.signIn({ userName: userName });
+      let playerId = await bridge.joinGame(gameName, playerName)
+      if (!playerId) {
+        // Failed to join game because this player already exists, just get the player id
+        let userId = this.players[userName].userId
+        playerId = (await bridge.getPlayer(userId, gameId)).id;
+      }
+      this.players[userName].playerId = playerId;
+      if (this.players[userName].startAllegiance) {
+        // If player should start with a certain allegiance, set it.
+        await bridge.changePlayerAllegiance(gameId, playerId, this.players[userName].startAllegiance)
+      }
+    }
   }
-  await bridge.changePlayerAllegiance(gameId, this.moldaviPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
-  /*
-    bridge.setAdminContact({
-      gameId: gameId,
-      playerId: moldaviPlayerId
-    });*/
 
-  await bridge.signIn({ userName: config.fakeUserIds.jack });
-  this.jackPlayerId = await bridge.joinGame(gameName, "JackSlayerTheBeanSlasher")
-  if (!this.jackPlayerId) {
-    this.jackPlayerId = (await bridge.getPlayer(this.jackUserId, this.gameId)).id;
-  }
-  await bridge.changePlayerAllegiance(gameId, this.jackPlayerId, Defaults.HUMAN_ALLEGIANCE_FILTER)
-
-  await bridge.signIn({ userName: config.fakeUserIds.drake });
-  this.drakePlayerId = await bridge.joinGame(gameName, "Drackan")
-  if (!this.drakePlayerId) {
-    this.drakePlayerId = (await bridge.getPlayer(this.drakeUserId, this.gameId)).id;
-  }
-  await bridge.changePlayerAllegiance(gameId, this.drakePlayerId, Defaults.ZOMBIE_ALLEGIANCE_FILTER)
-
-  // Make sure we get all the player ids in case we're remaking an existing game.  
-
-}
-
-/** Function used by fake-app.html to populate game data. */
-async function populateGame(bridge, gameId, config, populateLotsOfPlayers) {
-  let gameStartOffset = - 6 * 24 * 60 * 60 * 1000; // 6 days ago
-  bridge.setRequestTimeOffset(gameStartOffset);
-
-  // Setup the initial game
-  let gameName = "Test game"
-  this.gameId = await bridge.createGame(
+  /** Function used by fake-app.html to populate game data. */
+  async populateGame(bridge, gameId, config, populateLotsOfPlayers) {
+    // Setup the initial game
+    let gameStartOffset = - 6 * 24 * 60 * 60 * 1000; // 6 days ago
+    bridge.setRequestTimeOffset(gameStartOffset);
+    let gameName = "Test game"
+    this.gameId = await bridge.createGame(
     /* creatorUserId= */ this.zellaUserId,
     /* name= */ gameName,
     /* startTime= */ 1483344000000,
     /* endTime= */ 1483689600000
-  );
-  if (!this.gameId) {
-    // The game already exists, get the id.
-    this.gameId = await bridge.checkGameExists(gameName);
-  }
-
-  await this.populateFakeAppPlayers(config, bridge, gameName, this.gameId);
-  this.zellaUserId = await bridge.signIn({ userName: config.fakeUserIds.zella });
-
-
-  // Initialize chat rooms with some data
-  let globalChatRoomId = "";
-  let resistanceChatRoomId = "";
-  let hordeChatRoomId = "";
-  let adminChatRoomId = "";
-
-  let chatRooms = await bridge.getAllChatsInGame(this.gameId);
-  for (let chatRoom of chatRooms) {
-    if (chatRoom.name === Defaults.globalChatName) {
-      globalChatRoomId = chatRoom.id;
-    } else if (chatRoom.name === Defaults.globalHumanChatName) {
-      resistanceChatRoomId = chatRoom.id;
-    } else if (chatRoom.name === Defaults.globalZombieChatName) {
-      hordeChatRoomId = chatRoom.id;
-    } else if (chatRoom.name === Defaults.gameAdminChatName) {
-      adminChatRoomId = chatRoom.id;
+    );
+    if (!this.gameId) {
+      // The game already exists, get the id.
+      this.gameId = await bridge.checkGameExists(gameName);
     }
-  }
-  /*
-  // TODO: add support for this to firestore
-    bridge.addDefaultProfileImage({
-      gameId: gameId,
-      defaultProfileImageId: bridge.idGenerator.newGroupId(),
-      allegianceFilter: 'resistance',
-      profileImageUrl: 'http://dfwresistance.us/images/resistance-dfw-icon.png',
-    });
-    bridge.addDefaultProfileImage({
-      gameId: gameId,
-      defaultProfileImageId: bridge.idGenerator.newGroupId(),
-      allegianceFilter: 'resistance',
-      profileImageUrl: 'https://cdn.vectorstock.com/i/thumb-large/03/81/1890381.jpg',
-    });
-    bridge.addDefaultProfileImage({
-      gameId: gameId,
-      defaultProfileImageId: bridge.idGenerator.newGroupId(),
-      allegianceFilter: 'horde',
-      profileImageUrl: 'https://goo.gl/DP2vlY',
-    });
-    bridge.addDefaultProfileImage({
-      gameId: gameId,
-      defaultProfileImageId: bridge.idGenerator.newGroupId(),
-      allegianceFilter: 'horde',
-      profileImageUrl: 'https://cdn4.iconfinder.com/data/icons/miscellaneous-icons-3/200/monster_zombie_hand-512.png',
-    });
-  */
-  //bridge.addPlayersToGroup(gameId, "group-Admins-2", [moldaviPlayerId]); // Sets admin players
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.zellaPlayerId, 'Hello World!');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.zekePlayerId, 'What up?');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.zellaPlayerId, 'yo dawg i hear the zeds r comin!');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.zekePlayerId, 'they are hereeee!!');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), adminChatRoomId, this.zellaPlayerId, 'FOR GLORY!');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'yee!');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'man what i would do for some garlic rolls!');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'https://www.youtube.com/watch?v=GrHPTWTSFgc');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.jackPlayerId, 'yee!');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.jackPlayerId, 'yee!');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.moldaviPlayerId, 'yee!');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.jackPlayerId, 'yee!');
+    await this.populateFakeAppPlayers(bridge, gameName, this.gameId);
+    await bridge.signIn({ userName: Users.ZELLA });
 
-
-  console.log("Finished populating game.")
-  return;
-
-  let self = this
-  let callback = function (playerId, player) {
-    // Get the first life code
-    let lifeCode = Object.keys(player[PlayerPath.FIELD__LIVES])[0]
-    bridge.infectPlayerByLifeCode(gameId, /* infectorPlayerId= */ self.drakePlayerId, lifeCode);
-  }
-  bridge.listenToPlayer(gameId, this.zekePlayerId, callback);
-
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.zekePlayerId, 'zeds rule!');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.drakePlayerId, 'hoomans drool!');
-  bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.drakePlayerId, 'monkeys eat stool!');
-
-  bridge.createChatRoom(this.gameId, this.zekePlayerId, /* name= */ "Zeds Internal Secret Police", /* allegianceFilter= */ "horde");
-  let secondZedChatRoomId = "chat-Zeds Internal Secret Police-5";
-  let secondZedGroupId = "group-Zeds Internal Secret Police-5";
-  bridge.addPlayersToChat(
-    gameId,
-    secondZedGroupId,
-    secondZedChatRoomId,
-    [this.drakePlayerId]
-  );
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), secondZedChatRoomId, this.drakePlayerId, 'lololol we be zed police');
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), secondZedChatRoomId, this.zekePlayerId, 'lololol oink oink');
-
-  bridge.createChatRoom(gameId, this.zellaPlayerId, /* name= */ "My Chat Room!", /* allegianceFilter= */ "resistance");
-  let secondHumanChatRoomId = "chat-My Chat Room!-6";
-  let secondHumanGroupId = "group-My Chat Room!-6";
-  bridge.addPlayersToChat(
-    gameId,
-    secondHumanGroupId,
-    secondHumanChatRoomId,
-    [this.jackPlayerId]
-  );
-  bridge.sendChatMessage(gameId, bridge.idGenerator.newMessageId(), secondHumanChatRoomId, this.zellaPlayerId, 'lololol i have a chat room!');
-
-
-  /*
-    bridge.updatePlayer({
-      gameId: gameId,
-      playerId: zellaPlayerId,
-      avatarUrl: 'https://lh3.googleusercontent.com/GoKTAX0zAEt6PlzUkTn7tMeK-q1hwKDpzWsMJHBntuyR7ZKVtFXjRkbFOEMqrqxPWJ-7dbCXD7NbVgHd7VmkYD8bDzsjd23XYk0KyALC3BElIk65vKajjjRD_X2_VkLPOVejrZLpPpa2ebQVUHJF5UXVlkst0m6RRqs2SumRzC7EMmEeq9x_TurwKUJmj7PhNBPCeoDEh51jAIc-ZqvRfDegLgq-HtoyJAo91lbD6jqA2-TFufJfiPd4nOWnKhZkQmarxA8LQT0kOu7r3M5F-GH3pCbQqpH1zraha8CqvKxMGLW1i4CbDs1beXatKTdjYhb1D_MVnJ6h7O4WX3GULwNTRSIFVOrogNWm4jWLMKfKt3NfXYUsCOMhlpAI3Q8o1Qgbotfud4_HcRvvs6C6i17X-oQm8282rFu6aQiLXOv55FfiMnjnkbTokOA1OGDQrkBPbSVumz9ZE3Hr-J7w_G8itxqThsSzwtK6p5YR_9lnepWe0HRNKfUZ2x-a2ndT9m6aRXC_ymWHQGfdGPvTfHOPxUpY8mtX2vknmj_dn4dIuir1PpcN0DJVVuyuww3sOn-1YRFh80gBFvwFuMnKwz8GY8IX5gZmbrrBsy_FmwFDIvBcwNjZKd9fH2gkK5rk1AlWv12LsPBsrRIEaLvcSq7Iim9XSsiivzcNrLFG=w294-h488-no'
-    });
-    bridge.updatePlayer({
-      gameId: gameId,
-      playerId: drakePlayerId,
-      avatarUrl: 'https://lh3.googleusercontent.com/WP1fewVG0CvERcnQnmxjf84IjnEBoDQBgdaxbNAECRa433neObfAjv_xI35DN67WhcCL9y-mgXmfYrZEBeJ2PYrtIeCK3KSdJ4HiEDUqxaaGsJAtu5C5ZjcABUHoySueEwO0yJWfhWPVbGoAFdP-ZquoXSF3yz4gnlN76W-ltDBglclLxKs-hR9dTjf_DiX9yGmmb5y8mp1Jb8BEw9Q-zx_j9EFkgTI0EA6T10pogxsfAWkrwXO7t37D0vI2OxzHJA51EQ4LZw1oZsIN7Uyqnh06LAJ_ykYhW2xuSCpu7QY7UPm9IbDcsDqj1eap7xvV9JW_EW2Y8Km5nS0ZoAd-Eo3zUe-2YFTc0OAVDwgbhowzo1gUeqfCEtxVHuT36Aq2LWayB6DzOL9TqubcF7qmjtNy_UIr-RY1d69xN-KqjFBoWLtS6rDhQurrfJNd5x-MYOEjCMrbsGmSXE8L7PskM3e_3-ZhIqfMn2I-4zeEZIUG8U2iHRWK-blaqsSY8uhmzNG6sqF-liyINagQF4l35oy7tpobueWs7aDjRrcJrGiQDrGHYV1E67J64Ae9FqXPHmORRpYcihQc6pI0JAmaiWwMJoqD0QMJF9koaDYANPEGbWlnWc_lFzhCO_L8yCkVtJIIItQv-loypR6XqILK32eoGeatnp5Q0x0OEm3W=s240-no'
-    });
-    bridge.updatePlayer({
-      gameId: gameId,
-      playerId: zekePlayerId,
-      avatarUrl: 'https://s-media-cache-ak0.pinimg.com/736x/31/92/2e/31922e8b045a7ada368f774ce34e20c0.jpg'
-    });
-    bridge.updatePlayer({
-      gameId: gameId,
-      playerId: moldaviPlayerId,
-      avatarUrl: 'https://katiekhau.files.wordpress.com/2012/05/scan-9.jpeg'
-    });
-    bridge.updatePlayer({
-      gameId: gameId,
-      playerId: jackPlayerId,
-      avatarUrl: 'https://sdl-stickershop.line.naver.jp/products/0/0/1/1009925/android/main.png'
-    });
-  
-    var resistanceMapId = bridge.idGenerator.newMapId();
-    bridge.createMap({ gameId: gameId, requestTrackingUntil: new Date().getTime() + gameStartOffset, mapId: resistanceMapId, accessGroupId: resistanceGroupId, name: "Resistance Players" });
-    bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "First Tower", color: "FF00FF", playerId: null, mapId: resistanceMapId, latitude: 37.423734, longitude: -122.092054 });
-    bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Second Tower", color: "00FFFF", playerId: null, mapId: resistanceMapId, latitude: 37.422356, longitude: -122.088078 });
-    bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Third Tower", color: "FFFF00", playerId: null, mapId: resistanceMapId, latitude: 37.422757, longitude: -122.081984 });
-    bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Fourth Tower", color: "FF8000", playerId: null, mapId: resistanceMapId, latitude: 37.420382, longitude: -122.083884 });
-  
-    if (populateLotsOfPlayers) {
-      populatePlayersHeavy(bridge, gameId, gameStartOffset);
-    } else {
-      populatePlayersLight(bridge, gameId, gameStartOffset);
+    // Initialize chat rooms with some data
+    let globalChatRoomId = "";
+    let resistanceChatRoomId = "";
+    let hordeChatRoomId = "";
+    let adminChatRoomId = "";
+    let chatRooms = await bridge.getAllChatsInGame(this.gameId);
+    for (let chatRoom of chatRooms) {
+      if (chatRoom.name === Defaults.globalChatName) {
+        globalChatRoomId = chatRoom.id;
+      } else if (chatRoom.name === Defaults.globalHumanChatName) {
+        resistanceChatRoomId = chatRoom.id;
+      } else if (chatRoom.name === Defaults.globalZombieChatName) {
+        hordeChatRoomId = chatRoom.id;
+      } else if (chatRoom.name === Defaults.gameAdminChatName) {
+        adminChatRoomId = chatRoom.id;
+      }
     }
-  */
+    // Set admin players
+    let adminChatRoom = await bridge.getChatRoomOnce(this.gameId, adminChatRoomId);
+    await bridge.addPlayersToGroup(this.gameId, adminChatRoom.associatedGroupId, [this.players[Users.MOLDAVI].playerId]);
 
-  bridge.createMission(
-    gameId,
-    "First Human Mission!",
+    /*
+    // TODO: add support for this to firestore
+      bridge.addDefaultProfileImage({
+        gameId: gameId,
+        defaultProfileImageId: bridge.idGenerator.newGroupId(),
+        allegianceFilter: 'resistance',
+        profileImageUrl: 'http://dfwresistance.us/images/resistance-dfw-icon.png',
+      });
+      bridge.addDefaultProfileImage({
+        gameId: gameId,
+        defaultProfileImageId: bridge.idGenerator.newGroupId(),
+        allegianceFilter: 'resistance',
+        profileImageUrl: 'https://cdn.vectorstock.com/i/thumb-large/03/81/1890381.jpg',
+      });
+      bridge.addDefaultProfileImage({
+        gameId: gameId,
+        defaultProfileImageId: bridge.idGenerator.newGroupId(),
+        allegianceFilter: 'horde',
+        profileImageUrl: 'https://goo.gl/DP2vlY',
+      });
+      bridge.addDefaultProfileImage({
+        gameId: gameId,
+        defaultProfileImageId: bridge.idGenerator.newGroupId(),
+        allegianceFilter: 'horde',
+        profileImageUrl: 'https://cdn4.iconfinder.com/data/icons/miscellaneous-icons-3/200/monster_zombie_hand-512.png',
+      });
+    */
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.players[Users.ZELLA].playerId, 'Hello World!');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), globalChatRoomId, this.players[Users.ZEKE].playerId, 'What up?');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.players[Users.ZELLA].playerId, 'yo dawg i hear the zeds r comin!');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.players[Users.ZEKE].playerId, 'they are hereeee!!');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), adminChatRoomId, this.players[Users.ZELLA].playerId, 'FOR GLORY!');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.players[Users.MOLDAVI].playerId, 'yee!');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.players[Users.MOLDAVI].playerId, 'man what i would do for some garlic rolls!');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.players[Users.MOLDAVI].playerId, 'https://www.youtube.com/watch?v=GrHPTWTSFgc');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.players[Users.JACK].playerId, 'yee!');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.players[Users.JACK].playerId, 'yee!');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.players[Users.MOLDAVI].playerId, 'yee!');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), resistanceChatRoomId, this.players[Users.JACK].playerId, 'yee!');
+
+    // Infect somebody! This will move them from the Human chat to the Zombie chat
+    let zekePlayerData = await bridge.getPlayerOnce(this.gameId, this.players[Users.ZEKE].playerId);
+    let lifeCode = ""
+    for (let [key, value] of Object.entries(zekePlayerData[PlayerPath.FIELD__LIVES])) {
+      // Return the first valid lifecode we can use to infect.
+      if (value.isActive) {
+        lifeCode = key;
+        break;
+      }
+    }
+    await bridge.infectPlayerByLifeCode(this.gameId, /* infectorPlayerId= */ this.players[Users.DRAKE].playerId, lifeCode);
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.players[Users.ZEKE].playerId, 'zeds rule!');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.players[Users.DRAKE].playerId, 'hoomans drool!');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), hordeChatRoomId, this.players[Users.DRAKE].playerId, 'monkeys eat stool!');
+
+    let secondZedChatRoomName = "Zeds Internal Secret Police"
+    let secondZedChatRoom = await bridge.getChatRoomByName(this.gameId, secondZedChatRoomName)
+    if (secondZedChatRoom == null) {
+      // Database doesn't contain this chat, so create it. Otherwise we've been lazy and haven't cleared the database from last run.
+      await bridge.createChatRoom(this.gameId, this.players[Users.ZEKE].playerId, secondZedChatRoomName, /* allegianceFilter= */ "horde");
+      secondZedChatRoom = await bridge.getChatRoomByName(this.gameId, secondZedChatRoomName)
+    }
+    await bridge.addPlayersToChat(this.gameId, secondZedChatRoom.associatedGroupId, secondZedChatRoom.id, [this.players[Users.ZEKE].playerId, this.players[Users.DRAKE].playerId]);
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), secondZedChatRoom.id, this.players[Users.DRAKE].playerId, 'lololol we be zed police');
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), secondZedChatRoom.id, this.players[Users.ZEKE].playerId, 'lololol oink oink');
+
+    let secondHumanChatRoomName = "My Chat Room!"
+    let secondHumanChatRoom = await bridge.getChatRoomByName(this.gameId, secondHumanChatRoomName)
+    if (secondHumanChatRoom == null) {
+      // Database doesn't contain this chat, so create it. Otherwise we've been lazy and haven't cleared the database from last run.
+      await bridge.createChatRoom(this.gameId, this.players[Users.ZELLA].playerId, secondHumanChatRoomName, /* allegianceFilter= */ "resistance");
+      secondHumanChatRoom = await bridge.getChatRoomByName(this.gameId, secondHumanChatRoomName)
+    }
+    await bridge.addPlayersToChat(this.gameId, secondHumanChatRoom.associatedGroupId, secondHumanChatRoom.id, [this.players[Users.ZELLA].playerId, this.players[Users.JACK].playerId]);
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), secondHumanChatRoom.id, this.players[Users.ZELLA].playerId, 'lololol i have a chat room!');
+
+
+    /*
+      bridge.updatePlayer({
+        gameId: gameId,
+        playerId: zellaPlayerId,
+        avatarUrl: 'https://lh3.googleusercontent.com/GoKTAX0zAEt6PlzUkTn7tMeK-q1hwKDpzWsMJHBntuyR7ZKVtFXjRkbFOEMqrqxPWJ-7dbCXD7NbVgHd7VmkYD8bDzsjd23XYk0KyALC3BElIk65vKajjjRD_X2_VkLPOVejrZLpPpa2ebQVUHJF5UXVlkst0m6RRqs2SumRzC7EMmEeq9x_TurwKUJmj7PhNBPCeoDEh51jAIc-ZqvRfDegLgq-HtoyJAo91lbD6jqA2-TFufJfiPd4nOWnKhZkQmarxA8LQT0kOu7r3M5F-GH3pCbQqpH1zraha8CqvKxMGLW1i4CbDs1beXatKTdjYhb1D_MVnJ6h7O4WX3GULwNTRSIFVOrogNWm4jWLMKfKt3NfXYUsCOMhlpAI3Q8o1Qgbotfud4_HcRvvs6C6i17X-oQm8282rFu6aQiLXOv55FfiMnjnkbTokOA1OGDQrkBPbSVumz9ZE3Hr-J7w_G8itxqThsSzwtK6p5YR_9lnepWe0HRNKfUZ2x-a2ndT9m6aRXC_ymWHQGfdGPvTfHOPxUpY8mtX2vknmj_dn4dIuir1PpcN0DJVVuyuww3sOn-1YRFh80gBFvwFuMnKwz8GY8IX5gZmbrrBsy_FmwFDIvBcwNjZKd9fH2gkK5rk1AlWv12LsPBsrRIEaLvcSq7Iim9XSsiivzcNrLFG=w294-h488-no'
+      });
+      bridge.updatePlayer({
+        gameId: gameId,
+        playerId: drakePlayerId,
+        avatarUrl: 'https://lh3.googleusercontent.com/WP1fewVG0CvERcnQnmxjf84IjnEBoDQBgdaxbNAECRa433neObfAjv_xI35DN67WhcCL9y-mgXmfYrZEBeJ2PYrtIeCK3KSdJ4HiEDUqxaaGsJAtu5C5ZjcABUHoySueEwO0yJWfhWPVbGoAFdP-ZquoXSF3yz4gnlN76W-ltDBglclLxKs-hR9dTjf_DiX9yGmmb5y8mp1Jb8BEw9Q-zx_j9EFkgTI0EA6T10pogxsfAWkrwXO7t37D0vI2OxzHJA51EQ4LZw1oZsIN7Uyqnh06LAJ_ykYhW2xuSCpu7QY7UPm9IbDcsDqj1eap7xvV9JW_EW2Y8Km5nS0ZoAd-Eo3zUe-2YFTc0OAVDwgbhowzo1gUeqfCEtxVHuT36Aq2LWayB6DzOL9TqubcF7qmjtNy_UIr-RY1d69xN-KqjFBoWLtS6rDhQurrfJNd5x-MYOEjCMrbsGmSXE8L7PskM3e_3-ZhIqfMn2I-4zeEZIUG8U2iHRWK-blaqsSY8uhmzNG6sqF-liyINagQF4l35oy7tpobueWs7aDjRrcJrGiQDrGHYV1E67J64Ae9FqXPHmORRpYcihQc6pI0JAmaiWwMJoqD0QMJF9koaDYANPEGbWlnWc_lFzhCO_L8yCkVtJIIItQv-loypR6XqILK32eoGeatnp5Q0x0OEm3W=s240-no'
+      });
+      bridge.updatePlayer({
+        gameId: gameId,
+        playerId: zekePlayerId,
+        avatarUrl: 'https://s-media-cache-ak0.pinimg.com/736x/31/92/2e/31922e8b045a7ada368f774ce34e20c0.jpg'
+      });
+      bridge.updatePlayer({
+        gameId: gameId,
+        playerId: moldaviPlayerId,
+        avatarUrl: 'https://katiekhau.files.wordpress.com/2012/05/scan-9.jpeg'
+      });
+      bridge.updatePlayer({
+        gameId: gameId,
+        playerId: jackPlayerId,
+        avatarUrl: 'https://sdl-stickershop.line.naver.jp/products/0/0/1/1009925/android/main.png'
+      });
+    
+      var resistanceMapId = bridge.idGenerator.newMapId();
+      bridge.createMap({ gameId: gameId, requestTrackingUntil: new Date().getTime() + gameStartOffset, mapId: resistanceMapId, accessGroupId: resistanceGroupId, name: "Resistance Players" });
+      bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "First Tower", color: "FF00FF", playerId: null, mapId: resistanceMapId, latitude: 37.423734, longitude: -122.092054 });
+      bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Second Tower", color: "00FFFF", playerId: null, mapId: resistanceMapId, latitude: 37.422356, longitude: -122.088078 });
+      bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Third Tower", color: "FFFF00", playerId: null, mapId: resistanceMapId, latitude: 37.422757, longitude: -122.081984 });
+      bridge.addMarker({ gameId: gameId, markerId: bridge.idGenerator.newMarkerId(), name: "Fourth Tower", color: "FF8000", playerId: null, mapId: resistanceMapId, latitude: 37.420382, longitude: -122.083884 });
+    
+      if (populateLotsOfPlayers) {
+        populatePlayersHeavy(bridge, gameId, gameStartOffset);
+      } else {
+        populatePlayersLight(bridge, gameId, gameStartOffset);
+      }
+    */
+
+    let humanMissionName = "First Human Mission!";
+    let humanMission = await bridge.getMissionByName(this.gameId, humanMissionName);
+    if (humanMission == null) {
+      // We're in a fresh database that doesn't already have this mission.
+      await bridge.createMission(
+        this.gameId,
+        humanMissionName,
     /* startTime= */ new Date().getTime() - 10 * 1000,
     /* endTime= */ new Date().getTime() + 60 * 60 * 1000,
     /* details= */ HUMAN_MISSION_MARKDOWN,
-    "resistance"
-  );
+        "resistance"
+      );
+    }
 
-  bridge.createMission(
-    gameId,
-    "First Zed Mission!",
+    let zedMissionName = "First Zed Mission!";
+    let zedMission = await bridge.getMissionByName(this.gameId, zedMissionName);
+    if (zedMission == null) {
+      // We're in a fresh database that doesn't already have this mission.
+      await bridge.createMission(
+        this.gameId,
+        zedMissionName,
     /* startTime= */ new Date().getTime() + 60 * 60 * 1000,
     /* endTime= */ new Date().getTime() + 120 * 60 * 1000,
     /* details= */ ZOMBIE_MISSION_MARKDOWN,
-    "horde"
-  );
+        "horde"
+      );
+    }
 
-  // Create rewards
-  let signInRewardId = "reward-signed-3";
-  bridge.createReward(gameId, /* shortName= */ "signed", /* longName= */ "signed up!", /* description= */ 'signed up for the game!', 'https://maxcdn.icons8.com/Share/icon/ultraviolet/Baby//nerf_gun1600.png', /* points= */ 2)
-  let didTheThingRewardId = "reward-didthing-4";
-  bridge.createReward(gameId, /* shortName= */ "didthing", "did the thing!", 'soooo did the thing!', 'https://s-media-cache-ak0.pinimg.com/originals/94/9b/80/949b80956f246b74dc1f4f1f476eb9c1.png', /* points= */ 2)
-  let leafRewardId = "reward-foundleaf-5";
-  bridge.createReward(gameId, /* shortName= */ "foundleaf", "found a leaf!", 'i found a leaf when my allies were being ambushed!', 'http://static.tumblr.com/87e20377c9c37d0b07dcc10504c636a8/mteq5q3/k1Ynitn6h/tumblr_static_75lgqkjlvcw00cos8g8kko80k.png', /* points= */ 2)
-  let genoRewardId = "reward-knowgeno-6";
-  bridge.createReward(gameId, /* shortName= */ "knowgeno", "i know geno!", 'i know who geno is!', 'http://vignette2.wikia.nocookie.net/nintendo/images/0/02/Geno_Artwork_%28Super_Mario_RPG_-_Legend_of_the_Seven_Stars%29.png/revision/latest?cb=20121110130550&path-prefix=en', /* points= */ 2)
+    console.log("Finished populating game.")
+    return;
 
-  // Generate claim codes for the rewards we just created.
-  // Codes are of the form: <short name>-claim-# 
-  bridge.generateClaimCodes(gameId, signInRewardId, /* numCodes= */ 3);
-  bridge.generateClaimCodes(gameId, didTheThingRewardId, /* numCodes= */ 1);
-  bridge.generateClaimCodes(gameId, leafRewardId, /* numCodes= */ 1);
-  bridge.generateClaimCodes(gameId, genoRewardId, /* numCodes= */ 1);
+    // Create rewards
+    let signInRewardId = "reward-signed-3";
+    bridge.createReward(gameId, /* shortName= */ "signed", /* longName= */ "signed up!", /* description= */ 'signed up for the game!', 'https://maxcdn.icons8.com/Share/icon/ultraviolet/Baby//nerf_gun1600.png', /* points= */ 2)
+    let didTheThingRewardId = "reward-didthing-4";
+    bridge.createReward(gameId, /* shortName= */ "didthing", "did the thing!", 'soooo did the thing!', 'https://s-media-cache-ak0.pinimg.com/originals/94/9b/80/949b80956f246b74dc1f4f1f476eb9c1.png', /* points= */ 2)
+    let leafRewardId = "reward-foundleaf-5";
+    bridge.createReward(gameId, /* shortName= */ "foundleaf", "found a leaf!", 'i found a leaf when my allies were being ambushed!', 'http://static.tumblr.com/87e20377c9c37d0b07dcc10504c636a8/mteq5q3/k1Ynitn6h/tumblr_static_75lgqkjlvcw00cos8g8kko80k.png', /* points= */ 2)
+    let genoRewardId = "reward-knowgeno-6";
+    bridge.createReward(gameId, /* shortName= */ "knowgeno", "i know geno!", 'i know who geno is!', 'http://vignette2.wikia.nocookie.net/nintendo/images/0/02/Geno_Artwork_%28Super_Mario_RPG_-_Legend_of_the_Seven_Stars%29.png/revision/latest?cb=20121110130550&path-prefix=en', /* points= */ 2)
 
-  bridge.redeemRewardCode(gameId, drakePlayerId, "signed-claim-0");
-  bridge.redeemRewardCode(gameId, drakePlayerId, "didthing-claim-0");
-  bridge.redeemRewardCode(gameId, drakePlayerId, "foundleaf-claim-0");
-  bridge.redeemRewardCode(gameId, drakePlayerId, "knowgeno-claim-0");
+    // Generate claim codes for the rewards we just created.
+    // Codes are of the form: <short name>-claim-# 
+    bridge.generateClaimCodes(gameId, signInRewardId, /* numCodes= */ 3);
+    bridge.generateClaimCodes(gameId, didTheThingRewardId, /* numCodes= */ 1);
+    bridge.generateClaimCodes(gameId, leafRewardId, /* numCodes= */ 1);
+    bridge.generateClaimCodes(gameId, genoRewardId, /* numCodes= */ 1);
+
+    bridge.redeemRewardCode(gameId, drakePlayerId, "signed-claim-0");
+    bridge.redeemRewardCode(gameId, drakePlayerId, "didthing-claim-0");
+    bridge.redeemRewardCode(gameId, drakePlayerId, "foundleaf-claim-0");
+    bridge.redeemRewardCode(gameId, drakePlayerId, "knowgeno-claim-0");
 
 
-  // TODO: SUPPORT THINGS BELOW THIS POINT.
-  return;
-  /*
-    bridge.queueNotification({
-      gameId: gameId,
-      queuedNotificationId: bridge.idGenerator.newQueuedNotificationId(),
-      previewMessage: "Mission 1 Details: the zeds have invaded!",
-      message: "oh god theyre everywhere run",
-      sendTime: null,
-      groupId: resistanceGroupId,
-      playerId: null,
-      email: true,
-      site: true,
-      mobile: true,
-      vibrate: true,
-      sound: "ping.wav",
-      destination: "missions/" + firstMissionId,
-      icon: null
-    });
-  
-    let requestCategoryId = bridge.idGenerator.newRequestCategoryId();
-    let requestId = bridge.idGenerator.newRequestId();
-    bridge.addRequestCategory({
-      gameId: gameId,
-      requestCategoryId: requestCategoryId,
-      chatRoomId: resistanceChatRoomId,
-      playerId: moldaviPlayerId,
-      text: 'yee?',
-      type: 'ack',
-      dismissed: false
-    });
-    bridge.addRequest({
-      gameId: gameId,
-      requestId: requestId,
-      requestCategoryId: requestCategoryId,
-      playerId: jackPlayerId
-    });
-    bridge.addRequest({
-      gameId: gameId,
-      requestId: bridge.idGenerator.newRequestId(),
-      requestCategoryId: requestCategoryId,
-      playerId: zellaPlayerId
-    });
-    bridge.addResponse({
-      gameId: gameId,
-      requestId: requestId,
-      text: null
-    });
-    bridge.updateRequestCategory({
-      gameId: gameId,
-      requestCategoryId: requestCategoryId,
-      dismissed: true,
-    });
-  
-    let secondRequestCategoryId = bridge.idGenerator.newRequestCategoryId();
-    let secondRequestId = bridge.idGenerator.newRequestId();
-    bridge.addRequestCategory({
-      gameId: gameId,
-      requestCategoryId: secondRequestCategoryId,
-      chatRoomId: resistanceChatRoomId,
-      playerId: moldaviPlayerId,
-      text: 'yee2?',
-      type: 'ack',
-      dismissed: false
-    });
-    bridge.addRequest({
-      gameId: gameId,
-      requestId: secondRequestId,
-      requestCategoryId: secondRequestCategoryId,
-      playerId: jackPlayerId
-    });
-    bridge.addRequest({
-      gameId: gameId,
-      requestId: bridge.idGenerator.newRequestId(),
-      requestCategoryId: secondRequestCategoryId,
-      playerId: zellaPlayerId
-    });
-    bridge.addResponse({
-      gameId: gameId,
-      requestId: secondRequestId,
-      text: null
-    });
-  
-    let textRequestCategoryId = bridge.idGenerator.newRequestCategoryId();
-    let textRequestId = bridge.idGenerator.newRequestId();
-    bridge.addRequestCategory({
-      gameId: gameId,
-      requestCategoryId: textRequestCategoryId,
-      chatRoomId: resistanceChatRoomId,
-      playerId: moldaviPlayerId,
-      text: 'text?',
-      type: 'text',
-      dismissed: false
-    });
-    bridge.addRequest({
-      gameId: gameId,
-      requestId: textRequestId,
-      requestCategoryId: textRequestCategoryId,
-      playerId: jackPlayerId
-    });
-    bridge.addRequest({
-      gameId: gameId,
-      requestId: bridge.idGenerator.newRequestId(),
-      requestCategoryId: textRequestCategoryId,
-      playerId: zellaPlayerId
-    });
-    bridge.addResponse({
-      gameId: gameId,
-      requestId: textRequestId,
-      text: "responseText",
-    });
-  
-  
-    var withAdminsChatRoomGroupId = bridge.idGenerator.newGroupId();
-    var withAdminsChatRoomId = bridge.idGenerator.newChatRoomId();
-    bridge.createGroup({
-      groupId: withAdminsChatRoomGroupId,
-      name: "Group for " + withAdminsChatRoomId,
-      gameId: gameId,
-      ownerPlayerId: jackPlayerId,
-      allegianceFilter: 'none',
-      autoAdd: false,
-      autoRemove: false,
-      canAddOthers: false,
-      canRemoveOthers: false,
-      canAddSelf: true,
-      canRemoveSelf: true,
-    });
-    bridge.createChatRoom({
-      gameId: gameId,
-      chatRoomId: withAdminsChatRoomId,
-      accessGroupId: withAdminsChatRoomGroupId,
-      name: "JackSlayerTheBeanSlasher & HvZ CDC",
-      withAdmins: true,
-    });
-  
-    bridge.addPlayerToGroup({
-      gameId: gameId,
-      groupId: withAdminsChatRoomGroupId,
-      playerToAddId: jackPlayerId,
-      actingPlayerId: jackPlayerId,
-    });
-    bridge.addPlayerToGroup({
-      gameId: gameId,
-      groupId: withAdminsChatRoomGroupId,
-      playerToAddId: moldaviPlayerId,
-      actingPlayerId: jackPlayerId,
-    });
-    bridge.sendChatMessage({
-      gameId: gameId,
-      messageId: bridge.idGenerator.newMessageId(),
-      chatRoomId: withAdminsChatRoomId,
-      playerId: jackPlayerId,
-      message: 'hey how do i know if im the possessed human'
-    });
-  
-    populateQuiz(bridge, gameId); */
+    // TODO: SUPPORT THINGS BELOW THIS POINT.
+    return;
+    /*
+      bridge.queueNotification({
+        gameId: gameId,
+        queuedNotificationId: bridge.idGenerator.newQueuedNotificationId(),
+        previewMessage: "Mission 1 Details: the zeds have invaded!",
+        message: "oh god theyre everywhere run",
+        sendTime: null,
+        groupId: resistanceGroupId,
+        playerId: null,
+        email: true,
+        site: true,
+        mobile: true,
+        vibrate: true,
+        sound: "ping.wav",
+        destination: "missions/" + firstMissionId,
+        icon: null
+      });
+    
+      let requestCategoryId = bridge.idGenerator.newRequestCategoryId();
+      let requestId = bridge.idGenerator.newRequestId();
+      bridge.addRequestCategory({
+        gameId: gameId,
+        requestCategoryId: requestCategoryId,
+        chatRoomId: resistanceChatRoomId,
+        playerId: moldaviPlayerId,
+        text: 'yee?',
+        type: 'ack',
+        dismissed: false
+      });
+      bridge.addRequest({
+        gameId: gameId,
+        requestId: requestId,
+        requestCategoryId: requestCategoryId,
+        playerId: jackPlayerId
+      });
+      bridge.addRequest({
+        gameId: gameId,
+        requestId: bridge.idGenerator.newRequestId(),
+        requestCategoryId: requestCategoryId,
+        playerId: zellaPlayerId
+      });
+      bridge.addResponse({
+        gameId: gameId,
+        requestId: requestId,
+        text: null
+      });
+      bridge.updateRequestCategory({
+        gameId: gameId,
+        requestCategoryId: requestCategoryId,
+        dismissed: true,
+      });
+    
+      let secondRequestCategoryId = bridge.idGenerator.newRequestCategoryId();
+      let secondRequestId = bridge.idGenerator.newRequestId();
+      bridge.addRequestCategory({
+        gameId: gameId,
+        requestCategoryId: secondRequestCategoryId,
+        chatRoomId: resistanceChatRoomId,
+        playerId: moldaviPlayerId,
+        text: 'yee2?',
+        type: 'ack',
+        dismissed: false
+      });
+      bridge.addRequest({
+        gameId: gameId,
+        requestId: secondRequestId,
+        requestCategoryId: secondRequestCategoryId,
+        playerId: jackPlayerId
+      });
+      bridge.addRequest({
+        gameId: gameId,
+        requestId: bridge.idGenerator.newRequestId(),
+        requestCategoryId: secondRequestCategoryId,
+        playerId: zellaPlayerId
+      });
+      bridge.addResponse({
+        gameId: gameId,
+        requestId: secondRequestId,
+        text: null
+      });
+    
+      let textRequestCategoryId = bridge.idGenerator.newRequestCategoryId();
+      let textRequestId = bridge.idGenerator.newRequestId();
+      bridge.addRequestCategory({
+        gameId: gameId,
+        requestCategoryId: textRequestCategoryId,
+        chatRoomId: resistanceChatRoomId,
+        playerId: moldaviPlayerId,
+        text: 'text?',
+        type: 'text',
+        dismissed: false
+      });
+      bridge.addRequest({
+        gameId: gameId,
+        requestId: textRequestId,
+        requestCategoryId: textRequestCategoryId,
+        playerId: jackPlayerId
+      });
+      bridge.addRequest({
+        gameId: gameId,
+        requestId: bridge.idGenerator.newRequestId(),
+        requestCategoryId: textRequestCategoryId,
+        playerId: zellaPlayerId
+      });
+      bridge.addResponse({
+        gameId: gameId,
+        requestId: textRequestId,
+        text: "responseText",
+      });
+    
+    
+      var withAdminsChatRoomGroupId = bridge.idGenerator.newGroupId();
+      var withAdminsChatRoomId = bridge.idGenerator.newChatRoomId();
+      bridge.createGroup({
+        groupId: withAdminsChatRoomGroupId,
+        name: "Group for " + withAdminsChatRoomId,
+        gameId: gameId,
+        ownerPlayerId: jackPlayerId,
+        allegianceFilter: 'none',
+        autoAdd: false,
+        autoRemove: false,
+        canAddOthers: false,
+        canRemoveOthers: false,
+        canAddSelf: true,
+        canRemoveSelf: true,
+      });
+      bridge.createChatRoom({
+        gameId: gameId,
+        chatRoomId: withAdminsChatRoomId,
+        accessGroupId: withAdminsChatRoomGroupId,
+        name: "JackSlayerTheBeanSlasher & HvZ CDC",
+        withAdmins: true,
+      });
+    
+      bridge.addPlayerToGroup({
+        gameId: gameId,
+        groupId: withAdminsChatRoomGroupId,
+        playerToAddId: jackPlayerId,
+        actingPlayerId: jackPlayerId,
+      });
+      bridge.addPlayerToGroup({
+        gameId: gameId,
+        groupId: withAdminsChatRoomGroupId,
+        playerToAddId: moldaviPlayerId,
+        actingPlayerId: jackPlayerId,
+      });
+      bridge.sendChatMessage({
+        gameId: gameId,
+        messageId: bridge.idGenerator.newMessageId(),
+        chatRoomId: withAdminsChatRoomId,
+        playerId: jackPlayerId,
+        message: 'hey how do i know if im the possessed human'
+      });
+    
+      populateQuiz(bridge, gameId); */
+  }
 }
 
 /************************************************************************
@@ -944,3 +981,4 @@ Any circle of cones set up by a moderator or a helper is a safe zone. Zombies ca
 </ul>
 </ghvz-rules-section>
 `;
+

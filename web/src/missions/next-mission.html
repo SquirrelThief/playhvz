@@ -29,7 +29,6 @@
           player: Object,
 
           nextMissionId: Object,
-          nextMission: Object,
         },
 
         observers: [
@@ -39,8 +38,11 @@
         updateNextMissionId_: function () {
           let self = this
           let onMissionUpdatedCallback = function (mission) {
-            self.nextMissionId = mission.id;
-            self.nextMission = mission;
+            if (!mission) {
+              self.set("nextMissionId", null);
+              return;
+            }
+            self.set("nextMissionId", mission.id);
           }
           this.bridge.listenToLastMission(this.game.id, this.player.id, onMissionUpdatedCallback);
         },

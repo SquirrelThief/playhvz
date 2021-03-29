@@ -26,3 +26,11 @@ MissionPath.FIELD__START_TIME = "startTime";
 MissionPath.FIELD__END_TIME = "endTime";
 MissionPath.FIELD__DETAILS = "details";
 MissionPath.FIELD__ALLEGIANCE_FILTER = "allegianceFilter";
+
+MissionPath.MISSION_COLLECTION = function (db, gameId) {
+  return GamePath.GAMES_COLLECTION(db).doc(gameId).collection(MissionPath.COLLECTION_PATH);
+}
+
+MissionPath.MISSION_DOC_REF = function (db, gameId, missionId) {
+  return MissionPath.MISSION_COLLECTION(db, gameId).doc(missionId);
+}

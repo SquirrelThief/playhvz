@@ -221,6 +221,25 @@ class Bridge {
     });
   }
 
+  async createChatRoom(gameId, ownerId, chatName, allegianceFilter) {
+    var createChatRoom = firebase.functions().httpsCallable("createChatRoom");
+    await createChatRoom({ gameId: gameId, ownerId: ownerId, chatName: chatName, allegianceFilter: allegianceFilter })
+      .then((result) => {
+        console.log("Created chat room: " + chatName);
+      })
+      .catch(error => console.log("Error: " + error.message));
+  }
+
+
+  async getChatRoomOnce(gameId, chatRoomId) {
+    return this.firestoreOperations.getChatRoomOnce(gameId, chatRoomId).then(docSnapshot => {
+      if (docSnapshot == undefined || !docSnapshot.exists) {
+        return null;
+      }
+      return DataConverterUtils.convertSnapshotToChatRoom(docSnapshot);
+    });
+  }
+
   listenToChatRoom(gameId, chatRoomId, callback, onErrorCallback = null) {
     return this.firestoreOperations.getListenableChatRoom(gameId, chatRoomId)
       .onSnapshot(docSnapshot => {
@@ -253,89 +272,104 @@ class Bridge {
     return this.firestoreOperations.sendChatMessage(gameId, messageId, chatRoomId, playerId, message);
   }
 
+  async addPlayersToChat(gameId, groupId, chatRoomId, playerIdList) {
+    var addPlayersToChat = firebase.functions().httpsCallable("addPlayersToChat");
+    await addPlayersToChat({ gameId: gameId, groupId: groupId, chatRoomId: chatRoomId, playerIdList: playerIdList })
+      .then((result) => {
+        console.log("Added players to chat successfully");
+      })
+      .catch(error => console.log("Error: " + error.message));
+  }
+
 
   listenToLastMission(gameId, playerId, callback) {
-    /*// Get all the group ids that are related to missions.
-    let allMissions = this.fakeDatabase.getAllMissionsOfGame(gameId);
-    let allMissionGroupIds = [];
-    for (let mission of allMissions) {
-      allMissionGroupIds.push(mission[MissionPath.FIELD__GROUP_ID])
-    }
-    // Check every mission-group to see if the player is a member of that group
-    let allGroups = this.fakeDatabase.getAllGroupsOfGame(gameId);
-    let missionGroupsPlayerIsIn = [];
-    for (let group of allGroups) {
-      if (allMissionGroupIds.includes(group.id) && group[GroupPath.FIELD__MEMBERS].includes(playerId)) {
-        missionGroupsPlayerIsIn.push(group.id);
+    // Get all the groups the player is in
+    let self = this;
+    let allGroups = this.firestoreOperations.getAllGroupsPlayerIsMemberOf(gameId, playerId).then(querySnapshot => {
+      if (querySnapshot.empty) {
+        callback(null);
+        return;
       }
-    }
-    // Get all the missions that the player is in (based on mission-group membership)
-    let playerMissions = []
-    for (let mission of allMissions) {
-      if (missionGroupsPlayerIsIn.includes(mission[MissionPath.FIELD__GROUP_ID])) {
-        playerMissions.push(mission);
+      // Get all missions that are associated with one of those groups.
+      let groupIdList = [];
+      for (let doc of querySnapshot.docs) {
+        groupIdList.push(doc.id);
       }
-    }
-    // Sort missions by end time
-    let comparitor = function (mission1, mission2) {
-      if (mission1[MissionPath.FIELD__END_TIME] > mission2[MissionPath.FIELD__END_TIME]) {
-        return 1;
-      } else if (mission1[MissionPath.FIELD__END_TIME] < mission2[MissionPath.FIELD__END_TIME]) {
-        return -1;
-      }
-      return 0;
-    }
-    playerMissions.sort(comparitor);
-    // Return the last mission
-    return playerMissions[playerMissions.length - 1]*/
-    return null;
+      return self.firestoreOperations.getMissionsFromGroups(gameId, groupIdList, /* limit= */ 1).then(querySnapshot => {
+        if (querySnapshot.empty || querySnapshot.docs.size < 1) {
+          callback(null);
+          return;
+        }
+        callback(DataConverterUtils.convertSnapshotToMission(querySnapshot.docs[0]));
+      })
+    })
   }
 
   async changePlayerAllegiance(gameId, playerId, newAllegiance) {
     var changePlayerAllegiance = firebase.functions().httpsCallable("changePlayerAllegiance");
     await changePlayerAllegiance({ gameId: gameId, playerId: playerId, allegiance: newAllegiance })
       .then((result) => {
-        console.log("Changed " + playerId + " to " + newAllegiance)
+        console.log("Changed a player to " + newAllegiance)
       })
       .catch(error => console.log("Error: " + error.message));
   }
 
-
-
-
-
-
-  addPlayersToGroup(gameId, groupId, playerIdList) {
-    return this.inner.addPlayersToGroup(gameId, groupId, playerIdList)
+  async addPlayersToGroup(gameId, groupId, playerIdList) {
+    var addPlayersToGroup = firebase.functions().httpsCallable("addPlayersToGroup");
+    await addPlayersToGroup({ "gameId": gameId, "groupId": groupId, "playerIdList": playerIdList })
+      .then((result) => {
+        console.log("Added players to group.")
+      })
+      .catch(error => console.log("Error: " + error.message));
   }
 
-  infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode) {
-    return this.inner.infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode);
+  async infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode) {
+    var infectPlayerByLifeCode = firebase.functions().httpsCallable("infectPlayerByLifeCode");
+    await infectPlayerByLifeCode({ gameId: gameId, infectorPlayerId: infectorPlayerId, lifeCode: victimLifeCode })
+      .then((result) => {
+        console.log("Infected player! TODO: we probably want some callback here?")
+      })
+      .catch(error => console.log("Error: " + error.message));
   }
+
+  async createMission(gameId, missionName, startTime, endTime, details, allegianceFilter) {
+    var createMission = firebase.functions().httpsCallable("createMission");
+    await createMission({
+      gameId: gameId,
+      name: missionName,
+      startTime: startTime,
+      endTime: endTime,
+      details: details,
+      allegianceFilter: allegianceFilter
+    })
+      .then((result) => {
+        console.log("Created a mission!")
+      })
+      .catch(error => console.log("Error: " + error.message));
+  }
+
+  listenToMission(gameId, missionId, callback, onErrorCallback = null) {
+    return this.firestoreOperations.getListenableMission(gameId, missionId)
+      .onSnapshot(docSnapshot => {
+        let mission = null;
+        if (docSnapshot.exists) {
+          mission = DataConverterUtils.convertSnapshotToMission(docSnapshot);
+        }
+        callback(mission);
+      }, (error) => {
+        if (onErrorCallback != null) {
+          onErrorCallback();
+        }
+      });
+  }
+
 
   listenToReward(gameId, rewardId, callback) {
     return this.inner.listenToReward(gameId, rewardId, callback);
   }
 
-  createChatRoom(gameId, ownerId, chatName, allegianceFilter) {
-    return this.inner.createChatRoom(gameId, ownerId, chatName, allegianceFilter);
-  }
-
   createOrGetChatWithAdmin(gameId, playerId) {
     return this.inner.createOrGetChatWithAdmin(gameId, playerId);
-  }
-
-  addPlayersToChat(gameId, groupId, chatRoomId, playerIdList) {
-    return this.inner.addPlayersToChat(gameId, groupId, chatRoomId, playerIdList);
-  }
-
-  createMission(gameId, missionName, startTime, endTime, details, allegianceFilter) {
-    return this.inner.createMission(gameId, missionName, startTime, endTime, details, allegianceFilter);
-  }
-
-
-  listenToMission(gameId, missionId, callback) {
-    return this.inner.listenToMission(gameId, missionId, callback);
   }
 
   listenToMissionList(gameId, playerId, callback) {
@@ -363,6 +397,14 @@ class Bridge {
 
   async getAllChatsInGame(gameId) {
     return this.inner.getAllChatsInGame(gameId);
+  }
+
+  async getChatRoomByName(gameId, chatRoomName) {
+    return this.inner.getChatRoomByName(gameId, chatRoomName);
+  }
+
+  async getMissionByName(gameId, missionName) {
+    return this.inner.getMissionByName(gameId, missionName);
   }
 
   //////////////////////////////////////////////////////////////////////

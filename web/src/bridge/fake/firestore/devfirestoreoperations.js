@@ -32,4 +32,18 @@ class DevFirestoreOperations {
   getAllChatsInGame(gameId) {
     return ChatPath.CHAT_ROOMS_COLLECTION(this.db, gameId).get();
   }
+
+  /**
+   * Function that gets a chat room by name. Should not be exposed to prod.
+   * 
+   * @param gameId GameId to query
+   * @param chatRoomName name to find
+   */
+  getChatRoomByName(gameId, chatRoomName) {
+    return ChatPath.CHAT_ROOMS_COLLECTION(this.db, gameId).where(ChatPath.FIELD__NAME, "==", chatRoomName).get();
+  }
+
+  getMissionByName(gameId, missionName) {
+    return MissionPath.MISSION_COLLECTION(this.db, gameId).where(MissionPath.FIELD__NAME, "==", missionName).get();
+  }
 }

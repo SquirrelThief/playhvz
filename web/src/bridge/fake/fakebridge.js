@@ -150,6 +150,24 @@ class FakeBridge {
     });
   }
 
+  async getChatRoomByName(gameId, chatRoomName) {
+    return this.devFirestoreOperations.getChatRoomByName(gameId, chatRoomName).then(querySnapshot => {
+      if (querySnapshot.empty || querySnapshot.docs.size > 1) {
+        return null;
+      }
+      return DataConverterUtils.convertSnapshotToChatRoom(querySnapshot.docs[0]);
+    });
+  }
+
+  async getMissionByName(gameId, missionName) {
+    return this.devFirestoreOperations.getMissionByName(gameId, missionName).then(querySnapshot => {
+      if (querySnapshot.empty || querySnapshot.docs.size > 1) {
+        return null;
+      }
+      return DataConverterUtils.convertSnapshotToMission(querySnapshot.docs[0]);
+    });
+  }
+
   async getChatRoomOnce(gameId, chatRoomId) {
     return this.firestoreOperations.getChatRoomOnce(gameId, chatRoomId).then(docSnapshot => {
       if (docSnapshot == undefined || !docSnapshot.exists) {
@@ -159,44 +177,10 @@ class FakeBridge {
     });
   }
 
-  sendChatMessage(gameId, messageId, chatRoomId, playerId, message) {
-    return new Promise((resolve, reject) => {
-      resolve(this.server.sendChatMessage(gameId, messageId, chatRoomId, playerId, message));
-    });
-  }
-
-  infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode) {
-    return new Promise((resolve, reject) => {
-      resolve(this.server.infectPlayerByLifeCode(gameId, infectorPlayerId, victimLifeCode));
-    })
-  }
+  
 
   listenToReward(gameId, rewardId, callback) {
     callback(this.server.listenToReward(gameId, rewardId));
-  }
-
-  createChatRoom(gameId, ownerId, chatName, allegianceFilter) {
-    return Promise.resolve(this.server.createChatRoom(gameId, ownerId, chatName, allegianceFilter));
-  }
-
-  addPlayersToChat(gameId, groupId, chatRoomId, playerIdList) {
-    return new Promise((resolve, reject) => {
-      resolve(this.server.addPlayersToChat(gameId, groupId, chatRoomId, playerIdList));
-    });
-  }
-
-  createMission(gameId, missionName, startTime, endTime, details, allegianceFilter) {
-    return new Promise((resolve, reject) => {
-      resolve(this.server.createMission(gameId, missionName, startTime, endTime, details, allegianceFilter));
-    });
-  }
-
-  listenToLastMission(gameId, playerId, callback) {
-    callback(this.server.listenToLastMission(gameId, playerId));
-  }
-
-  listenToMission(gameId, missionId, callback) {
-    callback(this.server.listenToMission(gameId, missionId));
   }
 
   listenToMissionList(gameId, playerId, callback) {
@@ -218,12 +202,6 @@ class FakeBridge {
   redeemRewardCode(gameId, playerId, claimCode) {
     return new Promise((resolve, reject) => {
       resolve(this.server.redeemRewardCode(gameId, playerId, claimCode));
-    });
-  }
-
-  addPlayersToGroup(gameId, groupId, playerIdList) {
-    return new Promise((resolve, reject) => {
-      resolve(this.server.addPlayersToGroup(gameId, groupId, playerIdList));
     });
   }
 
