@@ -141,6 +141,10 @@
         getRewardsAsArray(player) {
           return Utils.toArray(player.rewards);
         },
+
+        getLifeCodesAsArray(player) {
+          return Utils.toArray(player.lives);
+        },
       });
     });
   </script>
@@ -292,11 +296,11 @@
           <div name="notes-box">Notes: [[player.private.notes]]</div>
         </template>
 
-        <template is="dom-repeat" items="[[player.lives]]" as="life">
+        <template is="dom-repeat" items="[[getLifeCodesAsArray(player)]]" as="lifeArrayObject">
           <div name$="life-line-[[index]]">
-            Life, at [[computeDateText_(life.created)]],
-            <template is="dom-if" if="[[life.lifeCode]]">
-              life code "[[life.lifeCode]]"
+            Life, at [[computeDateText_(lifeArrayObject.value.created)]],
+            <template is="dom-if" if="[[lifeArrayObject.value.isActive]]">
+              life code "[[lifeArrayObject.value.lifeCode]]"
             </template>
           </div>
         </template>

@@ -168,6 +168,15 @@ class FakeBridge {
     });
   }
 
+  async getRewardByShortName(gameId, shortName) {
+    return this.devFirestoreOperations.getRewardByShortName(gameId, shortName).then(querySnapshot => {
+      if (querySnapshot.empty || querySnapshot.docs.size > 1) {
+        return null;
+      }
+      return DataConverterUtils.convertSnapshotToReward(querySnapshot.docs[0]);
+    });
+  }
+
   async getChatRoomOnce(gameId, chatRoomId) {
     return this.firestoreOperations.getChatRoomOnce(gameId, chatRoomId).then(docSnapshot => {
       if (docSnapshot == undefined || !docSnapshot.exists) {
@@ -177,20 +186,8 @@ class FakeBridge {
     });
   }
 
-  
-
-  listenToReward(gameId, rewardId, callback) {
-    callback(this.server.listenToReward(gameId, rewardId));
-  }
-
   listenToMissionList(gameId, playerId, callback) {
     callback(this.server.listenToMissionList(gameId, playerId));
-  }
-
-  createReward(gameId, shortName, longName, description, imageUrl, points) {
-    return new Promise((resolve, reject) => {
-      resolve(this.server.createReward(gameId, shortName, longName, description, imageUrl, points));
-    });
   }
 
   generateClaimCodes(gameId, rewardId, numCodes) {

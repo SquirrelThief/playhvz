@@ -52,3 +52,41 @@ export function wrap(fun: any) {
 export function after() {
     test.cleanup();
 }
+/**********************************************************
+ * Firebase util functions
+ **********************************************************/
+
+/** Creates a default game and returns the game id for the game we created. */
+export async function createGame(gameName: string) {
+    const wrappedCreateGame = wrap(playHvzFunctions.createGame);
+    const data = {
+        name: gameName,
+        startTime: 0,
+        endTime: 5
+    };
+    return await wrappedCreateGame(data, context);
+}
+
+export async function deleteGame(gameId: string) {
+    const wrappedDeleteGame = wrap(playHvzFunctions.deleteGame);
+    const data = { gameId: gameId };
+    return await wrappedDeleteGame(data, context);
+}
+
+/** Creates a player and returns the player id. */
+export async function createPlayer(gameId: string, gameName: string, playerName: string) {
+    const wrappedJoinGame = wrap(playHvzFunctions.joinGame);
+    const data = { gameName: gameName, playerName: playerName };
+    await wrappedJoinGame(data, context)
+    let playerQuerySnapshot = await db.collection("games").doc(gameId).collection("players").where("name", "==", playerName).get();
+    return playerQuerySnapshot.docs[0].id;
+}
+
+/** Creates a player and initializes them to human; returns the player id. */
+export async function createHumanPlayer(gameId: string, gameName: string, playerName: string) {
+    const playerId = await createPlayer(gameId, gameName, playerName);
+    const wrappedChangeToHuman = wrap(playHvzFunctions.changePlayerAllegiance);
+    const data = { gameId: gameId, playerId: playerId, allegiance: "resistance" };
+    await wrappedChangeToHuman(data, context)
+    return playerId;
+}

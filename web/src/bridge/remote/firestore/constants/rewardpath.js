@@ -31,3 +31,12 @@ RewardPath.CLAIM_CODE_COLLECTION_PATH = "claimCodes";
 RewardPath.FIELD__CLAIM_CODE_CODE = "code";
 RewardPath.FIELD__CLAIM_CODE_REDEEMER = "redeemer";
 RewardPath.FIELD__CLAIM_CODE_TIMESTAMP = "timestamp";
+
+
+RewardPath.REWARD_COLLECTION = function (db, gameId) {
+  return GamePath.GAMES_COLLECTION(db).doc(gameId).collection(RewardPath.COLLECTION_PATH);
+}
+
+RewardPath.REWARD_DOC_REF = function (db, gameId, rewardId) {
+  return RewardPath.REWARD_COLLECTION(db, gameId).doc(rewardId);
+}

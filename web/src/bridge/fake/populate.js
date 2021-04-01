@@ -224,6 +224,8 @@ class Populator {
       if (this.players[userName].startAllegiance) {
         // If player should start with a certain allegiance, set it.
         await bridge.changePlayerAllegiance(gameId, playerId, this.players[userName].startAllegiance)
+        // Grant the player a reward as if they declared their allegiance through the quiz.
+        await bridge.redeemRewardCode(this.gameId, playerId, "declare-" + playerId + "-" + new Date().getTime());
       }
     }
   }
@@ -414,32 +416,34 @@ class Populator {
       );
     }
 
-    console.log("Finished populating game.")
-    return;
-
     // Create rewards
-    let signInRewardId = "reward-signed-3";
-    bridge.createReward(gameId, /* shortName= */ "signed", /* longName= */ "signed up!", /* description= */ 'signed up for the game!', 'https://maxcdn.icons8.com/Share/icon/ultraviolet/Baby//nerf_gun1600.png', /* points= */ 2)
-    let didTheThingRewardId = "reward-didthing-4";
-    bridge.createReward(gameId, /* shortName= */ "didthing", "did the thing!", 'soooo did the thing!', 'https://s-media-cache-ak0.pinimg.com/originals/94/9b/80/949b80956f246b74dc1f4f1f476eb9c1.png', /* points= */ 2)
-    let leafRewardId = "reward-foundleaf-5";
-    bridge.createReward(gameId, /* shortName= */ "foundleaf", "found a leaf!", 'i found a leaf when my allies were being ambushed!', 'http://static.tumblr.com/87e20377c9c37d0b07dcc10504c636a8/mteq5q3/k1Ynitn6h/tumblr_static_75lgqkjlvcw00cos8g8kko80k.png', /* points= */ 2)
-    let genoRewardId = "reward-knowgeno-6";
-    bridge.createReward(gameId, /* shortName= */ "knowgeno", "i know geno!", 'i know who geno is!', 'http://vignette2.wikia.nocookie.net/nintendo/images/0/02/Geno_Artwork_%28Super_Mario_RPG_-_Legend_of_the_Seven_Stars%29.png/revision/latest?cb=20121110130550&path-prefix=en', /* points= */ 2)
+    await bridge.createReward(this.gameId, /* shortName= */ "signed", /* longName= */ "signed up!", /* description= */ 'signed up for the game!', 'https://maxcdn.icons8.com/Share/icon/ultraviolet/Baby//nerf_gun1600.png', /* points= */ 2)
+    let signInRewardId = (await bridge.getRewardByShortName(this.gameId, "signed")).id;
+    await bridge.createReward(this.gameId, /* shortName= */ "didthing", "did the thing!", 'soooo did the thing!', 'https://s-media-cache-ak0.pinimg.com/originals/94/9b/80/949b80956f246b74dc1f4f1f476eb9c1.png', /* points= */ 2)
+    let didTheThingRewardId = (await bridge.getRewardByShortName(this.gameId, "didthing")).id;
+    await bridge.createReward(this.gameId, /* shortName= */ "foundleaf", "found a leaf!", 'i found a leaf when my allies were being ambushed!', 'http://static.tumblr.com/87e20377c9c37d0b07dcc10504c636a8/mteq5q3/k1Ynitn6h/tumblr_static_75lgqkjlvcw00cos8g8kko80k.png', /* points= */ 2)
+    let leafRewardId = (await bridge.getRewardByShortName(this.gameId, "foundleaf")).id;
+    await bridge.createReward(this.gameId, /* shortName= */ "knowgeno", "i know geno!", 'i know who geno is!', 'http://vignette2.wikia.nocookie.net/nintendo/images/0/02/Geno_Artwork_%28Super_Mario_RPG_-_Legend_of_the_Seven_Stars%29.png/revision/latest?cb=20121110130550&path-prefix=en', /* points= */ 2)
+    let genoRewardId = (await bridge.getRewardByShortName(this.gameId, "knowgeno")).id;
 
     // Generate claim codes for the rewards we just created.
     // Codes are of the form: <short name>-claim-# 
-    bridge.generateClaimCodes(gameId, signInRewardId, /* numCodes= */ 3);
-    bridge.generateClaimCodes(gameId, didTheThingRewardId, /* numCodes= */ 1);
-    bridge.generateClaimCodes(gameId, leafRewardId, /* numCodes= */ 1);
-    bridge.generateClaimCodes(gameId, genoRewardId, /* numCodes= */ 1);
+    await bridge.generateClaimCodes(this.gameId, signInRewardId, /* numCodes= */ 3);
+    await bridge.generateClaimCodes(this.gameId, didTheThingRewardId, /* numCodes= */ 1);
+    await bridge.generateClaimCodes(this.gameId, leafRewardId, /* numCodes= */ 1);
+    await bridge.generateClaimCodes(this.gameId, genoRewardId, /* numCodes= */ 1);
 
-    bridge.redeemRewardCode(gameId, drakePlayerId, "signed-claim-0");
-    bridge.redeemRewardCode(gameId, drakePlayerId, "didthing-claim-0");
-    bridge.redeemRewardCode(gameId, drakePlayerId, "foundleaf-claim-0");
-    bridge.redeemRewardCode(gameId, drakePlayerId, "knowgeno-claim-0");
+    let signInRewardClaimCodes = await bridge.getAvailableClaimCodes(this.gameId, signInRewardId);
+    let didThingRewardClaimCodes = await bridge.getAvailableClaimCodes(this.gameId, didTheThingRewardId);
+    let leafRewardClaimCodes = await bridge.getAvailableClaimCodes(this.gameId, leafRewardId);
+    let genoRewardClaimCodes = await bridge.getAvailableClaimCodes(this.gameId, genoRewardId);
 
+    await bridge.redeemRewardCode(this.gameId, this.players[Users.DRAKE].playerId, signInRewardClaimCodes[0]);
+    await bridge.redeemRewardCode(this.gameId, this.players[Users.DRAKE].playerId, didThingRewardClaimCodes[0]);
+    await bridge.redeemRewardCode(this.gameId, this.players[Users.DRAKE].playerId, leafRewardClaimCodes[0]);
+    await bridge.redeemRewardCode(this.gameId, this.players[Users.DRAKE].playerId, genoRewardClaimCodes[0]);
 
+    console.log("Finished populating game.")
     // TODO: SUPPORT THINGS BELOW THIS POINT.
     return;
     /*

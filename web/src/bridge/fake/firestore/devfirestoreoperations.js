@@ -46,4 +46,8 @@ class DevFirestoreOperations {
   getMissionByName(gameId, missionName) {
     return MissionPath.MISSION_COLLECTION(this.db, gameId).where(MissionPath.FIELD__NAME, "==", missionName).get();
   }
+
+  getRewardByShortName(gameId, shortName) {
+    return RewardPath.REWARD_COLLECTION(this.db, gameId).where(RewardPath.FIELD__SHORT_NAME, "==",shortName).get();
+  }
 }

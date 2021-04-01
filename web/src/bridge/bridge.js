@@ -363,9 +363,81 @@ class Bridge {
       });
   }
 
+  async createReward(gameId, shortName, longName, description, imageUrl, points) {
+    var createReward = firebase.functions().httpsCallable("createReward");
+    await createReward({
+      gameId: gameId,
+      shortName: shortName,
+      longName: longName,
+      description: description,
+      imageUrl: imageUrl,
+      points: points
+    })
+      .then((result) => {
+        console.log("Created a reward!")
+      })
+      .catch(error => console.log("Error: " + error.message));
+  }
+
+
+  async generateClaimCodes(gameId, rewardId, numCodes) {
+    var generateClaimCodes = firebase.functions().httpsCallable("generateClaimCodes");
+    await generateClaimCodes({
+      gameId: gameId,
+      rewardId: rewardId,
+      numCodes: numCodes
+    })
+      .then((result) => {
+        console.log("Generated " + numCodes + " codes!")
+      })
+      .catch(error => console.log("Error: " + error.message));
+  }
+
+  async redeemRewardCode(gameId, playerId, claimCode) {
+    var redeemRewardCode = firebase.functions().httpsCallable("redeemRewardCode");
+    await redeemRewardCode({
+      gameId: gameId,
+      playerId: playerId,
+      claimCode: claimCode
+    })
+      .then((result) => {
+        console.log("Redeemed reward code!")
+      })
+      .catch(error => console.log("Error: " + error.message));
+  }
+
+  async getAvailableClaimCodes(gameId, rewardId) {
+    var getAvailableClaimCodes = firebase.functions().httpsCallable("getAvailableClaimCodes");
+    return await getAvailableClaimCodes({
+      gameId: gameId,
+      rewardId: rewardId
+    })
+      .then((result) => {
+        if (result.data) {
+          let claimCodeArray = JSON.parse(result.data.claimCodes)
+          return claimCodeArray;
+        }
+        return [];
+      })
+      .catch(error => {
+        console.log("Error: " + error.message);
+        return [];
+      });
+  }
 
   listenToReward(gameId, rewardId, callback) {
-    return this.inner.listenToReward(gameId, rewardId, callback);
+    return this.firestoreOperations.getListenableReward(gameId, rewardId)
+      .onSnapshot(docSnapshot => {
+        let reward = null;
+        if (docSnapshot.exists) {
+          reward = DataConverterUtils.convertSnapshotToReward(docSnapshot);
+        }
+        callback(reward);
+      }, (error) => {
+        if (onErrorCallback != null) {
+          onErrorCallback();
+        }
+      });
   }
 
   createOrGetChatWithAdmin(gameId, playerId) {
@@ -376,17 +448,6 @@ class Bridge {
     return this.inner.listenToMissionList(gameId, playerId, callback);
   }
 
-  createReward(gameId, shortName, longName, description, imageUrl, points) {
-    return this.inner.createReward(gameId, shortName, longName, description, imageUrl, points);
-  }
-
-  generateClaimCodes(gameId, rewardId, numCodes) {
-    return this.inner.generateClaimCodes(gameId, rewardId, numCodes);
-  }
-
-  redeemRewardCode(gameId, playerId, claimCode) {
-    return this.inner.redeemRewardCode(gameId, playerId, claimCode);
-  }
   //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
   //////////////////////////////////////////////////////////////////////
@@ -407,6 +468,9 @@ class Bridge {
     return this.inner.getMissionByName(gameId, missionName);
   }
 
+  async getRewardByShortName(gameId, shortName) {
+    return this.inner.getRewardByShortName(gameId, shortName);
+  }
   //////////////////////////////////////////////////////////////////////
   // End dev supporting functions.
   //////////////////////////////////////////////////////////////////////

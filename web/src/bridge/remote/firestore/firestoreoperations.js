@@ -131,4 +131,12 @@ class FirestoreOperations {
         .get();
     }
   }
+
+  getRewardOnce(gameId, rewardId) {
+    return CacheUtils.optimizedGet(this.getListenableReward(gameId, rewardId));
+  }
+
+  getListenableReward(gameId, rewardId) {
+    return RewardPath.REWARD_DOC_REF(this.db, gameId, rewardId);
+  }
 }
