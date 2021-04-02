@@ -245,6 +245,8 @@ class Populator {
     if (!this.gameId) {
       // The game already exists, get the id.
       this.gameId = await bridge.checkGameExists(gameName);
+      // Actually, we can just exit. If you want to run this anyway then remove this line.
+      return;
     }
     await this.populateFakeAppPlayers(bridge, gameName, this.gameId);
     await bridge.signIn({ userName: Users.ZELLA });

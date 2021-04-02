@@ -98,7 +98,7 @@
   </style>
   <template>
 
-    <template is="dom-if" if="[[computeShowPage_(showPage.createGame, mostRecentPage)]]">
+    <template is="dom-if" if="[[computeShowPage_(showPage.createGame, mostRecentPage)]]" restamp>
       <ghvz-card padded full$="[[isMobile]]" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
         <div class="header">Create Game</div>
         <ghvz-create-game class="content" is-mobile="[[isMobile]]" bridge="[[bridge]]" user-id="[[userId]]">
@@ -106,7 +106,7 @@
       </ghvz-card>
     </template>
 
-    <template is="dom-if" if="[[computeShowPage_(showPage.createPopulatedGame, mostRecentPage)]]">
+    <template is="dom-if" if="[[computeShowPage_(showPage.createPopulatedGame, mostRecentPage)]]" restamp>
       <ghvz-card padded full$="[[isMobile]]" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
         <div class="header">Create Game</div>
         <ghvz-create-populated-game class="content" config="[[config]]" is-mobile="[[isMobile]]" bridge="[[bridge]]"
@@ -115,7 +115,7 @@
       </ghvz-card>
     </template>
 
-    <template is="dom-if" if="[[computeShowPage_(showPage.devTools, mostRecentPage)]]">
+    <template is="dom-if" if="[[computeShowPage_(showPage.devTools, mostRecentPage)]]" restamp>
       <ghvz-card padded full$="[[isMobile]]" spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
         <div class="header">Create Game</div>
         <ghvz-dev-tools class="content" config="[[config]]" bridge="[[bridge]]" user-id="[[userId]]">
@@ -123,20 +123,17 @@
       </ghvz-card>
     </template>
 
-    <template is="dom-if" if="[[computeShowPage_(showPage.game, mostRecentPage)]]">
+    <template is="dom-if" if="[[computeShowPage_(showPage.game, mostRecentPage)]]" restamp>
       <ghvz-game-page config="[[config]]" bridge="[[bridge]]" is-admin="[[isAdmin]]" database="[[database]]"
         user-id="[[userId]]" email="[[email]]" game="[[game]]" player="[[player]]" player-id="[[playerId]]"
         path="[[path]]" is-mobile="[[isMobile]]">
       </ghvz-game-page>
     </template>
 
-    <template is="dom-if" if="[[computeShowPage_(showPage.gameList, mostRecentPage)]]">
-      <ghvz-card padded spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-        <div class="header">Your Games</div>
-        <ghvz-game-list class="expand" bridge="[[bridge]]" user-id="[[userId]]">
-        </ghvz-game-list>
-      </ghvz-card>
+    <template is="dom-if" if="[[computeShowPage_(showPage.gameList, mostRecentPage)]]" restamp>
+      <ghvz-game-list-page class="expand" bridge="[[bridge]]" database="[[database]]" user-id="[[userId]]"
+        is-mobile="[[isMobile]]">
+      </ghvz-game-list-page>
     </template>
-
   </template>
 </dom-module>

@@ -26,6 +26,7 @@
 class Bridge {
   constructor(idGenerator, inner) {
     this.inner = inner;
+    this.isDevServer = this.inner.isDevServer;
     this.firestoreOperations = new FirestoreOperations();
     this.idGenerator = idGenerator;
 

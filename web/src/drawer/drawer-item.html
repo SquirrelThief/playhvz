@@ -15,93 +15,114 @@
 -->
 
 <dom-module id="ghvz-drawer-item">
-<script>
-  // Not sure why this HTMLImports.whenReady is really needed.
-  // Something about polymer initialization order.
-  // I think we're not supposed to need this.
-  HTMLImports.whenReady(() => {
-    Polymer({
-      is: 'ghvz-drawer-item',
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-drawer-item',
 
-      properties: {
-        icon: String,
-        text: String,
-        action: Object,
-        path: Array,
-        chatRoomId: String,
+        properties: {
+          icon: String,
+          text: String,
+          action: Object,
+          path: Array,
+          chatRoomId: String,
+          outsideGame: Boolean,
 
-        // Optionally add a dash to the element name
-        addDash: {
-          type: Boolean,
-          value: false,
+          // Optionally add a dash to the element name
+          addDash: {
+            type: Boolean,
+            value: false,
+          }
+        },
+
+        onClick_(e) {
+          if (this.action) {
+            this.action(e);
+          } else {
+            this.openPage_(e);
+          }
+        },
+
+        openPage_(e) {
+          this.fire('ghvz-close-drawer');
+          this.fire('ghvz-set-path', {
+            inGame: !this.outsideGame,
+            path: this.path,
+            replace: false,
+          });
+          e.preventDefault();
+          e.stopPropagation();
+        },
+
+        getItemName_(text) {
+          return 'drawer' + text;
+        },
+
+        isIronIcon_(icon) {
+          // Iron icons are in the form <lib>:<icon>, material icons are just the icon name
+          return icon.includes(":");
         }
-      },
-
-      onClick_(e) {
-        if (this.action) {
-          this.action(e);
-        } else {
-          this.openPage_(e);
-        }
-      },
-
-      openPage_(e) {
-        this.fire('ghvz-close-drawer');
-        this.fire('ghvz-set-path', {
-          inGame: true,
-          path: this.path,
-          replace: false,
-        });
-        e.preventDefault();
-        e.stopPropagation();
-      },
-
-      getItemName_(text) {
-        return 'drawer' + text;
-      },
+      });
     });
-  });
-</script>
-<style>
-  :host {
-    display: block;
-    overflow-y: auto;
-  }
-  .drawer-item {
-    display: flex;
-    align-items: center;
-    opacity: .6;
-    padding-left: 4px;
-    height: 40px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    color: black;
-    text-decoration: none;
+  </script>
+  <style>
+    :host {
+      display: block;
+      overflow-y: auto;
+    }
 
-    --ghvz-chat-room-name-label-icon: {
+    .drawer-item {
+      display: flex;
+      align-items: center;
+      opacity: .6;
+      padding-left: 4px;
+      height: 40px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      color: black;
+      text-decoration: none;
+
+      --ghvz-chat-room-name-label-icon: {
+        margin: 8px;
+        opacity: .8;
+      }
+    }
+
+    .drawer-item:active {
+      background-color: #e7e7e7;
+    }
+
+    .drawer-item:focus {
+      background-color: #e7e7e7;
+    }
+
+    .drawer-item iron-icon {
       margin: 8px;
       opacity: .8;
     }
-  }
-  .drawer-item:active {
-    background-color: #e7e7e7;
-  }
-  .drawer-item:focus {
-    background-color: #e7e7e7;
-  }
-  .drawer-item iron-icon {
-    margin: 8px;
-    opacity: .8;
-  }
-  iron-icon {
-    flex-shrink: 0;
-  }
-</style>
-<template>
-  <div on-click="onClick_" name$="[[getItemName_(text)]]" class="drawer-item">
-    <iron-icon icon="[[icon]]"></iron-icon>
-    [[text]]
-  </div>
-</template>
+
+    .drawer-item .material-icons-outlined {
+      margin: 8px;
+      opacity: .8;
+    }
+
+    iron-icon {
+      flex-shrink: 0;
+    }
+  </style>
+  <template>
+    <div on-click="onClick_" name$="[[getItemName_(text)]]" class="drawer-item">
+      <template is="dom-if" if="[[isIronIcon_(icon)]]">
+        <iron-icon icon="[[icon]]"></iron-icon>
+      </template>
+      <template is="dom-if" if="[[!isIronIcon_(icon)]]">
+        <span class="material-icons-outlined">[[icon]]</span>
+      </template>
+      [[text]]
+    </div>
+  </template>
 </dom-module>

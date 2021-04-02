@@ -24,7 +24,8 @@
 
         properties: {
           bridge: Object,
-          userId: String
+          userId: String,
+          isMobile: Boolean,
         },
 
         gameDocSnapshots: {
@@ -64,12 +65,17 @@
           event.preventDefault();
           event.stopPropagation();
         },
+
+        computeResponsiveWidth_(isMobile) {
+          return this.isMobile ? "1000px" : null;
+        },
       });
     });
   </script>
   <style>
     :host {
       display: flex;
+      flex-grow: 1;
     }
 
     paper-button {
@@ -82,10 +88,13 @@
     }
   </style>
   <template>
-    <div class="frame">
-      <template is="dom-repeat" items="[[games]]" as="game">
-        <ghvz-game-list-item game="[[game]]" on-tap="onTap_"></ghvz-game-list-item>
-      </template>
-    </div>
+    <ghvz-card padded spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+      <div class="header">Your Games</div>
+      <div class="frame">
+        <template is="dom-repeat" items="[[games]]" as="game">
+          <ghvz-game-list-item game="[[game]]" on-tap="onTap_"></ghvz-game-list-item>
+        </template>
+      </div>
+    </ghvz-card>
   </template>
 </dom-module>

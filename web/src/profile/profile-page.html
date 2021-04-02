@@ -120,19 +120,16 @@
             isActive: true,
           });
         },
-        unsetCanInfect_() {
-          this.bridge.updatePlayer({
-            gameId: this.game.id,
-            playerId: this.player.id,
-            canInfect: false,
-          });
+        giveReward_() {
+          console.error("Implement this...")
         },
-        setCanInfect_() {
-          this.bridge.updatePlayer({
-            gameId: this.game.id,
-            playerId: this.player.id,
-            canInfect: true,
-          });
+        changePlayerAllegiance_() {
+          /*let self = this;
+          doTheThing = async function () {
+            self.fire('ghvz-open-dialog', { dialog: self.$.changeAllegianceDialog });
+          }
+          doTheThing();*/
+          this.$.changeAllegianceDialog.open();
         },
         seePrivateInfo_(isAdmin, actingPlayerId, playerId) {
           return isAdmin || actingPlayerId == playerId;
@@ -143,8 +140,48 @@
         },
 
         getLifeCodesAsArray(player) {
-          return Utils.toArray(player.lives);
+          let descendingOrderLives = new Array();
+          for (let life of Object.keys(player.lives)) {
+            descendingOrderLives.push({ key: life, value: player.lives[life] });
+          }
+          descendingOrderLives.sort(function (a, b) {
+            return a.value.created - b.value.created;
+          })
+          return descendingOrderLives;
         },
+
+        getLifeCodeDescription_(index, lifeCodeObject) {
+          let lifeCode = lifeCodeObject.value;
+          if (lifeCode.isActive && index == 0) {
+            return "Current life code";
+          } else if (lifeCode.isActive) {
+            return "Previous life code - still active"
+          } else {
+            return "Previous life code - claimed"
+          }
+        },
+        isLifeCodeActive_(lifeCodeObject) {
+          if (lifeCodeObject.value.isActive) {
+            return "active"
+          } else {
+            return "deactive"
+          }
+        },
+        isLifeCodeOld_(index) {
+          if (index == 0) {
+            return "current";
+          } else {
+            return "old";
+          }
+        },
+
+        showLifeCodes_(isAdmin, actingPlayerId, player) {
+          let canSeePrivateData = this.seePrivateInfo_(isAdmin, actingPlayerId, player.id);
+          if (canSeePrivateData && player.allegiance === Defaults.HUMAN_ALLEGIANCE_FILTER) {
+            return true;
+          }
+          return false;
+        }
       });
     });
   </script>
@@ -183,12 +220,12 @@
       flex-grow: 1;
       font-size: 14px;
       padding: 8px;
+      display: flex;
     }
 
     .name {
-      font-size: 24px;
-      margin-top: 16px;
-      margin-bottom: 16px;
+      font-size: 32px;
+      align-self: center;
     }
 
     .profile-display-avatar {
@@ -208,6 +245,43 @@
       margin-top: 16px;
       margin-bottom: 16px;
     }
+
+    .divider.grey300 {
+      border-top: 1px solid #E0E0E0;
+      padding-bottom: 16px;
+    }
+
+    .material-icons-outlined.grey800 {
+      width: 48px;
+      height: 48px;
+      position: relative;
+      color: #424242
+    }
+
+    .attribute {
+      display: flex;
+      flex-direction: row;
+      padding-top: 8px;
+      padding-left: 16px;
+    }
+
+    .attribute-text {
+      color: #424242
+    }
+
+    /* Grey500 */
+    .attribute-text.old {
+      color: #9E9E9E
+    }
+
+    .attribute-header {
+      text-transform: uppercase;
+      font-size: 20px;
+    }
+
+    .attribute-header.deactive {
+      text-decoration: line-through;
+    }
   </style>
   <template>
     <div id="flexThing">
@@ -220,99 +294,63 @@
           <div name="player-name" class="name">
             [[player.name]]
           </div>
-          <div name="status" class="sub-item">
-            Status:
-            <span class="status">
-              [[getAliveStatusLabel_(player.allegiance)]]
-            </span>
-          </div>
-          <div class="sub-item">
-            Points:
-            <span name="profilePoints">[[player.points]]</span>
-          </div>
-          <template is="dom-if" if="[[seePrivateInfo_(isAdmin, actingPlayerId, playerId)]]">
-            <template is="dom-if" if="[[lifeCode]]">
-              <div name="lifecode" class="sub-item">
-                Life code: [[lifeCode]]
+        </div>
+      </div>
+    </div>
+    <div class="divider grey300"></div>
+    <div id="playerAttributes">
+      <div id="allegianceAttribute" class="attribute">
+        <span class="material-icons-outlined grey800">outlined_flag</span>
+        <div>
+          <div class="attribute-text attribute-header">[[player.allegiance]]</div>
+          <div class="attribute-text">Allegiance</div>
+        </div>
+      </div>
+      <template is="dom-if" if="[[showLifeCodes_(isAdmin, actingPlayerId, player)]]">
+        <div id="lifeCodeAttribute" class="attribute">
+          <span class="material-icons-outlined grey800">cake</span>
+          <div>
+            <template is="dom-repeat" items="[[getLifeCodesAsArray(player)]]" as="lifeCodeObject">
+              <div
+                class$="attribute-text attribute-header [[isLifeCodeActive_(lifeCodeObject)]] [[isLifeCodeOld_(index)]]">
+                [[lifeCodeObject.key]]</div>
+              <div class$="attribute-text [[isLifeCodeOld_(index)]]">[[getLifeCodeDescription_(index, lifeCodeObject)]]
               </div>
             </template>
-          </template>
+          </div>
+        </div>
+      </template>
+      <div id="pointAttribute" class="attribute">
+        <span class="material-icons-outlined grey800">emoji_events</span>
+        <div>
+          <div class="attribute-text attribute-header">[[player.points]] pts</div>
         </div>
       </div>
     </div>
 
-    <!-- TODO: Put this in appropriate location -->
     <template is="dom-repeat" items="[[getRewardsAsArray(player)]]" as="rewardObject">
-      <ghvz-reward-badge bridge="[[bridge]]" game="[[game]]" reward-object="[[rewardObject]]">
-      </ghvz-reward-badge>
+      <ghvz-reward-badge bridge="[[bridge]]" game="[[game]]" reward-object="[[rewardObject]]" />
     </template>
 
-    <template is="dom-if" if="[[seePrivateInfo_(isAdmin, actingPlayerId, playerId)]]">
-      <div id="details">
-        <div name="notifications-sound">Notifications should sound:
-          <b>[[computeBooleanText_(player.private.notificationSettings.sound)]]</b>
+    <template is="dom-if" if="[[isAdmin]]">
+      <div class="divider grey300" style="margin-top: 16px;"></div>
+      <div id="details" class="attribute" style="flex-direction: column;">
+        <div class="attribute-header">Admin Options:</div>
+        <div style="padding-top: 8px; display: flex;">
+          <paper-button raised id="change-allegiance" on-tap="changePlayerAllegiance_">Change allegiance</paper-button>
+          <paper-button raised id="give-reward" on-tap="giveReward_">Give reward</paper-button>
         </div>
-        <div name="notifications-vibration">Notifications should vibrate:
-          <b>[[computeBooleanText_(player.private.notificationSettings.vibrate)]]</b>
-        </div>
-
-        <template is="dom-if" if="[[isAdmin]]">
-          <!-- <div name="volunteered-for">
-            Volunteered for:
-            <b>
-              <template is="dom-if" if="[[player.private.volunteer.advertising]]">Advertising</template>
-              <template is="dom-if" if="[[player.private.volunteer.logistics]]">Logistics</template>
-              <template is="dom-if" if="[[player.private.volunteer.communications]]">Communications</template>
-              <template is="dom-if" if="[[player.private.volunteer.moderator]]">Moderator</template>
-              <template is="dom-if" if="[[player.private.volunteer.cleric]]">Cleric</template>
-              <template is="dom-if" if="[[player.private.volunteer.sorcerer]]">Sorcerer</template>
-              <template is="dom-if" if="[[player.private.volunteer.admin]]">Admin</template>
-              <template is="dom-if" if="[[player.private.volunteer.photographer]]">Photographer</template>
-              <template is="dom-if" if="[[player.private.volunteer.chronicler]]">Chronicler</template>
-              <template is="dom-if" if="[[player.private.volunteer.server]]">Server</template>
-              <template is="dom-if" if="[[player.private.volunteer.client]]">Client</template>
-            </b>
-          </div>
-          <div name="active">Active: <b>[[computeBooleanText_(player.isActive)]]</b></div>
-          <div name="can-infect">Can infect: <b>[[computeBooleanText_(player.private.canInfect)]]</b></div>
-          <div name="need-gun">Need gun: <b>[[computeBooleanText_(player.needGun)]]</b></div>
-          <div name="starting-zombie">Can be starting zombie:
-            <b>[[computeBooleanText_(player.private.startAsZombie)]]</b></div>
-          <div name="possessed-human">Wants to be possessed human:
-            <b>[[computeBooleanText_(player.private.wantToBeSecretZombie)]]</b></div>
-          <div name="got-equipment">Got equipment: <b>[[computeBooleanText_(player.private.gotEquipment)]]</b></div>
-          <template is="dom-if" if="[[player.isActive]]">
-            <paper-button raised name="deactivate-button" on-tap="deactivate_">Deactivate</paper-button>
-          </template> 
-          <template is="dom-if" if="[[!player.isActive]]">
-            <paper-button raised name="activate-button" on-tap="activate_">Activate</paper-button>
-          </template>-->
-          <template is="dom-if" if="[[player.private.canInfect]]">
-            <paper-button raised id="unset-infect-button" on-tap="unsetCanInfect_">Unset Can Infect</paper-button>
-          </template>
-          <template is="dom-if" if="[[!player.private.canInfect]]">
-            <paper-button raised id="set-infect-button" on-tap="setCanInfect_">Set Can Infect</paper-button>
-          </template>
-          <div name="notes-box">Notes: [[player.private.notes]]</div>
-        </template>
-
-        <template is="dom-repeat" items="[[getLifeCodesAsArray(player)]]" as="lifeArrayObject">
-          <div name$="life-line-[[index]]">
-            Life, at [[computeDateText_(lifeArrayObject.value.created)]],
-            <template is="dom-if" if="[[lifeArrayObject.value.isActive]]">
-              life code "[[lifeArrayObject.value.lifeCode]]"
-            </template>
-          </div>
-        </template>
-        <!-- <template is="dom-repeat" items="[[player.infections]]" as="infection">
+    </template>
+    <!-- <template is="dom-repeat" items="[[player.infections]]" as="infection">
           <div name$="infection-line-[[index]]">
             Infection, at [[computeDateText_(infection.time)]], infector
             <ghvz-player-label players-by-id="[[game.playersById]]" player-id="[[infection.infectorId]]">
             </ghvz-player-label>
           </div>
         </template> -->
+    </div>
 
-      </div>
-    </template>
+    <ghvz-dialog-change-allegiance id="changeAllegianceDialog" bridge="[[bridge]]" game="[[game]]" player="[[player]]">
+    </ghvz-dialog-change-allegiance>
   </template>
 </dom-module>

@@ -18,6 +18,7 @@
 
 class FakeBridge {
   constructor(serverConfig, alertHandler) {
+    this.isDevServer = true;
     this.alertHandler = alertHandler;
     firebase.initializeApp(serverConfig.firebaseConfig);
     this.db = firebase.firestore()

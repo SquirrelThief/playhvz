@@ -16,6 +16,8 @@
 
 class RemoteBridge {
   constructor(serverUrl, firebaseConfig, alertHandler, getGame) {
+    this.isDevServer = false;
+
     this.alertHandler = alertHandler;
 
     firebase.initializeApp(firebaseConfig);

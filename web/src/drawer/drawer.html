@@ -29,6 +29,11 @@
           userId: String,
           game: Object,
           player: Object,
+          isInGame: {
+            type: Boolean,
+            value: false,
+            computed: "computeIsInGame_(game)"
+          },
 
           canRegister: {
             type: Boolean,
@@ -62,6 +67,11 @@
           'onChatRoomsUpdated_(bridge, game, player.chatRoomMemberships.*)',
           'openChatWeWereWaitingOn_(bridge, game, waitingToOpenChatRoomId)',
         ],
+
+        computeIsInGame_() {
+          // This is never called if game isn''t set, that's why we have to default to false.
+          return !!this.game;
+        },
 
         onKeyPress_(e) {
           if (e.keyCode == 27) {
@@ -194,11 +204,6 @@
       background-color: #e7e7e7;
     }
 
-    .drawer-item iron-icon {
-      margin: 8px;
-      opacity: .8;
-    }
-
     .drawer-header {
       display: flex;
       align-items: center;
@@ -296,20 +301,31 @@
     </template>
 
     <div class="drawer-section">
+      <template is="dom-if" if="[[isInGame]]">
+        <ghvz-drawer-item text="Change game" path='["gameList"]' icon="list" outside-game></ghvz-drawer-item>
+      </template>
+      <template is="dom-if" if="[[!isInGame]]">
+        <ghvz-drawer-item text="Join game" path='["createGame"]' icon="person_add" outside-game></ghvz-drawer-item>
+        <ghvz-drawer-item text="Create new game" path='["createGame"]' icon="add" outside-game></ghvz-drawer-item>
+      </template>
+    </div>
+
+    <div class="drawer-section">
       <template is="dom-if" if="[[userId]]">
         <ghvz-drawer-item text="Sign Out" action="[[signOut_()]]" icon="icons:account-circle" name="drawerSign Out">
         </ghvz-drawer-item>
       </template>
     </div>
 
-    <div id="debugInfo">
-      <div>User ID: [[userId]]</div>
-      <div>Game ID: [[game.id]]</div>
-      <div>Player ID: [[player.id]]</div>
-      <div>Player Number: [[player.number]]</div>
-      <div>Player Name: [[player.name]]</div>
-    </div>
-    </div>
+    <template is="dom-if" if="[[bridge.isDevServer]]">
+      <div id="debugInfo">
+        <div>User ID: [[userId]]</div>
+        <div>Game ID: [[game.id]]</div>
+        <div>Player ID: [[player.id]]</div>
+        <div>Player Name: [[player.name]]</div>
+      </div>
+      </div>
+    </template>
 
     <ghvz-chat-room-settings id="settings" bridge="[[bridge]]" game="[[game]]" player="[[player]]"
       is-admin="[[isAdmin]]">
