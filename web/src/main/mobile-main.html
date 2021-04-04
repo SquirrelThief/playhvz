@@ -126,18 +126,18 @@
   </style>
   <template>
     <ghvz-card full with-menu>
-      <div class="header">Humans vs Zombies</div>
+      <div slot="headerText">Humans vs Zombies</div>
 
       <template is="dom-if" if="[[canRegister]]">
         <ghvz-card spaced full padded mobile>
-          <div class="header">Join Game!</div>
+          <div slot="headerText">Join Game!</div>
           <paper-button name="joinGame" raised on-tap="joinGame_">Join Game!</paper-button>
         </ghvz-card>
       </template>
 
       <template is="dom-if" if="[[canDeclare]]">
         <ghvz-card spaced left padded mobile name="declare-box">
-          <div class="header">Declare Allegiance!</div>
+          <div slot="headerText">Declare Allegiance!</div>
           <ghvz-declare-dashlet></ghvz-declare-dashlet>
         </ghvz-card>
       </template>
@@ -145,7 +145,7 @@
       <template is="dom-if" if="[[isPlayer]]">
         <template is="dom-if" if="[[isZombie]]">
           <ghvz-card name="infect-box" spaced mobile>
-            <div class="header">Infect</div>
+            <div slot="headerText">Infect</div>
             <ghvz-infect bridge="[[bridge]]" game="[[game]]" player="[[player]]">
             </ghvz-infect>
           </ghvz-card>
@@ -153,20 +153,20 @@
 
         <template is="dom-if" if="[[isZombie]]">
           <ghvz-card spaced left padded mobile name="stuntimer-box">
-            <div class="header">Stun Timer</div>
+            <div slot="headerText">Stun Timer</div>
             <ghvz-stun-timer game="[[game]]">
             </ghvz-stun-timer>
           </ghvz-card>
         </template>
 
         <ghvz-card spaced left padded mobile name="summary-box">
-          <div class="header">Game Summary</div>
+          <div slot="headerText">Game Summary</div>
           <ghvz-game-summary is-mobile="[[isMobile]]" game="[[game]]">
           </ghvz-game-summary>
         </ghvz-card>
 
         <ghvz-card spaced padded mobile name="next-mission-box">
-          <div class="header">Next Mission</div>
+          <div slot="headerText">Next Mission</div>
           <ghvz-next-mission bridge="[[bridge]]" game="[[game]]" player="[[player]]">
           </ghvz-next-mission>
         </ghvz-card>

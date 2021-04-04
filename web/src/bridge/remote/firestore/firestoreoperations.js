@@ -139,4 +139,19 @@ class FirestoreOperations {
   getListenableReward(gameId, rewardId) {
     return RewardPath.REWARD_DOC_REF(this.db, gameId, rewardId);
   }
+
+  updateGameRules(gameId, updatedRulesArray, successCallback, onErrorCallback) {
+    GamePath.GAME_DOC_REF(this.db, gameId).update(GamePath.FIELD__RULES, updatedRulesArray)
+      .then(() => {
+        if (successCallback) {
+          successCallback();
+        }
+      })
+      .catch((error) => {
+        Log.e(TAG, "Failed to update game: " + error.message);
+        if (onErrorCallback) {
+          onErrorCallback();
+        }
+      });
+  }
 }

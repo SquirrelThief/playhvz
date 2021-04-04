@@ -89,7 +89,7 @@
   </style>
   <template>
     <ghvz-card padded spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
-      <div class="header">Your Games</div>
+      <div slot="headerText">Your Games</div>
       <div class="frame">
         <template is="dom-repeat" items="[[games]]" as="game">
           <ghvz-game-list-item game="[[game]]" on-tap="onTap_"></ghvz-game-list-item>

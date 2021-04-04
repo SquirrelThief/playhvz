@@ -48,37 +48,37 @@
     <ghvz-dashboard>
 
       <ghvz-card spaced admin left padded>
-        <div class="header">Game</div>
+        <div slot="headerText">Game</div>
         <ghvz-game-details modify bridge="[[bridge]]" is-mobile="[[isMobile]]" game="[[game]]" user-id="[[userId]]">
         </ghvz-game-details>
       </ghvz-card>
 
       <ghvz-card spaced admin left>
-        <div class="header" name="Rules">Rules</div>
+        <div slot="headerText" name="Rules">Rules</div>
         <ghvz-rules name="admin-page" is-admin is-mobile="[[isMobile]]" bridge="[[bridge]]" game="[[game]]">
         </ghvz-rules>
       </ghvz-card>
 
       <ghvz-card spaced admin left padded>
-        <div class="header">FAQ</div>
+        <div slot="headerText">FAQ</div>
         <ghvz-game-faq is-admin is-mobile="[[isMobile]]" bridge="[[bridge]]" game="[[game]]">
         </ghvz-game-faq>
       </ghvz-card>
 
       <ghvz-card spaced admin left>
-        <div class="header">Game Summary</div>
+        <div slot="headerText">Game Summary</div>
         <ghvz-game-summary is-admin bridge="[[bridge]]" is-mobile="[[isMobile]]" game="[[game]]">
         </ghvz-game-summary>
       </ghvz-card>
 
       <ghvz-card spaced admin full>
-        <div class="header">Missions</div>
+        <div slot="headerText">Missions</div>
         <ghvz-missions is-mobile="[[isMobile]]" bridge="[[bridge]]" player="[[player]]" game="[[game]]">
         </ghvz-missions>
       </ghvz-card>
 
       <ghvz-card spaced scrolling admin full>
-        <div class="header">Players</div>
+        <div slot="headerText">Players</div>
         <ghvz-player-table id="playerTableModule" game="[[game]]" bridge="[[bridge]]" is-mobile="[[isMobile]]"
           reward-categories-by-id="[[game.rewardCategoriesById]]" players="[[game.players]]"
           players-by-id="[[game.playersById]]">
@@ -86,19 +86,19 @@
       </ghvz-card>
 
       <ghvz-card spaced scrolling admin right>
-        <div class="header">Guns</div>
+        <div slot="headerText">Guns</div>
         <ghvz-guns is-mobile="[[isMobile]]" bridge="[[bridge]]" game="[[game]]">
         </ghvz-guns>
       </ghvz-card>
 
       <ghvz-card spaced scrolling admin right>
-        <div class="header">Rewards</div>
+        <div slot="headerText">Rewards</div>
         <ghvz-rewards bridge="[[bridge]]" game="[[game]]" is-mobile="[[isMobile]]">
         </ghvz-rewards>
       </ghvz-card>
 
       <ghvz-card spaced scrolling admin right>
-        <div class="header">Notifications</div>
+        <div slot="headerText">Notifications</div>
         <ghvz-notifications bridge="[[bridge]]" is-mobile="[[isMobile]]" game="[[game]]">
         </ghvz-notifications>
       </ghvz-card>

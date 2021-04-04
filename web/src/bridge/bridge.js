@@ -286,7 +286,7 @@ class Bridge {
   listenToLastMission(gameId, playerId, callback) {
     // Get all the groups the player is in
     let self = this;
-    let allGroups = this.firestoreOperations.getAllGroupsPlayerIsMemberOf(gameId, playerId).then(querySnapshot => {
+    this.firestoreOperations.getAllGroupsPlayerIsMemberOf(gameId, playerId).then(querySnapshot => {
       if (querySnapshot.empty) {
         callback(null);
         return;
@@ -446,7 +446,34 @@ class Bridge {
   }
 
   listenToMissionList(gameId, playerId, callback) {
-    return this.inner.listenToMissionList(gameId, playerId, callback);
+    // Get all the groups the player is in
+    let self = this;
+    this.firestoreOperations.getAllGroupsPlayerIsMemberOf(gameId, playerId).then(querySnapshot => {
+      if (querySnapshot.empty) {
+        callback(null);
+        return;
+      }
+      // Get all missions that are associated with one of those groups.
+      let groupIdList = [];
+      for (let doc of querySnapshot.docs) {
+        groupIdList.push(doc.id);
+      }
+      return self.firestoreOperations.getMissionsFromGroups(gameId, groupIdList, /* limit= */ 1).then(querySnapshot => {
+        if (querySnapshot.empty || querySnapshot.docs.size < 1) {
+          callback(null);
+          return;
+        }
+        let missions = [];
+        for (let doc of querySnapshot.docs) {
+          missions.push(DataConverterUtils.convertSnapshotToMission(doc))
+        }
+        callback(missions);
+      })
+    })
+  }
+
+  updateGameRules(gameId, updatedRulesArray, successCallback = null, onErrorCallback = null) {
+    this.firestoreOperations.updateGameRules(gameId, updatedRulesArray, successCallback, onErrorCallback);
   }
 
   //////////////////////////////////////////////////////////////////////

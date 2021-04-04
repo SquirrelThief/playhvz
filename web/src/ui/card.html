@@ -197,7 +197,6 @@
 
     <paper-material>
       <div class="header">
-
         <template is="dom-if" if="[[withBack]]">
           <paper-icon-button name="backButton" class="menu" icon="icons:arrow-back" raised on-tap="back_">
           </paper-icon-button>
@@ -207,16 +206,16 @@
           </paper-icon-button>
         </template>
         <div id="header" class="text" pad-left$="[[!withBack]]">
-          <div id="headerText"></div>
-          <div id="headerContent">
-            <slot name=".header"></slot>
+          <div id="headerText">
+            <slot name="headerText"></slot>
           </div>
+          <div id="headerContent"> </div>
           <div id="headerElement"></div>
         </div>
         <!-- Some alternative paper-icon-button icons: 
           icons:chevron-left, icons:chevron-right, icons:refresh, icons:more-vert -->
         <div id="buttons">
-          <slot name=".header-button"></slot>
+          <slot name="headerButton"></slot>
           <paper-icon-button hidden$="[[!fullscreenPage]]" class="button" icon="icons:fullscreen"
             on-tap="openFullscreen_"></paper-icon-button>
         </div>

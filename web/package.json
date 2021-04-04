@@ -26,6 +26,8 @@
     "typescript": "^4.2.3"
   },
   "dependencies": {
+    "@material/fab": "^10.0.0",
+    "@material/icon-button": "^10.0.0",
     "@polymer/app-layout": "^3.1.0",
     "firebase": "^8.3.1",
     "firebase-admin": "^9.5.0",

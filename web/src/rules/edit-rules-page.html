@@ -1,0 +1,125 @@
+<!--
+  Copyright 2017 Google Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<dom-module id="ghvz-edit-rules-page">
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-edit-rules-page',
+
+        properties: {
+          bridge: Object,
+          game: Object,
+          isAdmin: {
+            type: Boolean,
+            value: false,
+          },
+          saveEnabled: {
+            type: Boolean,
+            value: false,
+          },
+          draftRules: {
+            type: Array,
+            notify: true,
+          },
+        },
+
+        observers: [
+          'serverRulesChanged_(game.rules)',
+          'localChanges_(game.rules, draftRules.*)',
+        ],
+
+        attached() {
+          this.fire('ghvz-add-toolbar-button', { button: this.$.save });
+        },
+
+        serverRulesChanged_() {
+          if (this.saveEnabled) {
+            // We have local changes, show an error.
+            return;
+          }
+          this.draftRules = JSON.parse(JSON.stringify(this.game.rules));
+        },
+
+        localChanges_() {
+          let draftRules = this.draftRules.filter(rule => rule.sectionTitle != null);
+          if (draftRules.length != this.draftRules.length) {
+            this.draftRules = draftRules;
+            return;
+          }
+          this.saveEnabled = JSON.stringify(this.game.rules) != JSON.stringify(draftRules);
+          if (this.saveEnabled) {
+            this.$.cancelChanges.style.display = "block";
+          } else {
+            this.$.cancelChanges.style.display = "none";
+          }
+        },
+
+        save_: function () {
+          this.saveEnabled = false;
+          this.bridge.updateGameRules(this.game.id, this.draftRules);
+        },
+
+        addItem_() {
+          this.push('draftRules', {
+            order: this.draftRules.length,
+            sectionTitle: "",
+            sectionContent: "",
+          });
+        },
+
+        cancelChanges_() {
+          this.draftRules = JSON.parse(JSON.stringify(this.game.rules));
+        }
+      });
+    });
+  </script>
+  <style>
+    :host {
+      display: flex;
+      padding-left: 16px;
+      padding-right: 16px;
+      font-size: 16px;
+    }
+
+    .add-item {
+      display: flex;
+      flex-direction: row;
+      font-size: 20px;
+      align-items: center;
+      padding-top: 16px;
+      color: var(--grey800);
+    }
+  </style>
+  <template>
+    <paper-icon-button slot="headerButton" name="save" id="save" icon="icons:check" disabled$="[[!saveEnabled]]"
+      on-tap="save_">
+    </paper-icon-button>
+    <template is="dom-repeat" items="{{draftRules}}" as="rule">
+      <ghvz-edit-rules-section rule={{rule}} index=[[index]]></ghvz-edit-rules-section>
+    </template>
+    <div id="addRule" class="add-item" on-tap="addItem_">
+      <div style="padding-right: 8px;">Add new item</div>
+      <span class="material-icons-outlined">add</span>
+    </div>
+    <div id="cancelChanges" class="add-item" style="font-size: 16px;">
+      <paper-button on-click="cancelChanges_">Cancel</paper-button>
+    </div>
+  </template>
+</dom-module>

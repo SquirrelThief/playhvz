@@ -50,13 +50,13 @@
     <ghvz-card full with-back with-menu>
 
       <ghvz-card spaced fullscreen-page="stats">
-        <div class="header">Game Stats</div>
+        <div slot="headerText">Game Stats</div>
         <ghvz-game-stat-summary game="[[game]]">
         </ghvz-game-stat-summary>
       </ghvz-card>
 
       <ghvz-card spaced scrolling>
-        <div class="header">Notifications</div>
+        <div slot="headerText">Notifications</div>
         <ghvz-notifications bridge="[[bridge]]" game="[[game]]" is-mobile="[[isMobile]]"
           players-by-id="[[game.playersById]]" queued-notifications="[[game.queuedNotifications]]"
           queued-notifications-by-id="[[game.queuedNotificationsById]]">

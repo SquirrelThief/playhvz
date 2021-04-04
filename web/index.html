@@ -117,8 +117,10 @@
   <link rel="import" href="/bower_components/iron-a11y-keys/iron-a11y-keys.html">
   <link rel="import" href="/bower_components/paper-tooltip/paper-tooltip.html">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel=”stylesheet” href="/node_modules/@material/icon-button/mdc-icon-button.scss">
+  <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
 
-
+  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
   <script src="/src/constants/defaults.js"></script>
   <script src="/src/utils/utils.js"></script>
   <script src="/src/utils/gatedwriter.js"></script>
@@ -253,6 +255,7 @@
   <link rel="import" href="/src/playertable/player-row.html">
   <link rel="import" href="/src/playertable/player-table.html">
   <link rel="import" href="/src/profile/dialog-change-allegiance.html">
+  <link rel="import" href="/src/profile/dialog-give-reward.html">
   <link rel="import" href="/src/profile/profile-page.html">
   <link rel="import" href="/src/profile/reward-badge.html">
   <link rel="import" href="/src/registration/game-registration.html">
@@ -268,6 +271,8 @@
   <link rel="import" href="/src/rules/rules-collapsible.html">
   <link rel="import" href="/src/rules/rules-section.html">
   <link rel="import" href="/src/rules/rules.html">
+  <link rel="import" href="/src/rules/edit-rules-page.html">
+  <link rel="import" href="/src/rules/edit-rules-section.html">
   <link rel="import" href="/src/ui/alert.html">
   <link rel="import" href="/src/ui/card.html">
   <link rel="import" href="/src/ui/dashboard.html">
@@ -348,6 +353,12 @@
       --app_color_text_on_primary_background: white;
       --admin_color_primary: #336d88;
       --admin_color_text_on_primary_background: white;
+      --alive_color: fuchsia;
+      --dead_color: forestgreen;
+      --grey800: #424242;
+      --grey700: #616161;
+      --grey500: #9E9E9E;
+      --grey300: #E0E0E0;
     }
   </style>
 

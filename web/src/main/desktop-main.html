@@ -154,7 +154,7 @@
 
       <template is="dom-if" if="[[canJoinGame]]">
         <ghvz-card spaced full padded name="join-box">
-          <div class="header">Join Game!</div>
+          <div slot="headerText">Join Game!</div>
           <div>
             <div id="welcome">Welcome to playhvz.com! Click the button to join the game.</div>
             <paper-button name="joinGame" raised on-tap="joinGame_">Join Game!</paper-button>
@@ -164,7 +164,7 @@
 
       <template is="dom-if" if="[[canDeclare]]">
         <ghvz-card spaced left padded name="declare-box">
-          <div class="header">Declare Allegiance!</div>
+          <div slot="headerText">Declare Allegiance!</div>
           <ghvz-declare-dashlet></ghvz-declare-dashlet>
         </ghvz-card>
       </template>
@@ -173,33 +173,33 @@
 
         <template is="dom-if" if="[[isZombie]]">
           <ghvz-card name="infect-box" spaced left>
-            <div class="header">Infect</div>
+            <div slot="headerText">Infect</div>
             <ghvz-infect bridge="[[bridge]]" game="[[game]]" player="[[player]]"">
             </ghvz-infect>
           </ghvz-card>
         </template>
 
           <ghvz-card spaced left padded name=" next-mission-box">
-              <div class="header">Next Mission</div>
+              <div slot="headerText">Next Mission</div>
               <ghvz-next-mission bridge="[[bridge]]" game="[[game]]" player="[[player]]">
               </ghvz-next-mission>
           </ghvz-card>
 
           <ghvz-card spaced left padded name="summary-box">
-            <div class="header">Game Summary</div>
+            <div slot="headerText">Game Summary</div>
             <ghvz-game-summary is-mobile="[[isMobile]]" game="[[game]]">
             </ghvz-game-summary>
           </ghvz-card>
 
           <!-- <ghvz-card spaced scrolling left name="leaderboard-box">
-          <div class="header">Leaderboard</div>
+          <div slot="headerText">Leaderboard</div>
           <ghvz-leaderboard-summary game="[[game]]" limit="3">
           </ghvz-leaderboard-summary>
         </ghvz-card> -->
           <!-- 
         <template is="dom-if" if="[[isDeclared]]">
           <ghvz-card spaced left fullscreen-page="stats" name="stats-box">
-            <div class="header">Game Stats</div>
+            <div slot="headerText">Game Stats</div>
             <ghvz-game-stat-summary game="[[game]]">
             </ghvz-game-stat-summary>
           </ghvz-card>
@@ -207,7 +207,7 @@
 
           <template is="dom-if" if="[[isDeclared]]">
             <ghvz-card name="rewards-box" spaced left>
-              <div class="header">Rewards</div>
+              <div slot="headerText">Rewards</div>
               <ghvz-claim-reward bridge="[[bridge]]" game="[[game]]" player="[[player]]">
               </ghvz-claim-reward>
             </ghvz-card>
