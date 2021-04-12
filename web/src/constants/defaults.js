@@ -42,3 +42,6 @@ Defaults.DECLARE_REWARD_IMAGE_URL = "https://photos.app.goo.gl/zdJuosGePWgAVyf47
 Defaults.DECLARE_REWARD_POINTS = 10;
 
 Defaults.FIGUREHEAD_ADMIN_NAME = "HvZ CDC";
+
+Defaults.ALIVE_COLOR = "#D9508A";
+Defaults.DEAD_COLOR = "#50d955";

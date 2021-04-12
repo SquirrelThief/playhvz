@@ -69,7 +69,7 @@
 
           this.bridge.sendChatMessage(
             this.game.id,
-            this.bridge.newMessageId(),
+            this.bridge.newMessageId(this.currentPlayer.name),
             this.chatRoom.id,
             this.currentPlayer.id,
             message,

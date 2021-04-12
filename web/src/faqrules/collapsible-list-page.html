@@ -1,0 +1,85 @@
+<!--
+  Copyright 2017 Google Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<dom-module id="ghvz-collapsible-list">
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-collapsible-list',
+
+        properties: {
+          game: Object,
+          display: String,
+          isAdmin: {
+            type: Boolean,
+            value: false,
+          },
+          collapsed: {
+            type: Boolean,
+            value: false,
+          },
+        },
+
+        observers: [
+          "isAdminSet_(isAdmin)",
+        ],
+
+        isAdminSet_() {
+          if (this.isAdmin) {
+            this.fire('ghvz-add-toolbar-button', { button: this.$.edit });
+          }
+        },
+
+        edit_() {
+          let editPath = "adminEditFaq"
+          if (this.display === "rules") {
+            editPath = "adminEditRules";
+          }
+          this.fire('ghvz-set-path', {
+            inGame: true,
+            path: [editPath],
+            replace: false,
+          });
+        },
+
+        getArrayOfItems_() {
+          if (this.display === "rules") {
+            return this.game.rules;
+          } else {
+            return this.game.faq;
+          }
+        }
+      });
+    });
+  </script>
+  <style>
+    :host {
+      display: block;
+      padding: 16px;
+    }
+  </style>
+  <template>
+    <button slot="headerButton" name="edit" id="edit" on-click="edit_" hidden="[[!isAdmin]]"
+      class="mdc-icon-button material-icons-outlined">create</button>
+    <template is="dom-repeat" items="[[getArrayOfItems_(game)]]" as="item">
+      <ghvz-collapsible-section item="[[item]]" collapsed="[[collapsed]]">
+      </ghvz-collapsible-section>
+    </template>
+  </template>
+</dom-module>

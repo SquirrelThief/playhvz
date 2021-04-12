@@ -13,54 +13,44 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<dom-module id="ghvz-rules-collapsible">
+<dom-module id="ghvz-edit-collapsible-section">
   <script>
     // Not sure why this HTMLImports.whenReady is really needed.
     // Something about polymer initialization order.
     // I think we're not supposed to need this.
     HTMLImports.whenReady(() => {
       Polymer({
-        is: 'ghvz-rules-collapsible',
+        is: 'ghvz-edit-collapsible-section',
 
         properties: {
-          rule: Object,
-          title: String,
-          expanded: {
-            type: Boolean,
-            value: false,
-          },
-          icon: {
-            type: String,
-            computed: "computeIcon_(expanded)",
-          },
+          index: Number,
+          item: Object,
         },
 
-        computeIcon_(expanded) {
-          return expanded ? "icons:expand-less" : "icons:expand-more";
-        },
-
-        toggle_() {
-          this.expanded = !this.expanded;
+        onDeleteClicked_() {
+          this.set('item.sectionTitle', null);
         },
       });
     });
   </script>
   <style>
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 16px;
+      margin: 16px 0;
     }
-
-    .title {
-      cursor: pointer;
-    } 
   </style>
   <template>
-    <div class="title" on-tap="toggle_">
-      [[rule.sectionTitle]]
-      <iron-icon icon="[[icon]]" name$="collapsible-[[title]]"></iron-icon>
+    <div style="display: flex; flex-direction: row;">
+      <paper-input id="titleInput" maxlength="120" label="Add title" name$="rule-title-input" autocorrect no-label-float
+        value={{item.sectionTitle}} style="padding-top: 24px">
+      </paper-input>
+      <button on-click="onDeleteClicked_" class="mdc-icon-button material-icons-outlined"
+        style="align-items: flex-end;">clear</button>
     </div>
-    <iron-collapse id="collapsible" name$="collapsible-text-[[title]]" opened="[[expanded]]">
-      [[rule.sectionContent]]
-    </iron-collapse>
+    <paper-textarea id="contentInput" label="Add some content" name$="rule-content-input" autocorrect no-label-float
+      value={{item.sectionContent}} multiline max-rows=3>
+    </paper-textarea>
   </template>
 </dom-module>

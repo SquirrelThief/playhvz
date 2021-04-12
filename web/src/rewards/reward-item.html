@@ -1,0 +1,129 @@
+<!--
+  Copyright 2017 Google Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<dom-module id="ghvz-reward-item">
+  <script>
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-reward-item',
+        properties: {
+          bridge: Object,
+          game: Object,
+          reward: Object,
+          editHandler: Object,
+          selectedMenuItem: Object,
+          stats: Object,
+        },
+
+        observers: ['getRewardStats_(bridge, game, reward)'],
+
+        getRewardStats_() {
+          this.bridge.getRewardClaimedStats(this.game.id, this.reward.id).then((result) => {
+            this.stats = result.data;
+          });
+        },
+
+        pointString_(reward) {
+          return reward.points === 1 ? "pt" : "pts";
+        },
+
+        edit_() {
+          this.editHandler.fn(this.reward);
+        },
+
+        getAvailabilityString_() {
+          if (!this.stats) {
+            return "Available: ?/?"
+          } else {
+            return "Available: " + this.stats.unusedCount + "/" + (this.stats.unusedCount + this.stats.usedCount);
+          }
+
+        },
+
+        captureTap_(e) {
+          var action = e.target.dataset.action || e.currentTarget.dataset.action;
+          var playerId = e.target.dataset.playerId || e.currentTarget.dataset.playerId;
+          if (action) {
+            this.fire('ghvz-chat-info-action', { action: action, playerId: playerId });
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          if (action == 'ping' || action == 'kick') {
+            //e.srcElement.closest("paper-menu-button").close();
+          }
+        },
+      });
+    });
+  </script>
+  <style>
+    :host {
+      display: flex;
+      width: 100%;
+      margin-top: 16px;
+      margin-bottom: 24px;
+      border: 1px solid var(--grey500);
+    }
+
+    :host .large-text {
+      font-size: 24px;
+    }
+  </style>
+
+  <template>
+    <ghvz-card admin>
+      <div slot="headerText">[[reward.shortName]]</div>
+      <div slot="headerButton">
+        <button class="mdc-icon-button material-icons-outlined" on-click="edit_">edit
+        </button>
+        <!-- <button class="mdc-icon-button material-icons-outlined" on-click="">more_vert
+        </button> -->
+        <!-- <paper-menu-button>
+          <paper-icon-button class="dropdown-trigger" icon="icons:more-vert">
+          </paper-icon-button>
+          <paper-menu class="dropdown-content" selected="{{selectedMenuItem}}">
+            <paper-item on-tap="captureTap_" data-action="view">
+              View claim codes
+            </paper-item>
+            <template is="dom-if" if="[[canRemoveOthers]]">
+              <paper-item on-tap="captureTap_" data-action="generate">
+                Generate claim codes
+              </paper-item>
+            </template>
+          </paper-menu>
+        </paper-menu-button> -->
+      </div>
+
+      <div slot style="display: flex; flex-direction: row;">
+        <img src="[[reward.imageUrl]]" width="54px" style="padding-right: 16px;"></img>
+        <div style="display: flex; flex-grow: 1; color: var(--grey800)">
+          <div style="display: flex; flex-grow: 1; flex-direction: column; align-self:center;">
+            <div class="large-text">
+              [[reward.longName]]
+            </div>
+            <div style="font-size: 18px; padding-top: 8px;">
+              [[reward.description]]
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column;">
+            <div class="large-text" style="align-self:center; flex-grow: 1;">
+              [[reward.points]] [[pointString_(reward)]]
+            </div>
+            <div>[[getAvailabilityString_(stats)]]</div>
+          </div>
+        </div>
+      </div>
+    </ghvz-card>
+  </template>
+</dom-module>

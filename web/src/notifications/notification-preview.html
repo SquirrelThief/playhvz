@@ -15,125 +15,129 @@
 -->
 
 <dom-module id="ghvz-notification-preview">
-<script>
-  // Not sure why this HTMLImports.whenReady is really needed.
-  // Something about polymer initialization order.
-  // I think we're not supposed to need this.
-  HTMLImports.whenReady(() => {
-    Polymer({
-      is: 'ghvz-notification-preview',
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-notification-preview',
 
-      properties: {
-        bridge: Object,
-        game: Object,
+        properties: {
+          bridge: Object,
+          game: Object,
 
-        player: Object,
+          player: Object,
 
-        notification: Object,
+          notification: Object,
 
-        navigateOnTap: {
-          type: Boolean,
-          value: false,
+          navigateOnTap: {
+            type: Boolean,
+            value: false,
+          },
+
+          withClose: {
+            type: Boolean,
+            value: false,
+          },
         },
 
-        withClose: {
-          type: Boolean,
-          value: false,
+        computeIcon_(notificationIcon) {
+          return notificationIcon || "notification:sms";
         },
-      },
 
-      computeIcon_(notificationIcon) {
-        return notificationIcon || "notification:sms";
-      },
+        handleTap_(e) {
+          if (this.navigateOnTap) {
+            this.bridge.updateNotification({
+              gameId: this.game.id,
+              playerId: this.player.id,
+              notificationId: this.notification.id,
+              seenTime: new Date().getTime(),
+            });
+            if (this.notification.destination.includes('http')) {
+              window.location = this.notification.destination;
+            } else {
+              let destinationString = this.notification.destination || 'notifications/' + this.notification.id;
+              let destinationPath = destinationString.split('/');
+              this.fire('ghvz-set-path', {
+                inGame: !destinationString.startsWith('game/'),
+                path: destinationPath,
+                replace: false,
+              });
+            }
+          }
+        },
 
-      handleTap_(e) {
-        if (this.navigateOnTap) {
+        close_(e) {
           this.bridge.updateNotification({
             gameId: this.game.id,
             playerId: this.player.id,
             notificationId: this.notification.id,
             seenTime: new Date().getTime(),
           });
-          if (this.notification.destination.includes('http')) {
-            window.location = this.notification.destination;
-          } else {
-            let destinationString = this.notification.destination || 'notifications/' + this.notification.id;
-            let destinationPath = destinationString.split('/');
-            this.fire('ghvz-set-path', {
-              inGame: !destinationString.startsWith('game/'),
-              path: destinationPath,
-              replace: false,
-            });
-          }
-        }
-      },
+          e.stopPropagation();
+        },
 
-      close_(e) {
-        this.bridge.updateNotification({
-          gameId: this.game.id,
-          playerId: this.player.id,
-          notificationId: this.notification.id,
-          seenTime: new Date().getTime(),
-        });
-        e.stopPropagation();
-      },
-
-      formatShortTime_(time) {
-        var time = Utils.formatShortTime(time);
-        return time;
-      },
+        formatShortTime_(time) {
+          var time = Utils.formatShortTime(time);
+          return time;
+        },
+      });
     });
-  });
-</script>
-<style>
-  :host {
-    display: block;
-  }
-  :host {
-    cursor: pointer;
-  }
-  :host:hover {
-    background-color: #F0F0F0;
-  }
-  #container {
-    display: flex;
-    min-height: 40px;
-    display: flex;
-    align-items: center;
-    padding: 0 8px;
-    box-sizing: border-box;
-  }
-  .icon {
-    opacity: .6;
-    margin-right: 8px;
-    flex-shrink: 0;
-  }
-  .preview-message {
-    flex-grow: 1;
-  }
-  .notification .close {
-    flex-shrink: 0;
-    opacity: .75;
-  }
-  #time {
-    margin-left: 10px;
-  }
-  .close {
-    flex-shrink: 0;
-  }
-</style>
-<template>
-  <div id="container" on-tap="handleTap_">
-    <iron-icon icon="[[computeIcon_(notification.icon)]]" class="icon"></iron-icon>
-    <div class="preview-message" name$="preview-[[notification.previewMessage]]">[[notification.previewMessage]]</div>
-    <div id="time">[[formatShortTime_(notification.time)]]</div>
-    <paper-icon-button
-        name="close-notification"
-        hidden$="[[!withClose]]"
-        class="close"
-        icon="icons:close"
+  </script>
+  <style>
+    :host {
+      display: block;
+    }
+
+    :host {
+      cursor: pointer;
+    }
+
+    :host:hover {
+      background-color: #F0F0F0;
+    }
+
+    :host #container {
+      display: flex;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      box-sizing: border-box;
+    }
+
+    .icon {
+      opacity: .6;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .preview-message {
+      flex-grow: 1;
+    }
+
+    .notification .close {
+      flex-shrink: 0;
+      opacity: .75;
+    }
+
+    #time {
+      margin-left: 10px;
+    }
+
+    .close {
+      flex-shrink: 0;
+    }
+  </style>
+  <template>
+    <div id="container" on-tap="handleTap_">
+      <iron-icon icon="[[computeIcon_(notification.icon)]]" class="icon"></iron-icon>
+      <div class="preview-message" name$="preview-[[notification.previewMessage]]">[[notification.previewMessage]]</div>
+      <div id="time">[[formatShortTime_(notification.time)]]</div>
+      <paper-icon-button name="close-notification" hidden$="[[!withClose]]" class="close" icon="icons:close"
         on-tap="close_">
-    </paper-icon-button>
-  </div>
-</template>
+      </paper-icon-button>
+    </div>
+  </template>
 </dom-module>

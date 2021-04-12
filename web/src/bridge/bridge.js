@@ -282,6 +282,47 @@ class Bridge {
       .catch(error => console.log("Error: " + error.message));
   }
 
+  async removePlayerFromChat(gameId, playerId, chatRoomId) {
+    var removePlayerFromChat = firebase.functions().httpsCallable("removePlayerFromChat");
+    await removePlayerFromChat({ gameId: gameId, playerId: playerId, chatRoomId: chatRoomId })
+      .then((result) => {
+        console.log("Removed player from chat successfully");
+      })
+      .catch(error => console.log("Error: " + error.message));
+  }
+
+  async listenToChatRooms(gameId, playerId) {
+    return this.getPlayerOnce(gameId, playerId).then(player => {
+      if (!player) {
+        return [];
+      }
+      let chatRoomIds = Object.keys(player.chatRoomMemberships);
+      let chatRoomPromises = []
+      for (let chatRoomId of chatRoomIds) {
+        const promise = this.getChatRoomOnce(gameId, chatRoomId);
+        chatRoomPromises.push(promise);
+      }
+      // Once we have all the chat rooms, we can now render the data.
+      return Promise.all(chatRoomPromises).then(chatRooms => {
+        return chatRooms;
+      });
+    });
+  }
+
+  async listenToChatList(gameId, chatRoomIds, callback) {
+    if (!chatRoomIds || chatRoomIds.length == 0) {
+      callback([]);
+    }
+    let chatRoomPromises = []
+    for (let chatRoomId of chatRoomIds) {
+      const promise = this.getChatRoomOnce(gameId, chatRoomId);
+      chatRoomPromises.push(promise);
+    }
+    // Once we have all the chat rooms, we can now render the data.
+    Promise.all(chatRoomPromises).then(chatRooms => {
+      callback(chatRooms);
+    });
+  }
 
   listenToLastMission(gameId, playerId, callback) {
     // Get all the groups the player is in
@@ -364,7 +405,7 @@ class Bridge {
       });
   }
 
-  async createReward(gameId, shortName, longName, description, imageUrl, points) {
+  async createReward(gameId, shortName, longName, description, imageUrl, points, onSuccess = null, onError = null) {
     var createReward = firebase.functions().httpsCallable("createReward");
     await createReward({
       gameId: gameId,
@@ -375,9 +416,40 @@ class Bridge {
       points: points
     })
       .then((result) => {
-        console.log("Created a reward!")
+        if (onSuccess) {
+          onSuccess();
+        }
       })
-      .catch(error => console.log("Error: " + error.message));
+      .catch(error => {
+        console.log("Error: " + error.message);
+        if (onError) {
+          onError(error.message);
+        }
+      });
+  }
+
+  async updateReward(gameId, rewardId, shortName, longName, description, imageUrl, points, onSuccess = null, onError = null) {
+    var updateReward = firebase.functions().httpsCallable("updateReward");
+    await updateReward({
+      gameId: gameId,
+      rewardId: rewardId,
+      shortName: shortName,
+      longName: longName,
+      description: description,
+      imageUrl: imageUrl,
+      points: points
+    })
+      .then((result) => {
+        if (onSuccess) {
+          onSuccess();
+        }
+      })
+      .catch((error) => {
+        console.log("Error: " + error.message);
+        if (onError) {
+          onError(error.message);
+        }
+      });
   }
 
 
@@ -441,8 +513,12 @@ class Bridge {
       });
   }
 
-  createOrGetChatWithAdmin(gameId, playerId) {
-    return this.inner.createOrGetChatWithAdmin(gameId, playerId);
+  async createOrGetChatWithAdmin(gameId, playerId) {
+    var createOrGetChatWithAdmin = firebase.functions().httpsCallable("createOrGetChatWithAdmin");
+    return createOrGetChatWithAdmin({
+      gameId: gameId,
+      playerId: playerId
+    });
   }
 
   listenToMissionList(gameId, playerId, callback) {
@@ -472,8 +548,88 @@ class Bridge {
     })
   }
 
-  updateGameRules(gameId, updatedRulesArray, successCallback = null, onErrorCallback = null) {
-    this.firestoreOperations.updateGameRules(gameId, updatedRulesArray, successCallback, onErrorCallback);
+  listenToRewardList(gameId, callback) {
+    let self = this;
+    this.firestoreOperations.getAllRewards(gameId).then(querySnapshot => {
+      if (querySnapshot.empty) {
+        callback([]);
+        return;
+      }
+      let rewardList = [];
+      let rewardUpdatedCallback = function (serverReward) {
+        for (let [index, reward] of rewardList.entries()) {
+          if (reward.id === serverReward.id) {
+            rewardList[index] = serverReward;
+            callback(rewardList);
+          }
+        }
+      }
+      for (let doc of querySnapshot.docs) {
+        rewardList.push(DataConverterUtils.convertSnapshotToReward(doc));
+        self.listenToReward(gameId, doc.id, rewardUpdatedCallback);
+      }
+    });
+  }
+
+  async getRewardClaimedStats(gameId, rewardId) {
+    var getRewardClaimedStats = firebase.functions().httpsCallable("getRewardClaimedStats");
+    return getRewardClaimedStats({
+      gameId: gameId,
+      rewardId: rewardId
+    });
+  }
+
+  async getGameStats(gameId) {
+    var getGameStats = firebase.functions().httpsCallable("getGameStats");
+    return getGameStats({
+      gameId: gameId
+    });
+  }
+
+  async updateGameRules(gameId, updatedRulesArray, successCallback = null, onErrorCallback = null) {
+    return this.firestoreOperations.updateGameRules(gameId, updatedRulesArray, successCallback, onErrorCallback);
+  }
+
+  async updateGameFaq(gameId, updatedFaqArray, successCallback = null, onErrorCallback = null) {
+    return this.firestoreOperations.updateGameFaq(gameId, updatedFaqArray, successCallback, onErrorCallback);
+  }
+
+  async updatePlayerChatVisibility(gameId, playerId, chatRoomId, isVisible, successCallback = null, onErrorCallback = null) {
+    let fieldAndValue = { field: PlayerPath.FIELD__CHAT_VISIBILITY, value: isVisible };
+    return this.firestoreOperations.updatePlayerChatSettings(gameId, playerId, chatRoomId, fieldAndValue, successCallback, onErrorCallback);
+  }
+
+  async getPlayerList(gameId, nameFilter, allegianceFilter, callback) {
+    let playerList = await this.firestoreOperations.getPlayerList(gameId, nameFilter, allegianceFilter, callback);
+    callback(playerList);
+  }
+
+  async getPlayerListOutsideOfGroup(gameId, group, nameFilter, allegianceFilter, callback) {
+    if (!group) {
+      return [];
+    }
+    let allPlayerList = await this.firestoreOperations.getPlayerList(gameId, nameFilter, allegianceFilter, callback);
+    for (let memberId of group.members) {
+      let index = allPlayerList.findIndex(item => item.id === memberId);
+      if (index > -1) {
+        allPlayerList.splice(index, /* deleteCount= */ 1);
+      }
+    }
+    callback(allPlayerList);
+  }
+
+  async getPlayerListInGroup(gameId, group, nameFilter, allegianceFilter, callback) {
+    let playerList = await this.firestoreOperations.getPlayerListInGroup(gameId, group);
+    for (let [index, player] of playerList.entries()) {
+      if (allegianceFilter && player.allegiance != allegianceFilter) {
+        // Remove players that aren't the right allegiance
+        playerList.splice(index, /* deleteCount= */ 1);
+      } else if (nameFilter && !player.name.startsWith(nameFilter)) {
+        // Remove players that aren't the right name
+        playerList.splice(index, /* deleteCount= */ 1);
+      }
+    }
+    callback(playerList);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -831,13 +987,6 @@ class FakeIdGenerator extends IdGenerator {
     name: '|String',
     withAdmins: '|Boolean',
   });
-  serverMethods.set('updateChatRoomMembership', {
-    gameId: 'GameId',
-    chatRoomId: 'ChatRoomId',
-    actingPlayerId: 'PublicPlayerId',
-    lastHiddenTime: '|?Timestamp',
-    lastSeenTime: '|?Timestamp',
-  });
 
   serverMethods.set('createMap', {
     gameId: 'GameId',
@@ -862,25 +1011,6 @@ class FakeIdGenerator extends IdGenerator {
     color: 'String',
     latitude: 'Number',
     longitude: 'Number',
-  });
-
-  serverMethods.set('addPlayerToGroup', {
-    gameId: 'GameId',
-    groupId: 'GroupId',
-    playerToAddId: 'PublicPlayerId',
-    actingPlayerId: '?PublicPlayerId',
-  });
-
-  serverMethods.set('removePlayerFromGroup', {
-    gameId: 'GameId',
-    groupId: 'GroupId',
-    playerToRemoveId: 'PublicPlayerId',
-    actingPlayerId: '?PublicPlayerId',
-  });
-
-  serverMethods.set('addAdmin', {
-    gameId: 'GameId',
-    userId: 'UserId',
   });
 
   serverMethods.set('joinHorde', {

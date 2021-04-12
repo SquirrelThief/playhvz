@@ -30,6 +30,7 @@
           path: Array,
           chatRoomId: String,
           outsideGame: Boolean,
+          withLoading: Boolean,
 
           // Optionally add a dash to the element name
           addDash: {
@@ -77,18 +78,17 @@
     .drawer-item {
       display: flex;
       align-items: center;
-      opacity: .6;
       padding-left: 4px;
       height: 40px;
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      color: black;
+      color: var(--grey700);
       text-decoration: none;
 
       --ghvz-chat-room-name-label-icon: {
         margin: 8px;
-        opacity: .8;
+        color: var(--grey700);
       }
     }
 
@@ -102,16 +102,24 @@
 
     .drawer-item iron-icon {
       margin: 8px;
-      opacity: .8;
+      color: var(--grey700);
     }
 
     .drawer-item .material-icons-outlined {
       margin: 8px;
-      opacity: .8;
+      color: var(--grey700);
+      width: 24px;
+      height: 24px;
     }
 
     iron-icon {
       flex-shrink: 0;
+    }
+
+    .spinner {
+      padding-left: 20px;
+      width: 24px;
+      height: 24px;
     }
   </style>
   <template>
@@ -123,6 +131,9 @@
         <span class="material-icons-outlined">[[icon]]</span>
       </template>
       [[text]]
+      <template is="dom-if" if="[[withLoading]]">
+        <paper-spinner id="loadingSpinner" active hidden class="spinner"></paper-spinner>
+      </template>
     </div>
   </template>
 </dom-module>

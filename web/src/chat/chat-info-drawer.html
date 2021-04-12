@@ -57,7 +57,6 @@
         ],
 
         onChatRoomIdChanged_() {
-          //assert(this.game.chatRooms[this.chatRoomId]);
           let self = this;
           this.chatMembersById = {};
           let groupUpdatedCallback = function (serverGroup) {
@@ -75,10 +74,10 @@
           if (!this.group || !this.chatRoom) {
             return;
           }
-          let ownsGroup = this.currentPlayer.id == this.group.ownerPlayerId;
-          this.canAdd = this.isAdmin || this.group.canAddOthers || (ownsGroup && !this.chatRoom.withAdmins);
-          this.canRemoveSelf = this.isAdmin || this.group.canRemoveSelf || (ownsGroup && !this.chatRoom.withAdmins);
-          this.canRemoveOthers = this.isAdmin || this.group.canRemoveOthers || (ownsGroup && !this.chatRoom.withAdmins);
+          let ownsGroup = this.group.owners.includes(this.currentPlayer.id)
+          this.canAdd = this.isAdmin || this.group.settings.canAddOthers || (ownsGroup && !this.chatRoom.withAdmins);
+          this.canRemoveSelf = this.isAdmin || this.group.settings.canRemoveSelf || (ownsGroup && !this.chatRoom.withAdmins);
+          this.canRemoveOthers = this.isAdmin || this.group.settings.canRemoveOthers || (ownsGroup && !this.chatRoom.withAdmins);
 
           this.showActionsSection = this.canAddd || this.canRemoveSelf;
           this.showPlayerDropdown = this.canRemoveOthers;
@@ -120,39 +119,49 @@
     :host {
       display: block;
       overflow-y: auto;
+      color: var(--grey700);
     }
 
-    .drawer-item {
+    :host .drawer-item {
       display: flex;
       align-items: center;
-      opacity: .6;
       padding-left: 4px;
       height: 40px;
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      color: black;
+      color: var(--grey700);
       text-decoration: none;
     }
 
-    .drawer-item iron-icon {
-      margin: 8px;
-      opacity: .8;
-    }
-
-    .drawer-header {
+    :host .drawer-header {
       display: flex;
       align-items: center;
-      opacity: .6;
       margin-left: 12px;
       height: 48px;
       font-size: 18px;
       font-weight: 500;
     }
 
-    .drawer-section {
+    :host .drawer-section {
       border-top: 1px solid #ddd;
       padding: 8px 0;
+    }
+
+    :host .drawer-item iron-icon {
+      margin: 8px;
+      color: var(--grey700);
+    }
+
+    :host .drawer-item .material-icons-outlined {
+      margin: 8px;
+      color: var(--grey700);
+      width: 24px;
+      height: 24px;
+    }
+
+    :host iron-icon {
+      flex-shrink: 0;
     }
 
     .info-label {
@@ -207,17 +216,17 @@
         <div class="drawer-section">
           <template is="dom-if" if="[[canAdd]]">
             <a name="chat-drawer-add" href="javascript:void(0)" data-action="add" class="drawer-item">
-              <iron-icon icon="icons:add"></iron-icon>
+              <span class="material-icons-outlined">add</span>
               Add player
             </a>
           </template>
           <a href="javascript:void(0)" data-action="notifications" class="drawer-item">
-            <iron-icon icon="social:notifications"></iron-icon>
+            <span class="material-icons-outlined">notifications</span>
             Notifications
           </a>
           <template is="dom-if" if="[[canRemoveSelf]]">
             <a name="chat-drawer-leave" href="javascript:void(0)" data-action="leave" class="drawer-item">
-              <iron-icon icon="communication:call-made"></iron-icon>
+              <span class="material-icons-outlined">call_made</span>
               Leave
             </a>
           </template>

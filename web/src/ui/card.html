@@ -46,6 +46,12 @@
           'ghvz-set-card-header': 'setCardHeader_',
         },
 
+        attached() {
+          this.$.headerContent.addEventListener('slotChange', function () {
+            this.deleteHeaders_();
+          });
+        },
+
         addToolbarButton_: function (event) {
           this.$.buttons.appendChild(event.detail.button);
           event.stopPropagation();
@@ -178,6 +184,7 @@
       flex-grow: 1;
       display: flex;
       flex-direction: column;
+      padding: 16px;
     }
 
     :host([scrolling]) #contents {

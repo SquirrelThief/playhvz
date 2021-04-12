@@ -54,6 +54,11 @@
             },
           },
 
+          chatsExpanded: {
+            type: Boolean,
+            value: false,
+          },
+
           waitingToOpenChatRoomId: String,
           adminChatExists: Boolean,
           adminChatRoomId: String,
@@ -118,7 +123,7 @@
         },
 
         openChatWeWereWaitingOn_(bridge, game, waitingToOpenChatRoomId) {
-          if (this.waitingToOpenChatRoomId && this.game.chatRooms[this.waitingToOpenChatRoomId]) {
+          if (this.waitingToOpenChatRoomId) {
             this.fire('ghvz-close-drawer', {});
             this.fire('ghvz-set-path', {
               inGame: true,
@@ -130,21 +135,24 @@
         },
 
         createAdminChat_() {
-          return () => {
+          return async () => {
+            let loadingSpinner = this.$$('#adminchat').$$('#loadingSpinner');
+            if (loadingSpinner) {
+              loadingSpinner.hidden = false;
+            }
             if (this.adminChatRoomId) {
               // The admin chat already exists, update visibility and open it
               this.waitingToOpenChatRoomId = this.adminChatRoomId;
-              this.bridge.updateChatRoomMembership({
-                gameId: this.game.id,
-                chatRoomId: this.adminChatRoomId,
-                actingPlayerId: this.player.id,
-                lastHiddenTime: null,
-              });
+              await this.bridge.updatePlayerChatVisibility(
+                this.game.id, this.player.id, this.adminChatRoomId, /* isVisible= */ true);
+              loadingSpinner.hidden = true;
               return;
             }
             // The admin chat doesn't exist, create it and open it when ready
-            this.bridge.createOrGetChatWithAdmin(this.game.id, this.player.id).then(adminChatId => {
-              this.waitingToOpenChatRoomId = adminChatId;
+            this.bridge.createOrGetChatWithAdmin(this.game.id, this.player.id).then(result => {
+              this.adminChatRoomId = result.data;
+              this.waitingToOpenChatRoomId = this.adminChatRoomId;
+              loadingSpinner.hidden = true;
             });
           }
         },
@@ -152,6 +160,12 @@
         createNewChat_() {
           return () => {
             this.fire('ghvz-open-dialog', { dialog: this.$.settings });
+          }
+        },
+
+        searchPlayerDialog_() {
+          return () => {
+            this.fire('ghvz-open-dialog', { dialog: this.$.searchPlayer });
           }
         },
 
@@ -168,6 +182,19 @@
             return array;
           });
           return array;
+        },
+
+        expandChats_() {
+          return () => {
+            if (this.chatsExpanded) {
+              this.$$("#chatExpander").icon = "expand_more";
+              this.$$("#chattoggle").style.display = "none";
+            } else {
+              this.$$("#chatExpander").icon = "expand_less";
+              this.$$("#chattoggle").style.display = "block";
+            }
+            this.chatsExpanded = !this.chatsExpanded
+          }
         }
       });
     });
@@ -176,24 +203,6 @@
     :host {
       display: block;
       overflow-y: auto;
-    }
-
-    .drawer-item {
-      display: flex;
-      align-items: center;
-      opacity: .6;
-      padding-left: 4px;
-      height: 40px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      color: black;
-      text-decoration: none;
-
-      --ghvz-chat-room-name-label-icon: {
-        margin: 8px;
-        opacity: .8;
-      }
     }
 
     .drawer-item:active {
@@ -207,7 +216,6 @@
     .drawer-header {
       display: flex;
       align-items: center;
-      opacity: .6;
       margin-left: 12px;
       height: 48px;
       font-size: 18px;
@@ -226,7 +234,13 @@
     }
 
     #debugInfo {
-      padding: 8px;
+      font-size: 12px;
+    }
+
+    .debug {
+      padding-left: 16px;
+      padding-right: 16px;
+      color: var(--grey500);
     }
 
     .first+.drawer-section {
@@ -253,51 +267,50 @@
 
     <template is="dom-if" if="[[isPlayer]]">
       <div class="drawer-section">
-        <ghvz-drawer-item text="Dashboard" path='["main"]' icon="icons:dashboard"></ghvz-drawer-item>
-        <ghvz-drawer-item text="My Profile" path='["profile"]' icon="icons:account-box"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Missions" path='["missions"]' icon="icons:group-work"></ghvz-drawer-item>
-
-        <template is="dom-repeat" items="[[chatMembershipAsArray_(player.chatRoomMemberships)]]" as="membership">
-          <ghvz-drawer-chat-item game="[[game]]" bridge="[[bridge]]" player="[[player]]"
-            chat-room-membership="[[membership]]">
-          </ghvz-drawer-chat-item>
-        </template>
-
-        <template is="dom-if" if="[[!adminChatExists]]">
-          <ghvz-drawer-item name="create-admin-chat-button" text="Chat with Admins" action="[[createAdminChat_()]]"
-            icon="social:group">
-          </ghvz-drawer-item>
-        </template>
-
-        <ghvz-drawer-item id="new-chat" text="New chat" action="[[createNewChat_()]]" icon="icons:add">
+        <ghvz-drawer-item text="Dashboard" path='["main"]' icon="dashboard"></ghvz-drawer-item>
+        <ghvz-drawer-item text="My Profile" path='["profile"]' icon="perm_identity"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Missions" path='["missions"]' icon="event"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Infect" path='["infect"]' icon="whatshot"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Redeem reward" path='["rewards"]' icon="emoji_events"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Leaderboard" path='["leaderboard"]' icon="leaderboard"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Game Stats" path='["stats"]' icon="pie_chart"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Chats" id="chatExpander" action="[[expandChats_()]]" icon="expand_more">
         </ghvz-drawer-item>
-
-        <ghvz-drawer-item text="Leaderboard" path='["leaderboard"]' icon="social:group"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Notifications" path='["notifications"]' icon="notification:sms"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Infect" path='["infect"]' icon="social:whatshot"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Rewards" path='["rewards"]' icon="icons:stars"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Stun Timer" path='["stuntimer"]' icon="icons:hourglass-full"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Rules" path='["rules"]' icon="editor:format-list-numbered"></ghvz-drawer-item>
-        <ghvz-drawer-item text="FAQ" path='["faq"]' icon="icons:question-answer"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Game Stats" path='["stats"]' icon="editor:pie-chart"></ghvz-drawer-item>
+        <div id="chattoggle" style="display: none; padding-left: 16px;">
+          <template is="dom-repeat" items="[[chatMembershipAsArray_(player.chatRoomMemberships)]]" as="membership">
+            <ghvz-drawer-chat-item game="[[game]]" bridge="[[bridge]]" player="[[player]]"
+              chat-room-membership="[[membership]]">
+            </ghvz-drawer-chat-item>
+          </template>
+          <ghvz-drawer-item id="new-chat" text="New chat" action="[[createNewChat_()]]" icon="add">
+          </ghvz-drawer-item>
+        </div>
+        <ghvz-drawer-item text="Search for players" action="[[searchPlayerDialog_()]]" icon="person_search">
+        </ghvz-drawer-item>
+        <ghvz-drawer-item text="Rules" path='["rules"]' icon="list"></ghvz-drawer-item>
+        <ghvz-drawer-item text="FAQ" path='["faq"]' icon="help_outlined"></ghvz-drawer-item>
+        <ghvz-drawer-item id="adminchat" name="create-admin-chat-button" text="Chat with an Admin"
+          action="[[createAdminChat_()]]" with-loading icon="headset_mic">
+        </ghvz-drawer-item>
+        <ghvz-drawer-item text="Stun Timer" path='["stuntimer"]' icon="timer"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Notifications" path='["notifications"]' icon="notifications"></ghvz-drawer-item>
       </div>
     </template>
 
     <template is="dom-if" if="[[isAdmin]]">
       <div id="adminPages" class="drawer-section">
-        <ghvz-drawer-item text="Admin Dashboard" path='["adminMain"]' icon="icons:dashboard"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Admin Game Details" path='["adminGame"]' icon="icons:group-work"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Admin Game Summary" path='["adminGameSummary"]' icon="icons:language">
+        <ghvz-drawer-item text="Admin dashboard" path='["adminMain"]' icon="dashboard"></ghvz-drawer-item>
+        <ghvz-drawer-item text="View admin chats" path='["adminChats"]' icon="headset_mic"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Edit missions" path='["adminMissions"]' icon="edit_calendar"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Rewards" path='["adminRewards"]' icon="emoji_events"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Edit allegiance quiz" path='["adminEditQuiz"]' icon="school"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Edit Rules" path='["adminEditRules"]' icon="playlist_add"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Edit FAQ" path='["adminEditFaq"]' icon="help_outlined"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Game Settings" path='["adminGame"]' icon="settings"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Admin Notifications" path='["adminNotifications"]' icon="notifications">
         </ghvz-drawer-item>
-        <ghvz-drawer-item text="Admin Missions" path='["adminMissions"]' icon="icons:group-work"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Admin Players" path='["adminPlayers"]' icon="social:group"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Admin Dev Tools" path='["adminDevTools"]' icon="icons:build"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Admin Guns" path='["adminGuns"]' icon="icons:favorite"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Admin Rewards" path='["adminRewards"]' icon="icons:stars"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Admin Notifications" path='["adminNotifications"]' icon="notification:sms">
-        </ghvz-drawer-item>
-        <ghvz-drawer-item text="Admin Chats" path='["adminChats"]' icon="communication:chat"></ghvz-drawer-item>
-        <ghvz-drawer-item text="Admin Edit Rules" path='["adminEditRules"]' icon="list"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Admin Guns" path='["adminGuns"]' icon="handyman"></ghvz-drawer-item>
+        <ghvz-drawer-item text="Admin Dev Tools" path='["adminDevTools"]' icon="build"></ghvz-drawer-item>
       </div>
     </template>
 
@@ -319,7 +332,8 @@
     </div>
 
     <template is="dom-if" if="[[bridge.isDevServer]]">
-      <div id="debugInfo">
+      <span class="material-icons-outlined debug">bug_report</span>
+      <div id="debugInfo" class="debug">
         <div>User ID: [[userId]]</div>
         <div>Game ID: [[game.id]]</div>
         <div>Player ID: [[player.id]]</div>
@@ -331,5 +345,8 @@
     <ghvz-chat-room-settings id="settings" bridge="[[bridge]]" game="[[game]]" player="[[player]]"
       is-admin="[[isAdmin]]">
     </ghvz-chat-room-settings>
+    <ghvz-search-player-dialog id="searchPlayer" bridge="[[bridge]]" game="[[game]]" player="[[player]]"
+      is-admin="[[isAdmin]]" opens-profile>
+    </ghvz-search-player-dialog>
   </template>
 </dom-module>

@@ -42,27 +42,33 @@
         width: 100%;
         display: block;
       }
+
       :host[section-width=half] {
         width: calc(50% - 16px);
       }
+
       :host[section-width=third] {
         width: calc(33% - 16px);
       }
+
       :host[section-width=fourth] {
         width: calc(25% - 16px);
       }
+
       :host[is-mobile] {
         width: 100%;
       }
+
       :host[spaced] {
         margin-top: 8px;
       }
+
       .description {
         color: #606060;
       }
     </style>
     <div id$="form-section-[[name]]">
-      <content></content>
+      <slot name="formContent"></slot>
     </div>
     <div class="description">
       [[description]]

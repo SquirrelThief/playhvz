@@ -529,6 +529,15 @@ Utils.isMobile = function () {
   return false;
 }
 
+/** Navigates to the current game's dashboard. Pass in "this" as the env variable. */
+Utils.navigateToDashboard = function (env) {
+  env.fire('ghvz-set-path', {
+    inGame: true,
+    path: ['main'],
+    replace: true,
+  });
+}
+
 Utils.arrayShallowEquals = function (a, b) {
   assert(a);
   assert(b);

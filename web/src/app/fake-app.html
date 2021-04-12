@@ -198,21 +198,6 @@
 
           this.setUrl_(true);
         },
-
-        unloadUserTapped_(e) {
-          let option = e.model.option;
-          let userId = option.userId;
-          let optionIndex = this.userOptions.indexOf(option);
-
-          if (this.focusedUserId == userId) {
-            this.focusedUserId = null;
-          }
-
-          this.appsByUserId[userId].remove();
-          delete this.appsByUserId[userId];
-          this.set('userOptions.' + optionIndex + '.focused', false);
-          this.set('userOptions.' + optionIndex + '.loaded', false);
-        },
       });
     });
   </script>
@@ -228,6 +213,8 @@
       position: relative;
       background-color: var(--app_color_accent);
       flex-wrap: wrap;
+      /* This saves space for the firebase emulator warning. */
+      margin-bottom: 16px;
     }
 
     .option {
@@ -272,15 +259,7 @@
             <paper-button raised id$="[[option.name]]Button" on-tap="loadUserTapped_">
               [[option.name]]
             </paper-button>
-
-            <paper-icon-button hidden$="[[!option.loaded]]" icon="icons:close" on-tap="unloadUserTapped_">
-            </paper-icon-button>
           </div>
-          <!--
-        These tooltips seem to interfere with webdrivers...
-        <paper-tooltip fit-to-visible-bounds position="top">
-          [[option.description]]
-        </paper-tooltip> -->
         </div>
       </template>
     </div>

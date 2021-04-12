@@ -28,19 +28,17 @@
           game: Object,
           chatRoom: Object,
           isAdmin: Boolean,
+          group: Object,
 
           playerId: String,
 
-          kickPlayer: {
-            type: Object,
-            value: function() { return []; },
-          }
+          kickPlayerId: Object,
         },
 
         executeAction(e) {
           let action = e.detail.action;
           let playerId = e.detail.playerId;
-          switch(action) {
+          switch (action) {
             case 'add':
               this.addPlayer_();
               break;
@@ -58,6 +56,7 @@
               });
               break;
             case 'ping':
+              console.error("We should implement this....");
               console.log(action);
               console.log(playerId);
               break;
@@ -65,67 +64,47 @@
               this.kickFromChat_(playerId);
               break;
             default:
-              // Unrecognized action, do nothing
+            // Unrecognized action, do nothing
           }
         },
 
-        addPlayer_: function() {
+        addPlayer_: function () {
           this.$.addDialog.open().then((playerId) => {
             if (playerId) {
-              this.bridge.addPlayerToGroup({
-                gameId: this.game.id,
-                groupId: this.chatRoom.accessGroupId,
-                actingPlayerId: this.playerId,
-                playerToAddId: playerId,
-              });
+              this.bridge.addPlayersToChat(this.game.id,
+                this.chatRoom.associatedGroupId,
+                this.chatRoom.id,
+                [playerId],
+              );
             }
           });
         },
 
-        leaveChat_: function() {
+        leaveChat_: function () {
           let adminChat = this.chatRoom.withAdmins;
-          let group = this.game.groupsById[this.chatRoom.accessGroupId];
-          let canLeaveAdminChat = this.isAdmin 
-              && (this.playerId != this.game.adminContactPlayerId) 
-              && (this.playerId != group.ownerPlayerId);
-          if (!adminChat || (adminChat && canLeaveAdminChat)) {
+          if (!adminChat) {
             this.$.leaveForm.open();
           } else {
-           this.hideChat_();
+            this.hideChat_();
           }
         },
 
-        onConfirmLeave_: function(e) {
-          this.bridge.removePlayerFromGroup({
-            gameId: this.game.id,
-            groupId: this.chatRoom.accessGroupId,
-            actingPlayerId: this.playerId,
-            playerToRemoveId: this.playerId,
-          });
+        onConfirmLeave_: function (e) {
+          this.bridge.removePlayerFromChat(this.game.id, this.playerId, this.chatRoom.id);
         },
 
-        hideChat_: function() {
+        hideChat_: function () {
           this.fire('ghvz-hide-chat-info-drawer', {});
-          this.bridge.updateChatRoomMembership({
-            gameId: this.game.id, 
-            chatRoomId: this.chatRoom.id,
-            actingPlayerId: this.playerId,
-            lastHiddenTime: new Date().getTime(),
-          });
+          this.bridge.removePlayerFromChat(this.game.id, this.playerId, this.chatRoom.id);
         },
 
-        kickFromChat_: function(playerId, game) {
-          this.kickPlayer = this.game.players[playerId];
+        kickFromChat_: function (playerId) {
+          this.kickPlayerId = playerId;
           this.$.kickForm.open();
         },
 
-        onConfirmKick_: function(e) {
-          this.bridge.removePlayerFromGroup({
-            gameId: this.game.id,
-            groupId: this.chatRoom.accessGroupId,
-            actingPlayerId: this.playerId,
-            playerToRemoveId: this.kickPlayer.id,
-          });
+        onConfirmKick_: function (e) {
+          this.bridge.removePlayerFromChat(this.game.id, this.kickPlayerId, this.chatRoom.id);
         },
       });
     });
@@ -134,36 +113,27 @@
     :host {
       display: block;
     }
-    .form-contents {
-      padding: 8px;
-    }
+
     #lookup {
       width: 100%;
     }
   </style>
   <template>
-    <ghvz-player-dialog id="addDialog" game="[[game]]"></ghvz-player-dialog>
+    <ghvz-search-player-dialog id="addDialog" bridge="[[bridge]]" game="[[game]]" player="[[player]]"
+      is-admin="[[isAdmin]]" group="[[group]]">
+    </ghvz-search-player-dialog>
 
-    <ghvz-form
-      id="leaveForm"
-      name$="chat-leave-dialog-[[chatRoom.name]]"
-      title="Really leave [[chatRoom.name]]?"
-      close-label="Cancel"
-      done-label="Yep, really leave"
-      on-ghvz-form-done="onConfirmLeave_">
-      <div class="form-contents">
+    <ghvz-form id="leaveForm" name$="chat-leave-dialog-[[chatRoom.name]]" title="Really leave [[chatRoom.name]]?"
+      close-label="Cancel" done-label="Yep, really leave" on-ghvz-form-done="onConfirmLeave_">
+      <div slot="formContent">
         Can't be undone, someone will have to add you back
       </div>
     </ghvz-form>
 
-    <ghvz-form
-      id="kickForm"
-      name="chat-kick-player-dialog-[[chatRoom.name]]"
-      title="Really kick [[kickPlayer.name]] from [[chatRoom.name]]?"
-      close-label="Cancel"
-      done-label="Yep, really kick"
+    <ghvz-form id="kickForm" name="chat-kick-player-dialog-[[chatRoom.name]]"
+      title="Really kick [[kickPlayer.name]] from [[chatRoom.name]]?" close-label="Cancel" done-label="Yep, really kick"
       on-ghvz-form-done="onConfirmKick_">
-      <div class="form-contents">
+      <div class="form-contents" slot="formContent">
         Don't be a jerk! Removing them from the chat can't be undone, someone will have to add them back
       </div>
     </ghvz-form>

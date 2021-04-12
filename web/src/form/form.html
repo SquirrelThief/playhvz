@@ -69,6 +69,10 @@
           this.$.dialog.open();
         },
 
+        close() {
+          this.$.dialog.close();
+        },
+
         opened_(e) {
           if (e.target == this.$.dialog) {
             let inputs = this.querySelectorAll('input, paper-input, paper-button, paper-checkbox, paper-textarea, ghvz-timestamp-picker');
@@ -129,24 +133,30 @@
       form {
         display: flex;
         flex-wrap: wrap;
-        margin-top: 0;
-        padding-top: 0;
+        margin: 0;
+        padding: 0;
         overflow-y: auto;
+        min-height: 100px;
       }
 
-      .button-container {
+      .form-contents {
+        padding: 16px;
+        background: white;
+      }
+
+      :host .button-container {
         display: flex;
         align-items: flex-end;
         justify-content: flex-end;
-        margin: 8px;
+        background: white;
       }
 
-      paper-button {
+      :host paper-button {
         background-color: var(--admin_color_primary);
         color: var(--admin_color_text_on_primary_background);
       }
 
-      #title {
+      :host #title {
         margin-top: 0;
         color: var(--admin_color_text_on_primary_background);
         background-color: var(--admin_color_primary);
@@ -155,9 +165,10 @@
         font-weight: bold;
       }
 
-      #dialog {
+      :host #dialog {
         display: flex;
         flex-direction: column;
+        background-color: white;
       }
     </style>
 
@@ -167,12 +178,14 @@
           [[title]]
         </div>
       </template>
-      <form is="iron-form" id="form">
-        <content></content>
+      <form is="iron-form" id="form" class="form-contents">
+        <slot name="formContent"></slot>
       </form>
-      <div name$="form-buttons-[[typeName]]" class="buttons">
-        <paper-button id="cancel" dialog-dismiss>[[closeLabel]]</paper-button>
-        <paper-button id="done" dialog-confirm disabled="[[!doneEnabled]]" autofocus>[[doneLabel]]</paper-button>
+      <div name$="form-buttons-[[typeName]]" class="buttons button-container">
+        <slot name="dialogButtons">
+          <paper-button id="cancel" dialog-dismiss>[[closeLabel]]</paper-button>
+          <paper-button id="done" dialog-confirm disabled="[[!doneEnabled]]" autofocus>[[doneLabel]]</paper-button>
+        </slot>
       </div>
     </paper-dialog>
   </template>

@@ -26,23 +26,21 @@
         properties: {
           game: Object,
           player: Object,
+          adminPlayer: Object,
           chatRoom: Object,
-
-          membership: Object,
-        },
-
-        observers: [
-          'onChatRoomUpdated_(game, player, chatRoom)',
-        ],
-
-        onChatRoomUpdated_(game, player, chatRoom) {
-          let membership = this.player.private.chatRoomMembershipsById[this.chatRoom.id] || null;
-          this.$.membershipSelector.select(membership);
+          isVisible: {
+            type: Boolean,
+            computed: 'isVisible_(adminPlayer, chatRoom)',
+          }
         },
 
         computePath_(chatRoomId) {
           return ["adminChats", chatRoomId];
         },
+
+        isVisible_() {
+          return this.adminPlayer.chatRoomMemberships[this.chatRoom.id].isVisible;
+        }
       });
     });
   </script>
@@ -51,24 +49,6 @@
       display: block;
       overflow-y: auto;
       position: relative;
-    }
-
-    .drawer-item {
-      display: flex;
-      align-items: center;
-      opacity: .6;
-      padding-left: 4px;
-      height: 40px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      color: black;
-      text-decoration: none;
-
-      --ghvz-chat-room-name-label-icon: {
-        margin: 8px;
-        opacity: .8;
-      }
     }
 
     #unseenIcon {
@@ -82,32 +62,17 @@
       border-radius: 6px;
     }
 
-    .drawer-item:active {
-      background-color: #e7e7e7;
-    }
-
-    .drawer-item:focus {
-      background-color: #e7e7e7;
-    }
-
-    .drawer-item iron-icon {
-      margin: 8px;
-      opacity: .8;
+    :host .name {
+      font-size: 24px;
+      margin-top: 16px;
+      margin-bottom: 16px;
     }
   </style>
   <template>
-    <array-selector id="membershipSelector" items="[[player.private.chatRoomMemberships]]" selected="{{membership}}">
-    </array-selector>
-
-    <template is="dom-if" if="[[membership]]">
-      <ghvz-drawer-chat-item game="[[game]]" open-in-admin-chats chat-room-membership="[[membership]]" ignore-hidden>
-      </ghvz-drawer-chat-item>
+    <template is="dom-if" if="[[isVisible]]">
+      <div class="name">
+        [[chatRoom.name]]
+      </div>
     </template>
-    <template is="dom-if" if="[[!membership]]">
-      <ghvz-drawer-item text="[[chatRoom.name]]" path="[[computePath_(chatRoom.id)]]"
-        chat-room-id="[[chatRoomMembership.chatRoomId]]" icon="communication:chat">
-      </ghvz-drawer-item>
-    </template>
-
   </template>
 </dom-module>

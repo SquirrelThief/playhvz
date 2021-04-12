@@ -146,7 +146,7 @@
   <template>
     <ghvz-form id="settingsForm" title="Chat Settings" close-label="Cancel" done-label="Create"
       done-enabled="[[doneEnabled]]" on-ghvz-form-done="createChatRoom_">
-      <div class="contents">
+      <div class="contents" slot="formContent">
         <paper-input id="chatName" class="input" auto-validate error-message="Name required!" label="Name"
           no-label-float maxlength="40" value="{{newName}}">
         </paper-input>

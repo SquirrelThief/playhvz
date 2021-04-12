@@ -55,14 +55,16 @@
 
       <ghvz-card spaced admin left>
         <div slot="headerText" name="Rules">Rules</div>
-        <ghvz-rules name="admin-page" is-admin is-mobile="[[isMobile]]" bridge="[[bridge]]" game="[[game]]">
-        </ghvz-rules>
+        <ghvz-collapsible-list name="admin-page" is-admin is-mobile="[[isMobile]]" bridge="[[bridge]]" game="[[game]]"
+          collapsed display="rules">
+        </ghvz-collapsible-list>
       </ghvz-card>
 
       <ghvz-card spaced admin left padded>
         <div slot="headerText">FAQ</div>
-        <ghvz-game-faq is-admin is-mobile="[[isMobile]]" bridge="[[bridge]]" game="[[game]]">
-        </ghvz-game-faq>
+        <ghvz-collapsible-list name="admin-page" is-admin is-mobile="[[isMobile]]" bridge="[[bridge]]" game="[[game]]"
+          collapsed display="faq">
+        </ghvz-collapsible-list>
       </ghvz-card>
 
       <ghvz-card spaced admin left>
@@ -75,14 +77,6 @@
         <div slot="headerText">Missions</div>
         <ghvz-missions is-mobile="[[isMobile]]" bridge="[[bridge]]" player="[[player]]" game="[[game]]">
         </ghvz-missions>
-      </ghvz-card>
-
-      <ghvz-card spaced scrolling admin full>
-        <div slot="headerText">Players</div>
-        <ghvz-player-table id="playerTableModule" game="[[game]]" bridge="[[bridge]]" is-mobile="[[isMobile]]"
-          reward-categories-by-id="[[game.rewardCategoriesById]]" players="[[game.players]]"
-          players-by-id="[[game.playersById]]">
-          </ghv-player-table>
       </ghvz-card>
 
       <ghvz-card spaced scrolling admin right>

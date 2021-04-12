@@ -30,50 +30,42 @@
           user: String,
           game: String,
           player: Object,
+          adminPlayer: Object,
           path: String,
           isAdmin: Boolean,
           isMobile: {
             type: Boolean,
             value: false,
           },
-
-          adminChats: Array,
-
           currentChatRoom: {
             type: Object,
             value: null,
           },
-
           showChatRoom: {
             type: Boolean,
-            computed: 'computeShowChatRoom_(isMobile, path)',
+            computed: 'computeShowChatRoom_(path)',
           },
-
           showChatRoomList: {
             type: Boolean,
-            computed: 'computeShowChatRoomList_(isMobile, path)',
+            computed: 'computeShowChatRoomList_(path)',
           },
         },
 
         observers: [
-          'onPathChanged_(path, game.chatRooms.*, adminChats)',
-          'onChatRoomsUpdated_(game, currentChatRoom, adminChats.length)',
-          'getAdminChats_(game.chatRooms.*)',
+          'onPathChanged_(path, bridge, game, isAdmin)',
+          'getAdminPlayer_(bridge, game, isAdmin)',
+          'onChatRoomUpdated_(currentChatRoom)',
         ],
 
-
-        computeShowChatRoomList_(isMobile, path) {
-          if (isMobile) {
-            return !this.computeShowChatRoom_(isMobile, path);
-          } else {
-            return true;
+        computeShowChatRoomList_(path) {
+          let showChatList = !this.computeShowChatRoom_(path);
+          if (showChatList) {
+            this.fire('ghvz-set-card-header-text', { headerText: "Admin Chats" });
           }
+          return showChatList;
         },
 
-        computeShowChatRoom_(isMobile, path) {
-          if (!isMobile) {
-            return true;
-          }
+        computeShowChatRoom_(path) {
           let indexOfChatString = path.indexOf("adminChats");
           if (indexOfChatString >= 0) {
             // If there's something after "chat" in the path
@@ -83,16 +75,6 @@
           }
           return false;
         },
-       
-        getAdminChats_() {
-          let adminChats = [];
-          for (chatRoom of this.game.chatRooms) {
-            if (chatRoom.withAdmins) {
-              adminChats.push(chatRoom);
-            }
-          }
-          this.adminChats = adminChats;
-        },
 
         onPathChanged_() {
           if (!this.isAdmin || this.path[0] != 'adminChats') {
@@ -100,48 +82,20 @@
           }
           var chatRoomId = this.path[1];
           if (chatRoomId) {
-            this.$.chatRoomSelector.select(
-                this.game.chatRooms.find(chatRoom => {
-                  return chatRoom.id == chatRoomId;
-                }));
-            if (this.$.chatRoomSelector.selected != null) {
-              return;
+            let self = this;
+            let callback = function (serverChatRoom) {
+              self.set('currentChatRoom', serverChatRoom);
             }
-            // If we get here we tried to view a chat room we no longer have access to, 
-            // redirect to /adminChat/ for mobile (desktop takes care of this by setting a new chat room id below)
-            if (this.isMobile) {
-              this.async(() => {
-                this.fire('ghvz-set-card-header-text', { headerText: "Admin Chats" });
-                this.fire('ghvz-set-path', {
-                  inGame: true,
-                  path: ['adminChat'],
-                  replace: true,
-                });
-              });
-            }
+            this.bridge.listenToChatRoom(this.game.id, chatRoomId, callback);
           }
-          // If we get here, then there wasn't a chat room, it was just /adminChats in the url
-          // (or there was a chat room id but we couldnt find that chat room)
-          if (this.isMobile) {
-            // If we get here, that means we're at /adminChats and on mobile. In this case
-            // we just want to show the chat list.
-            this.async(() => {
-              this.fire('ghvz-set-card-header-text', { headerText: "Admin Chats" });
-            });
-          } else {
-            // If we get here, that means we're at /adminChats and on desktop. In this case
-            // we want to just pick a chat room and show it.
-            if (this.adminChats.length > 0) {
-              this.async(() => {
-                chatRoomId = this.adminChats[0].id;
-                this.fire('ghvz-set-path', {
-                  inGame: true,
-                  path: ['adminChats', chatRoomId],
-                  replace: true,
-                });
-              });
-            }
+        },
+
+        getAdminPlayer_() {
+          let self = this;
+          let callback = function (serverPlayer) {
+            self.set('adminPlayer', serverPlayer);
           }
+          this.bridge.listenToPlayer(this.game.id, this.game.figureheadAdminPlayerAccount, callback);
         },
 
         onChatRoomsUpdated_() {
@@ -149,11 +103,11 @@
             // We are viewing a chat room that still exists, do nothing
             return;
           }
-          // Change to adminChat/ which will redirect us to a valid chat room
+          // Change to adminChat/ which will redirect us to the chat room list
           this.fire('ghvz-set-path', {
-                  inGame: true,
-                  path: ['adminChats'],
-                  replace: true,
+            inGame: true,
+            path: ['adminChats'],
+            replace: true,
           });
         },
       });
@@ -162,62 +116,53 @@
   <style include="iron-flex iron-flex-alignment">
     :host {
       display: flex;
-      flex-grow: 1;
       flex-direction: column;
     }
+
     #container {
       display: flex;
       flex-grow: 1;
       flex-direction: row
     }
+
     .chat-window {
       width: 100%;
+      height: 100%;
     }
+
     .chat-room-list {
       overflow-y: auto;
     }
+
     #container[is-mobile] .chat-room-list {
       max-width: 100%;
     }
+
     .vertical-separator {
       border-right: 1px solid darkgray;
     }
+
     #container {
       display: flex;
     }
-    ghvz-admin-chat-room-list {
-      flex-grow: 1;
-    }
+
     ghvz-chat-room {
       flex-grow: 3;
     }
   </style>
   <template>
-    <array-selector id="chatRoomSelector" items="[[game.chatRooms]]" selected="{{currentChatRoom}}"></array-selector>
     <div id="container" is-mobile$="[[isMobile]]" class="flex layout horizontal">
       <template is="dom-if" if="[[showChatRoomList]]">
-        <ghvz-admin-chat-room-list 
-            class="chat-room-list" 
-            bridge="[[bridge]]"
-            game="[[game]]"
-            player="[[player]]"
-            is-admin="[[isAdmin]]">
+        <ghvz-admin-chat-room-list class="chat-room-list" bridge="[[bridge]]" game="[[game]]" player="[[player]]"
+          is-admin="[[isAdmin]]" admin-player=[[adminPlayer]]>
         </ghvz-admin-chat-room-list>
       </template>
-      <template is="dom-if" if="[[showChatRoom]]">
-        <template is="dom-if" if="[[currentChatRoom]]">
-          <div class="vertical-separator"></div>
-          <ghvz-chat-room
-              name$="chat-room-[[currentChatRoom.name]]"
-              bridge="[[bridge]]"
-              game="[[game]]"
-              is-admin="[[isAdmin]]"
-              current-player="[[player]]"
-              chat-room-id="[[currentChatRoom.id]]"
-              is-mobile="[[isMobile]]"
-              class="chat-window">
-          </ghvz-chat-room>
-        </template>
+      <template is="dom-if" if="[[showChatRoom]]" restamp>
+        <div class="vertical-separator"></div>
+        <ghvz-chat-room name$="chat-room-[[currentChatRoom.name]]" bridge="[[bridge]]" game="[[game]]"
+          is-admin="[[isAdmin]]" current-player="[[adminPlayer]]" chat-room-id="[[currentChatRoom.id]]"
+          is-mobile="[[isMobile]]" with-back class="chat-window">
+        </ghvz-chat-room>
       </template>
     </div>
   </template>

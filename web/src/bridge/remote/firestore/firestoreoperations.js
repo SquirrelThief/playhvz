@@ -22,6 +22,7 @@ class FirestoreOperations {
   game;
 
   constructor() {
+    let PAGINATION_LIMIT = 25;
     this.db = firebase.firestore();
     this.game = {};
   }
@@ -140,6 +141,10 @@ class FirestoreOperations {
     return RewardPath.REWARD_DOC_REF(this.db, gameId, rewardId);
   }
 
+  getAllRewards(gameId) {
+    return RewardPath.REWARD_COLLECTION(this.db, gameId).get();
+  }
+
   updateGameRules(gameId, updatedRulesArray, successCallback, onErrorCallback) {
     GamePath.GAME_DOC_REF(this.db, gameId).update(GamePath.FIELD__RULES, updatedRulesArray)
       .then(() => {
@@ -152,6 +157,129 @@ class FirestoreOperations {
         if (onErrorCallback) {
           onErrorCallback();
         }
+      });
+  }
+
+  updateGameFaq(gameId, updatedFaqArray, successCallback, onErrorCallback) {
+    GamePath.GAME_DOC_REF(this.db, gameId).update(GamePath.FIELD__FAQ, updatedFaqArray)
+      .then(() => {
+        if (successCallback) {
+          successCallback();
+        }
+      })
+      .catch((error) => {
+        Log.e(TAG, "Failed to update game: " + error.message);
+        if (onErrorCallback) {
+          onErrorCallback();
+        }
+      });
+  }
+
+  updatePlayerChatSettings(gameId, playerId, chatRoomId, fieldAndValue, successCallback, onErrorCallback) {
+    let chatPath = PlayerPath.FIELD__CHAT_MEMBERSHIPS + "." + chatRoomId + "." + fieldAndValue.field;
+    PlayerPath.PLAYER_DOC_REF(this.db, gameId, playerId).update(chatPath, fieldAndValue.value)
+      .then(() => {
+        if (successCallback) {
+          successCallback();
+        }
+      })
+      .catch((error) => {
+        Log.e(TAG, "Failed to update player chat settings: " + error.message);
+        if (onErrorCallback) {
+          onErrorCallback();
+        }
+      });
+  }
+
+  async getPlayerList(gameId, nameFilter, allegianceFilter, callback) {
+    if (!nameFilter && !allegianceFilter) {
+      return PlayerPath.PLAYERS_COLLECTION(this.db, gameId)
+        .orderBy(PlayerPath.FIELD__NAME)
+        .limit(this.PAGINATION_LIMIT)
+        .get()
+        .then(serverPlayerSnapshots => {
+          if (!serverPlayerSnapshots || serverPlayerSnapshots.empty) {
+            return [];
+          }
+          let playerList = new Array();
+          for (let doc of serverPlayerSnapshots.docs) {
+            playerList.push(DataConverterUtils.convertSnapshotToPlayer(doc));
+          }
+          return playerList;
+        });
+    } else if (!nameFilter && allegianceFilter) {
+      return PlayerPath.PLAYERS_COLLECTION(this.db, gameId)
+        .orderBy(PlayerPath.FIELD__NAME)
+        .where(GroupPath.FIELD__SETTINGS_ALLEGIANCE_FILTER, "==", allegianceFilter)
+        .limit(this.PAGINATION_LIMIT)
+        .get()
+        .then(serverPlayerSnapshots => {
+          if (!serverPlayerSnapshots || serverPlayerSnapshots.empty) {
+            return [];
+          }
+          let playerList = new Array();
+          for (let doc of serverPlayerSnapshots.docs) {
+            playerList.push(DataConverterUtils.convertSnapshotToPlayer(doc));
+          }
+          return playerList;
+        });
+    } else if (nameFilter && !allegianceFilter) {
+      return PlayerPath.PLAYERS_COLLECTION(this.db, gameId)
+        .orderBy(PlayerPath.FIELD__NAME)
+        .startAt(nameFilter)
+        .endAt(nameFilter + "\uf8ff") // '\uf8ff' is super large char val
+        .limit(this.PAGINATION_LIMIT)
+        .get()
+        .then(serverPlayerSnapshots => {
+          if (!serverPlayerSnapshots || serverPlayerSnapshots.empty) {
+            return [];
+          }
+          let playerList = new Array();
+          for (let doc of serverPlayerSnapshots.docs) {
+            playerList.push(DataConverterUtils.convertSnapshotToPlayer(doc));
+          }
+          return playerList;
+        });
+    } else if (nameFilter && allegianceFilter) {
+      return PlayerPath.PLAYERS_COLLECTION(this.db, gameId)
+        .where(GroupPath.FIELD__SETTINGS_ALLEGIANCE_FILTER, "==", allegianceFilter)
+        .orderBy(PlayerPath.FIELD__NAME)
+        .startAt(nameFilter)
+        .endAt(nameFilter + "\uf8ff") // '\uf8ff' is super large char val
+        .limit(this.PAGINATION_LIMIT)
+        .get()
+        .then(serverPlayerSnapshots => {
+          if (!serverPlayerSnapshots || serverPlayerSnapshots.empty) {
+            return [];
+          }
+          let playerList = new Array();
+          for (let doc of serverPlayerSnapshots.docs) {
+            playerList.push(DataConverterUtils.convertSnapshotToPlayer(doc));
+          }
+          return playerList;
+        });
+    }
+
+  }
+
+  async getPlayerListInGroup(gameId, group) {
+    if (!group) {
+      return [];
+    }
+    return PlayerPath.PLAYERS_COLLECTION(this.db, gameId)
+      .where(firebase.firestore.FieldPath.documentId(), "in", group.members)
+      .orderBy(PlayerPath.FIELD__NAME)
+      .limit(this.PAGINATION_LIMIT)
+      .get()
+      .then(serverPlayerSnapshots => {
+        if (!serverPlayerSnapshots || serverPlayerSnapshots.empty) {
+          return [];
+        }
+        let playerList = new Array();
+        for (let doc of serverPlayerSnapshots.docs) {
+          playerList.push(DataConverterUtils.convertSnapshotToPlayer(doc));
+        }
+        return playerList;
       });
   }
 }

@@ -28,11 +28,22 @@
           bridge: Object,
           game: String,
           player: Object,
+          adminPlayer: Object,
           isAdmin: Boolean,
+          adminChats: Array,
         },
 
-        isAdminChat_(chatRoom) {
-          return chatRoom.withAdmins;
+        observers: [
+          'getAdminChats_(bridge, game, adminPlayer.*)',
+        ],
+
+        getAdminChats_() {
+          let self = this;
+          let callback = function (chatRooms) {
+            self.set('adminChats', chatRooms);
+          }
+          let chatRoomIds = Object.keys(this.adminPlayer.chatRoomMemberships);
+          this.bridge.listenToChatList(this.game.id, chatRoomIds, callback);
         },
 
         onTap_(e) {
@@ -52,64 +63,16 @@
   </script>
   <style include="iron-flex iron-flex-alignment">
     :host {
-      display: block;
-    }
-
-    .action {
       display: flex;
-      align-items: center;
-      opacity: .6;
-      padding-left: 4px;
-      height: 40px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      color: black;
-      text-decoration: none;
-    }
-
-    .frame {
-      padding-right: 8px;
-    }
-
-    .list-item {
-      padding-top: 8px;
-      height: 48px;
-      align-items: center;
-      display: flex;
-      padding-bottom: 8px;
-    }
-
-    .section {
-      border-top: 1px solid #ddd;
-      padding: 8px 0;
-    }
-
-    .name-label {
-      height: 48px;
-      align-items: center;
-      cursor: pointer;
-      color: black;
-      text-decoration: none;
-      text-overflow: ellipsis;
-
-      --ghvz-chat-room-name-label-icon: {
-        padding-right: 8px;
-      }
-    }
-
-    iron-icon {
-      flex-shrink: 0;
-      padding-right: 8px;
-      margin: 0;
+      flex-grow: 1;
+      flex-direction: column;
     }
   </style>
   <template>
-    <div class="frame">
-      <template is="dom-repeat" items="[[game.chatRooms]]" as="chatRoom" filter="isAdminChat_">
-        <ghvz-admin-chat-list-item game="[[game]]" player="[[player]]" chat-room="[[chatRoom]]" on-tap="onTap_">
-        </ghvz-admin-chat-list-item>
-      </template>
-    </div>
+    <template is="dom-repeat" items="[[adminChats]]" as="chatRoom">
+      <ghvz-admin-chat-list-item game="[[game]]" player="[[player]]" admin-player="[[adminPlayer]]"
+        chat-room="[[chatRoom]]" on-tap="onTap_">
+      </ghvz-admin-chat-list-item>
+    </template>
   </template>
 </dom-module>

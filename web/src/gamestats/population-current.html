@@ -14,92 +14,87 @@
   limitations under the License.
 -->
 <dom-module id="ghvz-population-current">
-<script>
-  // Not sure why this HTMLImports.whenReady is really needed.
-  // Something about polymer initialization order.
-  // I think we're not supposed to need this.
-  HTMLImports.whenReady(() => {
-    Polymer({
-      is: 'ghvz-population-current',
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-population-current',
 
-      properties: {
-        game: Object,
-        chartLoaded: {
-          type: Boolean,
-          value: undefined,
-        }
-      },
-
-      attached() {
-        google.charts.setOnLoadCallback(() => this.setChartLoaded());
-
-        // The following makes Google Charts responsive and will resize the chart
-        // as the page is resized.
-        var lastResize; // closure property for debouncing
-        window.addEventListener('resize', () => {
-          if (lastResize) {
-            window.clearTimeout(lastResize);
+        properties: {
+          stats: Object,
+          chartLoaded: {
+            type: Boolean,
+            value: undefined,
           }
+        },
 
-          lastResize = window.setTimeout(() => {
-            this.drawCurrentPopulationChart();
-          }, 200)
-        });
-      },
+        attached() {
+          google.charts.setOnLoadCallback(() => this.setChartLoaded());
 
-      setChartLoaded() {
-        this.chartLoaded = true;
-      },
+          // The following makes Google Charts responsive and will resize the chart
+          // as the page is resized.
+          var lastResize; // closure property for debouncing
+          window.addEventListener('resize', () => {
+            if (lastResize) {
+              window.clearTimeout(lastResize);
+            }
 
-      observers: [
-        'drawCurrentPopulationChart(chartLoaded, game)',
-      ],
+            lastResize = window.setTimeout(() => {
+              this.drawCurrentPopulationChart();
+            }, 200)
+          });
+        },
 
-      drawCurrentPopulationChart: function() {
-        var numZombies = 0;
-        var numHumans = 0;
-        for (let player of this.game.players) {
-          numZombies += player.allegiance == 'horde';
-          numHumans += player.allegiance == 'resistance';
-        }
+        setChartLoaded() {
+          this.chartLoaded = true;
+        },
 
-        // update hidden nodes for testing
-        this.$.zombie_count.textContent = numZombies;
-        this.$.humans_count.textContent = numHumans;
+        observers: [
+          'drawCurrentPopulationChart(chartLoaded, stats)',
+        ],
 
-        var data = google.visualization.arrayToDataTable([
-          ['Type', 'Number'],
-          ['Human',  numHumans],
-          ['Zombie',  numZombies],
+        drawCurrentPopulationChart: function () {
+          var numZombies = this.stats.currentZombieCount;
+          var numHumans = this.stats.currentHumanCount;
+
+          // update hidden nodes for testing
+          this.$.zombie_count.textContent = numZombies;
+          this.$.humans_count.textContent = numHumans;
+
+          var data = google.visualization.arrayToDataTable([
+            ['Type', 'Number'],
+            ['Human', numHumans],
+            ['Zombie', numZombies],
           ]);
 
-        var options = {
-          title: "Current Population",
-          legend: { position: 'right' }
-        };
+          var options = {
+            title: "Current Population",
+            legend: { position: 'right' },
+            colors: [Defaults.ALIVE_COLOR, Defaults.DEAD_COLOR]
+          };
 
-        // ensure old dom is cleared out
-        this.$.current_population_chart.textContent = '';
-        var chart = new google.visualization.PieChart(
-          this.$.current_population_chart);
-
-        chart.draw(data, options);
-      }
+          // ensure old dom is cleared out
+          this.$.current_population_chart.textContent = '';
+          var chart = new google.visualization.PieChart(this.$.current_population_chart);
+          chart.draw(data, options);
+        }
+      });
     });
-  });
-</script>
-<style>
-  .hidden {
-    width: 0;
-    height: 0;
-    overflow: hidden;
-  }
-</style>
-<template>
-  <div id="current_population_chart" style="width: 100%, height: 100%"></div>
-  <div id="current_population_meta" class="hidden">
-    <div id="zombie_count"></div>
-    <div id="humans_count"></div>
-  </div>
-</template>
+  </script>
+  <style>
+    .hidden {
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+  </style>
+  <template>
+    <div id="current_population_chart" style="width: 100%;"></div>
+    <div id="current_population_meta" class="hidden">
+      <div id="zombie_count"></div>
+      <div id="humans_count"></div>
+    </div>
+  </template>
 </dom-module>

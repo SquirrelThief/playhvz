@@ -14,18 +14,19 @@
   limitations under the License.
 -->
 
-<dom-module id="ghvz-edit-rules-page">
+<dom-module id="ghvz-edit-collapsible-list-page">
   <script>
     // Not sure why this HTMLImports.whenReady is really needed.
     // Something about polymer initialization order.
     // I think we're not supposed to need this.
     HTMLImports.whenReady(() => {
       Polymer({
-        is: 'ghvz-edit-rules-page',
+        is: 'ghvz-edit-collapsible-list-page',
 
         properties: {
           bridge: Object,
           game: Object,
+          display: String,
           isAdmin: {
             type: Boolean,
             value: false,
@@ -34,36 +35,57 @@
             type: Boolean,
             value: false,
           },
-          draftRules: {
+          draftList: {
             type: Array,
             notify: true,
           },
         },
 
         observers: [
+          'serverFaqChanged_(game.faq)',
           'serverRulesChanged_(game.rules)',
-          'localChanges_(game.rules, draftRules.*)',
+          'localChanges_(game, draftList.*)',
         ],
 
         attached() {
           this.fire('ghvz-add-toolbar-button', { button: this.$.save });
         },
 
-        serverRulesChanged_() {
+        serverFaqChanged_() {
+          if (this.display != "faq") {
+            // We're not editing faq, so we don't care about this change.
+            return;
+          }
           if (this.saveEnabled) {
             // We have local changes, show an error.
             return;
           }
-          this.draftRules = JSON.parse(JSON.stringify(this.game.rules));
+          this.draftList = JSON.parse(JSON.stringify(this.game.faq));
+        },
+
+        serverRulesChanged_() {
+          if (this.display != "rules") {
+            // We're not editing rules, so we don't care about this change.
+            return;
+          }
+          if (this.saveEnabled) {
+            // We have local changes, show an error.
+            return;
+          }
+          this.draftList = JSON.parse(JSON.stringify(this.game.rules));
         },
 
         localChanges_() {
-          let draftRules = this.draftRules.filter(rule => rule.sectionTitle != null);
-          if (draftRules.length != this.draftRules.length) {
-            this.draftRules = draftRules;
+          let draftList = this.draftList.filter(rule => rule.sectionTitle != null);
+          if (draftList.length != this.draftList.length) {
+            this.draftList = draftList; // This update will trigger this function again.
             return;
           }
-          this.saveEnabled = JSON.stringify(this.game.rules) != JSON.stringify(draftRules);
+          if (this.display === "rules") {
+            this.saveEnabled = JSON.stringify(this.game.rules) != JSON.stringify(draftList);
+          } else {
+            this.saveEnabled = JSON.stringify(this.game.faq) != JSON.stringify(draftList);
+          }
           if (this.saveEnabled) {
             this.$.cancelChanges.style.display = "block";
           } else {
@@ -73,19 +95,35 @@
 
         save_: function () {
           this.saveEnabled = false;
-          this.bridge.updateGameRules(this.game.id, this.draftRules);
+          let self = this;
+          let onSuccess = function () {
+            self.fire('ghvz-set-path', {
+              inGame: true,
+              path: [self.display],
+              replace: true,
+            });
+          }
+          if (this.display === "rules") {
+            this.bridge.updateGameRules(this.game.id, this.draftList, onSuccess);
+          } else {
+            this.bridge.updateGameFaq(this.game.id, this.draftList, onSuccess);
+          }
         },
 
         addItem_() {
-          this.push('draftRules', {
-            order: this.draftRules.length,
+          this.push('draftList', {
+            order: this.draftList.length,
             sectionTitle: "",
             sectionContent: "",
           });
         },
 
         cancelChanges_() {
-          this.draftRules = JSON.parse(JSON.stringify(this.game.rules));
+          if (this.display === "rules") {
+            this.draftList = JSON.parse(JSON.stringify(this.game.rules));
+          } else {
+            this.draftList = JSON.parse(JSON.stringify(this.game.faq));
+          }
         }
       });
     });
@@ -108,13 +146,12 @@
     }
   </style>
   <template>
-    <paper-icon-button slot="headerButton" name="save" id="save" icon="icons:check" disabled$="[[!saveEnabled]]"
-      on-tap="save_">
-    </paper-icon-button>
-    <template is="dom-repeat" items="{{draftRules}}" as="rule">
-      <ghvz-edit-rules-section rule={{rule}} index=[[index]]></ghvz-edit-rules-section>
+    <button slot="headerButton" name="save" id="save" on-click="save_" disabled$="[[!saveEnabled]]"
+      class="mdc-icon-button material-icons-outlined">check</button>
+    <template is="dom-repeat" items="{{draftList}}" as="item">
+      <ghvz-edit-collapsible-section item={{item}} index=[[index]]></ghvz-edit-collapsible-section>
     </template>
-    <div id="addRule" class="add-item" on-tap="addItem_">
+    <div id="add" class="add-item" on-tap="addItem_">
       <div style="padding-right: 8px;">Add new item</div>
       <span class="material-icons-outlined">add</span>
     </div>

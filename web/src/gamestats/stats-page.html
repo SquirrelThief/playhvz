@@ -14,27 +14,40 @@
   limitations under the License.
 -->
 <dom-module id="ghvz-stats-page">
-<script>
-  // Not sure why this HTMLImports.whenReady is really needed.
-  // Something about polymer initialization order.
-  // I think we're not supposed to need this.
-  HTMLImports.whenReady(() => {
-    Polymer({
-      is: 'ghvz-stats-page',
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-stats-page',
 
-      properties: {
-        game: Object,
-      },
+        properties: {
+          bridge: Object,
+          game: Object,
+          stats: Object,
+        },
+
+        observers: [
+          'getStats_(bridge, game)',
+        ],
+
+        getStats_() {
+          let self = this;
+          this.bridge.getGameStats(this.game.id).then((result) => {
+            self.set('stats', result.data);
+          });
+        },
+      });
     });
-  });
-</script>
-<style include="iron-flex iron-flex-alignment">
-  :host {
-    display: block;
-  }
-</style>
-<template>
-  <ghvz-population-current game="[[game]]"></ghvz-population-current>
-  <ghvz-population-over-time game="[[game]]"></ghvz-population-over-time>
-</template>
+  </script>
+  <style include="iron-flex iron-flex-alignment">
+    :host {
+      display: block;
+    }
+  </style>
+  <template>
+    <ghvz-population-current stats="[[stats]]"></ghvz-population-current>
+    <ghvz-population-over-time stats="[[stats]]"></ghvz-population-over-time>
+  </template>
 </dom-module>

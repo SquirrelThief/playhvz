@@ -25,7 +25,6 @@ GroupPath.FIELD__MANAGED = "managed";
 GroupPath.FIELD__MEMBERS = "members";
 GroupPath.FIELD__OWNERS = "owners";
 GroupPath.FIELD__SETTINGS = "settings";
-GroupPath.FIELD__SETTINGS_ALLEGIANCE_FILTER = "allegianceFilter";
 GroupPath.FIELD__SETTINGS_ADD_SELF = "canAddSelf";
 GroupPath.FIELD__SETTINGS_ADD_OTHERS = "canAddOthers";
 GroupPath.FIELD__SETTINGS_REMOVE_SELF = "canRemoveSelf";

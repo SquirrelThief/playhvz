@@ -31,7 +31,7 @@
           latitude: Number,
           longitude: Number,
 
-           doneEnabled: {
+          doneEnabled: {
             type: Boolean,
             value: false,
           },
@@ -59,14 +59,14 @@
           this.latitude = e.detail.latitude;
           this.longitude = e.detail.longitude;
           this.doneEnabled = true;
-        }, 
+        },
 
         openSendLocationDialog_() {
           this.latitude = null;
           this.longitude = null;
-          if (navigator.geolocation) {   
+          if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(this.onSuccess, this.onError);
-          } else { 
+          } else {
             this.geolocationError = true;
             console.log("Geolocation is not supported by this browser.");
           }
@@ -91,10 +91,10 @@
           let longitude = this.longitude;
           this.bridge.sendChatMessage({
             gameId: this.game.id,
-            messageId: this.bridge.newMessageId(), 
-            chatRoomId: this.chatRoomId, 
-            playerId: this.player.id, 
-            location: {latitude: latitude, longitude: longitude},
+            messageId: this.bridge.newMessageId(),
+            chatRoomId: this.chatRoomId,
+            playerId: this.player.id,
+            location: { latitude: latitude, longitude: longitude },
           });
           this.latitude = null;
           this.longitude = null;
@@ -107,31 +107,22 @@
     :host {
       display: block;
     }
+
     .icon-button {
       color: dodgerblue;
     }
+
     .map {
       padding-top: 16px;
     }
   </style>
   <template>
-    <paper-icon-button
-      class="icon-button"
-      icon="maps:my-location"
-      title="Send current location"
+    <paper-icon-button class="icon-button" icon="maps:my-location" title="Send current location"
       on-click="openSendLocationDialog_">
     </paper-icon-button>
-    <ghvz-form
-        id="sendLocationForm"
-        title="Send location?"
-        close-label="Cancel"
-        done-label="Send"
-        done-enabled="{{doneEnabled}}"
-        on-ghvz-form-done="onConfirmSendLocation_">
-      <ghvz-static-map 
-        class="map"
-        latitude="[[latitude]]" 
-        longitude="[[longitude]]" 
+    <ghvz-form id="sendLocationForm" title="Send location?" close-label="Cancel" done-label="Send"
+      done-enabled="{{doneEnabled}}" on-ghvz-form-done="onConfirmSendLocation_">
+      <ghvz-static-map slot="formContent" class="map" latitude="[[latitude]]" longitude="[[longitude]]"
         error="[[geolocationError]]">
       </ghvz-static-map>
     </ghvz-form>
