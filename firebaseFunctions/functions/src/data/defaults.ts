@@ -37,7 +37,7 @@ export const INFECT_REWARD_POINTS = 50;
 export const DECLARE_REWARD_SHORT_NAME = "declare";
 export const DECLARE_REWARD_LONG_NAME = "By jolly, I declare";
 export const DECLARE_REWARD_DESCRIPTION = "I'm a great player, I play by the rules";
-export const DECLARE_REWARD_IMAGE_URL = "https://photos.app.goo.gl/zdJuosGePWgAVyf47";
+export const DECLARE_REWARD_IMAGE_URL = "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/google/274/scroll_1f4dc.png";
 export const DECLARE_REWARD_POINTS = 10;
 
 export const GAME_STATS_DIVIDEND = 5; // Splits game stats into 5 equal sections of game play

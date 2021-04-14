@@ -154,25 +154,27 @@ class Bridge {
     });
   }
 
-  async joinGame(gameName, playerName, callback = null) {
+  /** Returns the *playerId* of the game that was joined. */
+  joinGame(gameName, playerName) {
     var joinGame = firebase.functions().httpsCallable("joinGame");
-    await joinGame({ gameName: gameName, playerName: playerName }).then((result) => {
-      console.log("Joined: " + result.data)
-      var gameId = result.data;
-      if (callback != null) {
-        callback(gameId);
-      }
+    return joinGame({ gameName: gameName, playerName: playerName }).then((result) => {
+      // Expect result.data is of the form {gameId: "...", playerId: "..."};
+      return result.data;
     })
-      .catch(error => console.log("Error: " + error.message));
+      .catch((error) => {
+        console.log("Error: " + error.message);
+        return { gameId: null, playerId: null }
+      });
   }
 
-  async getPlayer(userId, gameId) {
+  async getPlayerByUserId(userId, gameId) {
     return this.firestoreOperations.getUserPlayer(userId, gameId).then(querySnapshot => {
-      if (querySnapshot.docs.length > 1) {
+      if (querySnapshot.docs.length > 1 || querySnapshot.empty) {
         return null
       }
       return DataConverterUtils.convertSnapshotToPlayer(querySnapshot.docs[0]);
-    });
+    })
+      .catch((error) => { console.log("Error: " + error.message) });
   }
 
   async getPlayerOnce(gameId, playerId) {
@@ -191,6 +193,16 @@ class Bridge {
         player = DataConverterUtils.convertSnapshotToPlayer(docSnapshot);
       }
       callback(player)
+    });
+  }
+
+  async getAllPlayersOnce(gameId) {
+    return this.firestoreOperations.getAllPlayersOnce(gameId).then((querySnapshot) => {
+      let players = new Array();
+      for (let doc of querySnapshot.docs) {
+        players.push(DataConverterUtils.convertSnapshotToPlayer(doc));
+      }
+      return players;
     });
   }
 
@@ -498,6 +510,16 @@ class Bridge {
       });
   }
 
+  async getRewardOnce(gameId, rewardId) {
+    return this.firestoreOperations.getRewardOnce(gameId, rewardId).then(docSnapshot => {
+      if (docSnapshot == undefined || !docSnapshot.exists) {
+        return null;
+      }
+      return DataConverterUtils.convertSnapshotToReward(docSnapshot);
+    });
+  }
+
+
   listenToReward(gameId, rewardId, callback) {
     return this.firestoreOperations.getListenableReward(gameId, rewardId)
       .onSnapshot(docSnapshot => {
@@ -518,6 +540,8 @@ class Bridge {
     return createOrGetChatWithAdmin({
       gameId: gameId,
       playerId: playerId
+    }).then(result => {
+      return result.data;
     });
   }
 
@@ -632,6 +656,25 @@ class Bridge {
     callback(playerList);
   }
 
+  async addQuizQuestion(gameId, quizQuestion, successCallback = null, onErrorCallback = null) {
+    return this.firestoreOperations.addQuizQuestion(gameId, quizQuestion, successCallback, onErrorCallback);
+  }
+
+  async updateQuizQuestion(gameId, draftQuizQuestion, successCallback = null, onErrorCallback = null) {
+    return this.firestoreOperations.updateQuizQuestion(gameId, draftQuizQuestion, successCallback, onErrorCallback);
+  }
+
+  listenToQuizQuestions(gameId, callback) {
+    return this.firestoreOperations.getListenableQuizQuestions(gameId).onSnapshot(querySnapshot => {
+      let questionArray = [];
+      for (let doc of querySnapshot.docs) {
+        let question = DataConverterUtils.convertSnapshotToQuizQuestion(doc);
+        questionArray.push(question);
+      }
+      callback(questionArray);
+    });
+  }
+
   //////////////////////////////////////////////////////////////////////
   // End of new Firestore supporting functions.
   //////////////////////////////////////////////////////////////////////
@@ -654,6 +697,10 @@ class Bridge {
 
   async getRewardByShortName(gameId, shortName) {
     return this.inner.getRewardByShortName(gameId, shortName);
+  }
+
+  sleep(ms) {
+    return this.inner.sleep(ms);
   }
   //////////////////////////////////////////////////////////////////////
   // End dev supporting functions.
@@ -773,39 +820,6 @@ class FakeIdGenerator extends IdGenerator {
     playerId: '?PublicPlayerId',
   }); */
 
-  // Games
-  /*serverMethods.set('createGame', {
-    gameId: '!GameId',
-    creatorUserId: 'UserId',
-    name: 'String',
-    /*rulesHtml: 'String',
-    faqHtml: 'String',
-    summaryHtml: 'String',
-    stunTimer: 'Number',
-    infectPoints: 'Number',
-    isActive: 'Boolean', *
-    startTime: 'Timestamp',
-    endTime: 'Timestamp',
-    /*registrationEndTime: 'Timestamp',
-    declareResistanceEndTime: 'Timestamp',
-    declareHordeEndTime: 'Timestamp', *
-  }); */
-  serverMethods.set('updateGame', {
-    gameId: 'GameId',
-    adminOnCallPlayerId: "String",
-    name: '|String',
-    /*rulesHtml: '|String',
-    faqHtml: '|String',
-    summaryHtml: '|String',
-    stunTimer: '|Number',
-    infectPoints: '|Number',
-    isActive: '|Boolean', */
-    startTime: '|Timestamp',
-    endTime: '|Timestamp',
-    /*registrationEndTime: '|Timestamp',
-    declareResistanceEndTime: '|Timestamp',
-    declareHordeEndTime: '|Timestamp', */
-  });
   serverMethods.set('setAdminContact', {
     gameId: 'GameId',
     playerId: 'PublicPlayerId',
@@ -815,44 +829,6 @@ class FakeIdGenerator extends IdGenerator {
     defaultProfileImageId: '!DefaultProfileImageId',
     allegianceFilter: 'String',
     profileImageUrl: 'String',
-  });
-
-  // Players
-  serverMethods.set('createPlayer', {
-    playerId: '!PublicPlayerId',
-    userId: 'UserId',
-    gameId: 'GameId',
-    name: 'String',
-    allegiance: 'String',
-    avatarUrl: 'String',
-    points: 'Number',
-    /*needGun: 'Boolean',
-    canInfect: 'Boolean',
-    profileImageUrl: 'String',
-    wantToBeSecretZombie: 'Boolean',
-    beInPhotos: 'Boolean',
-    volunteer: {
-      advertising: 'Boolean',
-      logistics: 'Boolean',
-      communications: 'Boolean',
-      moderator: 'Boolean',
-      cleric: 'Boolean',
-      sorcerer: 'Boolean',
-      admin: 'Boolean',
-      photographer: 'Boolean',
-      chronicler: 'Boolean',
-      server: 'Boolean',
-      android: 'Boolean',
-      ios: 'Boolean',
-      client: 'Boolean',
-    },
-    notificationSettings: {
-      vibrate: 'Boolean',
-      sound: 'Boolean',
-    },
-    isActive: 'Boolean',
-    gotEquipment: 'Boolean',
-    notes: 'String', */
   });
   serverMethods.set('updatePlayer', {
     playerId: 'PublicPlayerId',
@@ -889,17 +865,6 @@ class FakeIdGenerator extends IdGenerator {
     notes: '|String', */
   });
 
-
-  serverMethods.set('addMission', {
-    missionId: '!MissionId',
-    accessGroupId: 'GroupId',
-    rsvpersGroupId: 'GroupId',
-    gameId: 'GameId',
-    beginTime: 'Timestamp',
-    endTime: 'Timestamp',
-    name: 'String',
-    detailsHtml: 'String',
-  });
   serverMethods.set('updateMission', {
     missionId: 'MissionId',
     gameId: 'GameId',
@@ -939,40 +904,6 @@ class FakeIdGenerator extends IdGenerator {
     canRemoveOthers: '|Boolean',
     canAddSelf: '|Boolean',
     canRemoveSelf: '|Boolean',
-  });
-
-  serverMethods.set('addRewardCategory', {
-    rewardCategoryId: '!RewardCategoryId',
-    gameId: 'GameId',
-    name: 'String',
-    points: 'Number',
-    badgeImageUrl: '?String',
-    shortName: 'String',
-    description: 'String',
-    limitPerPlayer: 'Number',
-  });
-  serverMethods.set('updateRewardCategory', {
-    rewardCategoryId: 'RewardCategoryId',
-    gameId: 'GameId',
-    name: '|String',
-    points: '|Number',
-    badgeImageUrl: '|?String',
-    shortName: '|String',
-    description: '|String',
-    limitPerPlayer: '|Number',
-  });
-
-  serverMethods.set('addReward', {
-    gameId: 'GameId',
-    rewardId: '!RewardId',
-    rewardCategoryId: 'RewardCategoryId',
-    code: '?String',
-  });
-
-  serverMethods.set('addRewards', {
-    gameId: 'GameId',
-    rewardCategoryId: 'RewardCategoryId',
-    count: 'Number',
   });
 
   serverMethods.set('claimReward', {
@@ -1025,18 +956,6 @@ class FakeIdGenerator extends IdGenerator {
     privateLifeId: '?!PrivateLifeId',
   });
 
-  /*serverMethods.set('sendChatMessage', {
-    gameId: 'GameId',
-    messageId: '!MessageId',
-    chatRoomId: 'ChatRoomId',
-    playerId: 'PublicPlayerId',
-    message: '|String',
-    location: optional({
-      latitude: 'Number',
-      longitude: 'Number',
-    }),
-  });*/
-
   serverMethods.set('addRequestCategory', {
     gameId: 'GameId',
     requestCategoryId: '!RequestCategoryId',
@@ -1074,15 +993,6 @@ class FakeIdGenerator extends IdGenerator {
     privateLifeId: '?!PrivateLifeId',
     lifeCode: '?String',
   });
-
-  /* serverMethods.set('infect', {
-     gameId: 'GameId',
-     infectionId: '!InfectionId',
-     infectorPlayerId: '?PublicPlayerId',
-     victimLifeCode: '?String',
-     victimPlayerId: '?PublicPlayerId',
-   });*/
-
   serverMethods.set('queueNotification', {
     gameId: 'GameId',
     queuedNotificationId: '!QueuedNotificationId',
@@ -1130,39 +1040,6 @@ class FakeIdGenerator extends IdGenerator {
     destination: '?String',
     playerId: '?PublicPlayerId',
     icon: '?String',
-  });
-
-  serverMethods.set('addQuizQuestion', {
-    quizQuestionId: '!QuizQuestionId',
-    gameId: 'GameId',
-    text: 'String',
-    type: 'String',
-    number: 'Number',
-  });
-  serverMethods.set('updateQuizQuestion', {
-    quizQuestionId: 'QuizQuestionId',
-    gameId: 'GameId',
-    text: '|String',
-    type: '|String',
-    number: '|Number',
-  });
-
-  serverMethods.set('addQuizAnswer', {
-    gameId: 'GameId',
-    quizAnswerId: '!QuizAnswerId',
-    quizQuestionId: 'QuizQuestionId',
-    text: 'String',
-    order: 'Number',
-    isCorrect: 'Boolean',
-    number: 'Number',
-  });
-  serverMethods.set('updateQuizAnswer', {
-    gameId: 'GameId',
-    quizAnswerId: 'QuizAnswerId',
-    text: '|String',
-    order: '|Number',
-    isCorrect: '|Boolean',
-    number: '|Number',
   });
 
   serverMethods.set('updateNotification', {

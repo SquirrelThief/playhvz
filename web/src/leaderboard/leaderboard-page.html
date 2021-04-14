@@ -1,0 +1,100 @@
+<!--
+  Copyright 2017 Google Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<dom-module id="ghvz-leaderboard-page">
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-leaderboard-page',
+
+        properties: {
+          bridge: Object,
+          game: Object,
+          allPlayers: Array,
+          players: Array,
+          limit: {
+            type: Number,
+            value: 0,
+          },
+          selectedMenuItem: {
+            type: Number,
+            value: 2,
+          },
+        },
+
+        observers: [
+          'init_(bridge, game)',
+          'setFilter_(selectedMenuItem)',
+        ],
+
+        attached() {
+          this.fire('ghvz-add-toolbar-button', { button: this.$.menuButton });
+        },
+
+        init_() {
+          this.bridge.getAllPlayersOnce(this.game.id).then(serverPlayers => {
+            this.allPlayers = serverPlayers;
+            this.players = serverPlayers;
+          });
+        },
+
+        setFilter_() {
+          let filter = "";
+          switch (this.selectedMenuItem) {
+            case 0: // Resistance
+              filter = Defaults.HUMAN_ALLEGIANCE_FILTER;
+              break;
+            case 1: // Horde 
+              filter = Defaults.ZOMBIE_ALLEGIANCE_FILTER;
+              break;
+            case 2: // All
+              filter = null;
+              break;
+          }
+          if (!filter) {
+            this.players = this.allPlayers;
+          } else {
+            this.players = this.allPlayers.filter(player => player.allegiance === filter);
+          }
+        },
+      });
+    });
+  </script>
+  <style>
+    :host {
+      display: flex;
+      z-index: 1;
+    }
+  </style>
+  <template>
+    <paper-menu-button id="menuButton" slot="headerButton">
+      <paper-icon-button class="action-menu-button dropdown-trigger" icon="icons:filter-list">
+      </paper-icon-button>
+      <paper-menu id="filterMenu" class="dropdown-content" selected="{{selectedMenuItem}}">
+        <paper-item>Resistance</paper-item>
+        <paper-item>Horde</paper-item>
+        <paper-item>All</paper-item>
+      </paper-menu>
+    </paper-menu-button>
+    <paper-spinner id="loadingSpinner" active hidden$="[[players]]" class="spinner"></paper-spinner>
+    <template is="dom-repeat" items="[[players]]" as="player">
+      <ghvz-leaderboard-item bridge="[[bridge]]" game="[[game]]" player="[[player]]"></ghvz-leaderboard-item>
+    </template>
+  </template>
+</dom-module>

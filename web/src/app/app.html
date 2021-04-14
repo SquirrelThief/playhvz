@@ -234,7 +234,7 @@
         listenToPlayer_() {
           this.gettingPlayer = true;
           let self = this;
-          this.bridge.getPlayer(this.userId, this.game.id).then(player => {
+          this.bridge.getPlayerByUserId(this.userId, this.game.id).then(player => {
             if (player) {
               self.playerId = player.id
             }

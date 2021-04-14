@@ -71,3 +71,10 @@ DataConverterUtils.convertSnapshotToMission = function (documentSnapshot) {
   mission.id = documentSnapshot.id
   return mission
 };
+
+
+DataConverterUtils.convertSnapshotToQuizQuestion = function (documentSnapshot) {
+  const question = new QuizQuestion(documentSnapshot.data())
+  question.id = documentSnapshot.id
+  return question
+};

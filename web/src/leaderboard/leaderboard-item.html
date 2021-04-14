@@ -1,0 +1,84 @@
+<!--
+  Copyright 2017 Google Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<dom-module id="ghvz-leaderboard-item">
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-leaderboard-item',
+
+        properties: {
+          bridge: Object,
+          game: Object,
+          player: Object,
+        },
+
+        getRewardsAsArray(player) {
+          return Utils.toArray(player.rewards);
+        },
+
+        openProfile_(player) {
+          this.fire('ghvz-set-path', {
+            inGame: true,
+            path: ['profile', this.player.id],
+            replace: false,
+          });
+        },
+      });
+    });
+  </script>
+  <style>
+    :host {
+      display: flex;
+      align-items: center;
+      padding-top: 12px;
+      padding-bottom: 8px;
+    }
+
+    :host .name {
+      flex-grow: 1;
+      padding-left: 16px;
+      color: var(--grey800);
+      font-size: 16px;
+    }
+
+    :host .points {
+      padding-left: 16px;
+      color: var(--grey800);
+      font-size: 22px;
+    }
+  </style>
+  <template>
+    <div on-click="openProfile_" style="cursor: pointer; display: flex; flex-direction: row; align-items: center;">
+      <ghvz-player-avatar medium bridge="[[bridge]]" game="[[game]]" player-id="[[player.id]]">
+      </ghvz-player-avatar>
+      <div class="name">
+        <div>[[player.name]]</div>
+        <div style="text-transform: capitalize;">[[player.allegiance]]</div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: row; flex-grow: 1; justify-content: flex-end;">
+      <template is="dom-repeat" items="[[getRewardsAsArray(player)]]" as="rewardObject">
+        <ghvz-reward-icon style="padding-left: 8px; padding-right:8px;" bridge="[[bridge]]" game="[[game]]"
+          reward-object="[[rewardObject]]" />
+      </template>
+    </div>
+    <div class="points">[[player.points]] pts</div>
+  </template>
+</dom-module>

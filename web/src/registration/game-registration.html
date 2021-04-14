@@ -69,8 +69,8 @@
 
         done_() {
           this.submitEnabled = false;
-          this.bridge.joinGame(this.game.name, this.newPlayerArgs.name).then(playerId => {
-            if (playerId) {
+          this.bridge.joinGame(this.game.name, this.newPlayerArgs.name).then(gameId => {
+            if (gameId) {
               this.fire('ghvz-set-path', {
                 inGame: true,
                 path: ['main'],

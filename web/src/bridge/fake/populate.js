@@ -214,11 +214,11 @@ class Populator {
       }
       // Sign in so that all the firebase commands we run are run for the current user.
       await bridge.signIn({ userName: userName });
-      let playerId = await bridge.joinGame(gameName, playerName)
+      let playerId = (await bridge.joinGame(gameName, playerName)).playerId;
       if (!playerId) {
         // Failed to join game because this player already exists, just get the player id
         let userId = this.players[userName].userId
-        playerId = (await bridge.getPlayer(userId, gameId)).id;
+        playerId = (await bridge.getPlayerByUserId(userId, gameId)).id;
       }
       this.players[userName].playerId = playerId;
       if (this.players[userName].startAllegiance) {
@@ -447,6 +447,15 @@ class Populator {
     await bridge.redeemRewardCode(this.gameId, this.players[Users.DRAKE].playerId, leafRewardClaimCodes[0]);
     await bridge.redeemRewardCode(this.gameId, this.players[Users.DRAKE].playerId, genoRewardClaimCodes[0]);
 
+    let jackAndAdminChatRoomId = await bridge.createOrGetChatWithAdmin(this.gameId, this.players[Users.JACK].playerId);
+    await bridge.sendChatMessage(this.gameId, bridge.idGenerator.newMessageId(), jackAndAdminChatRoomId, this.players[Users.JACK].playerId, 'Are there traitor humans in this game?');
+
+    // Populate the declare allegiance quiz
+    await bridge.addQuizQuestion(this.gameId, QUIZ_QUESTION_1);
+    await bridge.addQuizQuestion(this.gameId, QUIZ_QUESTION_2);
+    await bridge.addQuizQuestion(this.gameId, QUIZ_QUESTION_3);
+    await bridge.addQuizQuestion(this.gameId, QUIZ_QUESTION_4);
+
     console.log("Finished populating game.")
     // TODO: SUPPORT THINGS BELOW THIS POINT.
     return;
@@ -558,50 +567,6 @@ class Populator {
         gameId: gameId,
         requestId: textRequestId,
         text: "responseText",
-      });
-    
-    
-      var withAdminsChatRoomGroupId = bridge.idGenerator.newGroupId();
-      var withAdminsChatRoomId = bridge.idGenerator.newChatRoomId();
-      bridge.createGroup({
-        groupId: withAdminsChatRoomGroupId,
-        name: "Group for " + withAdminsChatRoomId,
-        gameId: gameId,
-        ownerPlayerId: jackPlayerId,
-        allegianceFilter: 'none',
-        autoAdd: false,
-        autoRemove: false,
-        canAddOthers: false,
-        canRemoveOthers: false,
-        canAddSelf: true,
-        canRemoveSelf: true,
-      });
-      bridge.createChatRoom({
-        gameId: gameId,
-        chatRoomId: withAdminsChatRoomId,
-        accessGroupId: withAdminsChatRoomGroupId,
-        name: "JackSlayerTheBeanSlasher & HvZ CDC",
-        withAdmins: true,
-      });
-    
-      bridge.addPlayerToGroup({
-        gameId: gameId,
-        groupId: withAdminsChatRoomGroupId,
-        playerToAddId: jackPlayerId,
-        actingPlayerId: jackPlayerId,
-      });
-      bridge.addPlayerToGroup({
-        gameId: gameId,
-        groupId: withAdminsChatRoomGroupId,
-        playerToAddId: moldaviPlayerId,
-        actingPlayerId: jackPlayerId,
-      });
-      bridge.sendChatMessage({
-        gameId: gameId,
-        messageId: bridge.idGenerator.newMessageId(),
-        chatRoomId: withAdminsChatRoomId,
-        playerId: jackPlayerId,
-        message: 'hey how do i know if im the possessed human'
       });
     
       populateQuiz(bridge, gameId); */
@@ -803,14 +768,6 @@ class Populator {
     bridge.executeNotifications({});
   }
 }
-// const HUMAN_MISSION_HTML = 'mmm human mission';
-
-// const ZOMBIE_MISSION_HTML = 'mmm brains mission';
-
-// const FAQ_HTML = 'i am faq';
-
-// const RULES_HTML = 'i am rules';
-
 
 const HUMAN_MISSION_MARKDOWN = `
 ### TL;DR: Meet at charleston park!
@@ -982,3 +939,78 @@ Tags/Stuns made because of unsafe situations do not count.`,
     Don't intentionally create an unsafe situation.`,
   },
 ];
+
+const QUIZ_QUESTION_1 = {
+  type: "boolean",
+  index: 0,
+  text: "Are you ready to play?",
+  answers: [{
+    correct: true,
+    order: -1,
+    text: "True",
+  },
+  {
+    correct: false,
+    order: -1,
+    text: "False",
+  }],
+};
+
+const QUIZ_QUESTION_2 = {
+  type: "order",
+  index: 1,
+  text: "When a zombie is stunned, what is the correct order of events?",
+  answers: [{
+    correct: true,
+    order: 0,
+    text: "The zombie sits down (1)",
+  },
+  {
+    correct: true,
+    order: 1,
+    text: "The zombie counts to 60 (2)",
+  },
+  {
+    correct: true,
+    order: 2,
+    text: "The zombie counts the last 10 seconds outloud then stands and rejoins play (3)",
+  },
+  {
+    correct: false,
+    order: -1,
+    text: "The human becomes a zombie (unused)",
+  }],
+};
+
+const QUIZ_QUESTION_3 = {
+  type: "multipleChoice",
+  index: 2,
+  text: "Valid races in the game are?",
+  answers: [{
+    correct: true,
+    order: 0,
+    text: "Zombie",
+  },
+  {
+    correct: true,
+    order: 1,
+    text: "Human",
+  },
+  {
+    correct: false,
+    order: 2,
+    text: "Sparkysparky boomboom man",
+  },
+  {
+    correct: false,
+    order: 3,
+    text: "The Batman",
+  }],
+};
+
+const QUIZ_QUESTION_4 = {
+  type: "info",
+  index: 3,
+  text: "Remember to follow the rules and chat with an admin if you need anything!",
+  answers: [],
+};

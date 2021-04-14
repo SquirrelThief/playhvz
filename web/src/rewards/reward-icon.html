@@ -1,0 +1,89 @@
+<!--
+  Copyright 2017 Google Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<dom-module id="ghvz-reward-icon">
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    // hey dudes, game.rewardCategories.0.name just changed
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-reward-icon',
+
+        properties: {
+          bridge: Object,
+          game: Object,
+          rewardObject: Object,
+          reward: Object,
+        },
+
+        observers: ['getReward_(bridge, game, rewardObject)'],
+
+        getReward_() {
+          let self = this;
+          this.bridge.getRewardOnce(this.game.id, this.rewardObject.key).then(serverReward => {
+            self.reward = serverReward;
+          });
+        },
+      });
+    });
+  </script>
+  <style>
+    :host {
+      display: block;
+    }
+
+    #container {
+      display: flex;
+      align-items: center;
+    }
+
+    #name {
+      margin-left: 8px;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    #description {
+      margin-left: 8px;
+      font-size: 18px;
+      opacity: .75;
+    }
+
+    :host img {
+      max-width: 40px;
+      max-height: 40px;
+    }
+
+    :host([badgeOnly]) #container {
+      display: inline-block;
+      margin-left: 4px;
+    }
+
+    :host([badgeOnly]) #name,
+    :host([badgeOnly]) #description {
+      display: none;
+    }
+
+    :host([badgeOnly]) img {
+      max-width: 24px;
+      max-height: 24px;
+    }
+  </style>
+  <template>
+    <img src$="[[reward.imageUrl]]" />
+  </template>
+</dom-module>

@@ -1,5 +1,5 @@
 <!--
-  Copyright 2017 Google Inc.
+  Copyright 2021 Google Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -14,32 +14,30 @@
   limitations under the License.
 -->
 
-<dom-module id="ghvz-admin-reward-dialog">
+<dom-module id="ghvz-edit-quiz-question-dialog">
   <script>
     // Not sure why this HTMLImports.whenReady is really needed.
     // Something about polymer initialization order.
     // I think we're not supposed to need this.
     HTMLImports.whenReady(() => {
       Polymer({
-        is: 'ghvz-admin-reward-dialog',
+        is: 'ghvz-edit-quiz-question-dialog',
 
         properties: {
           bridge: Object,
           game: Object,
-          reward: Object,
-          draftReward: Object,
+          question: Object,
+          draftQuestion: Object,
+          totalQuestions: Number,
           isMobile: Boolean,
-
           typeName: {
             type: String,
             value: "",
           },
-
           editing: {
             type: String,
             value: null,
           },
-
           saveEnabled: {
             type: Boolean,
             value: false,
@@ -47,25 +45,21 @@
         },
 
         observers: [
-          'updateSaveEnabled_(draftReward.*)',
+          'updateSaveEnabled_(draftQuestion.*)',
         ],
 
         attached: function () {
           this.resolveDonePromise = null;
         },
 
-        populate_() {
-
-        },
-
-        openForCreate: function (opt_initialValues) {
+        openForAdd: function (totalQuestions) {
           this.editing = false;
-          this.draftReward = new Reward({
-            shortName: "",
-            longName: "",
-            description: "",
-            imageUrl: "https://bit.ly/39Whh8b",
-            points: 20,
+          this.question = null;
+          this.totalQuestions = totalQuestions
+          this.draftQuestion = new QuizQuestion({
+            index: totalQuestions,
+            text: "",
+            type: "info",
           });
           this.$.dialog.open();
           return new Promise((resolve, reject) => {
@@ -73,9 +67,11 @@
           });
         },
 
-        openForEdit: function (reward) {
+        openForEdit: function (question, index, totalQuestions) {
           this.editing = true;
-          this.draftReward = JSON.parse(JSON.stringify(reward))
+          this.question = question;
+          this.totalQuestions = totalQuestions
+          this.draftQuestion = JSON.parse(JSON.stringify(question))
           this.$.dialog.open();
           return new Promise((resolve, reject) => {
             this.resolveDonePromise = resolve;
@@ -84,6 +80,7 @@
 
         close: function () {
           this.$.dialog.close();
+          this.draftQuestion = { type: "", text: "", answers: [] }
         },
 
         showError: function (message) {
@@ -92,7 +89,7 @@
         },
 
         computeTitle_(editing) {
-          return editing ? "Edit reward " : "Create reward";
+          return editing ? this.question.type + " question " : "Create question";
         },
 
         save_: function () {
@@ -105,22 +102,13 @@
           }
           this.saveEnabled = false;
           if (!this.editing) {
-            this.bridge.createReward(this.game.id,
-              this.draftReward.shortName,
-              this.draftReward.longName,
-              this.draftReward.description,
-              this.draftReward.imageUrl,
-              Number(this.draftReward.points),
+            this.bridge.addQuizQuestion(this.game.id,
+              this.draftQuestion,
               onSuccess,
               onError);
           } else {
-            this.bridge.updateReward(this.game.id,
-              this.draftReward.id,
-              this.draftReward.shortName,
-              this.draftReward.longName,
-              this.draftReward.description,
-              this.draftReward.imageUrl,
-              Number(this.draftReward.points),
+            this.bridge.updateQuizQuestion(this.game.id,
+              this.draftQuestion,
               onSuccess,
               onError);
           }
@@ -128,15 +116,17 @@
         },
 
         updateSaveEnabled_() {
-          if (!this.draftReward.shortName || /\s/g.test(this.draftReward.shortName)) {
-            // Disable "done" button if shortname is blank or contains whitespace
-            this.$.shortError.style.display = "block";
+          if (!this.draftQuestion.text) {
+            // Disable "done" button if question text is blank
             this.saveEnabled = false;
           } else {
-            this.$.shortError.style.display = "none";
             this.saveEnabled = true;
             this.$.generalError.style.display = "none";
           }
+        },
+
+        showAnswers_() {
+          return this.draftQuestion.type != "info"
         },
       });
     });
@@ -146,11 +136,21 @@
       margin: 8px;
     }
 
+    .content {
+      display: flex;
+      flex-grow: 1;
+      flex-direction: column;
+      align-content: center;
+      overflow-y: -moz-scrollbars-none;
+      max-height: 400px;
+    }
+
     :host .label {
       color: var(--grey700);
-      padding-top: 8px;
+      padding-top: 18px;
       font-size: 15px;
-      padding-bottom: 12px;
+      padding-bottom: 8px;
+      text-transform: none;
     }
 
     :host .error-label {
@@ -178,32 +178,25 @@
     }
   </style>
   <template>
-    <ghvz-form id="dialog" title="[[computeTitle_(editing)]]">
-      <div slot="formContent" style="flex-grow: 1; display: flex; flex-direction: column;">
-        <div id="generalError" class="error-label">Error! Something went wrong :( maybe that short name was already
-          used?</div>
-        <img src="[[draftReward.imageUrl]]" height="56px" style="align-self: center;"></img>
-        <div class="label">Image Url</div>
-        <paper-input id="imageUrlInput" label="https://bit.ly/39Whh8b" autocorrect no-label-float
-          value={{draftReward.imageUrl}}></paper-input>
-        <div class="label">Point value</div>
-        <paper-input id="pointInput" label="20" type="number" no-label-float value={{draftReward.points}}>
-        </paper-input>
-        <div class="label">Short name</div>
-        <paper-input id="shortNameInput" maxlength="120" label="valor" autocorrect no-label-float
-          value={{draftReward.shortName}} enabled="[[!editing]]" on-keyup="updateSaveEnabled_"></paper-input>
-        <div id="shortError" class="error-label">Error: short name can't contain spaces</div>
-        <div class="label">Long name</div>
-        <paper-input id="longNameInput" label="For extreme valor on the field of battle!" autocorrect no-label-float
-          value={{draftReward.longName}}></paper-input>
-        <div class="label">Description</div>
-        <paper-textarea id="descriptionInput" label="I have extreme valor!" autocorrect no-label-float
-          value={{draftReward.description}} multiline max-lines="5">
+    <ghvz-form id="dialog" style="text-transform: capitalize;" title="[[computeTitle_(editing, question)]]">
+      <div slot="formContent" class="content">
+        <div id="generalError" class="error-label">Error! Something went wrong :(</div>
+        <paper-textarea id="textInput" label="Write question here" autocorrect no-label-float
+          value={{draftQuestion.text}} multiline max-lines="5">
         </paper-textarea>
+        <template is="dom-if" if="[[showAnswers_(draftQuestion)]]">
+          <div class="label" style="align-self: center;">Answers will appear in a random order to
+            users.</div>
+          <template is="dom-repeat" items="{{draftQuestion.answers}}" as="item">
+            <ghvz-edit-answer-item answer={{item}} index=[[index]] total-answers="[[draftQuestion.answers.length]]"
+              edit-handler="[[editHandler]]" style="padding-top: 8px; padding-bottom: 24px;">
+            </ghvz-edit-answer-item>
+          </template>
+        </template>
       </div>
       <!-- Must be outside above slot since slots are only noticed if they are top-level elements. -->
       <div slot="dialogButtons" class="buttons">
-        <paper-button id="cancel" dialog-dismiss>Cancel</paper-button>
+        <paper-button id="cancel" on-tap="close">Cancel</paper-button>
         <paper-button id="save" on-tap="save_" disabled="[[!saveEnabled]]">Save</paper-button>
       </div>
     </ghvz-form>

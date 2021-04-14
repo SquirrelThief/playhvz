@@ -69,6 +69,7 @@
               'adminPlayers': 'adminPlayers',
               'adminRewards': 'adminRewards',
               'adminChats': 'adminChats',
+              'adminEditQuiz': 'adminEditQuiz',
             },
           },
         },
@@ -315,8 +316,8 @@
       <ghvz-card class$="[[computePageClass_(showPage.leaderboard, mostRecentPage)]]" name="leaderboard-card"
         spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
         <div slot="headerText">Leaderboard</div>
-        <ghvz-leaderboard-summary class="expand" game="[[game]]">
-        </ghvz-leaderboard-summary>
+        <ghvz-leaderboard-page class="expand" bridge="[[bridge]]" game="[[game]]">
+        </ghvz-leaderboard-page>
       </ghvz-card>
     </template>
 
@@ -346,6 +347,16 @@
         <ghvz-admin-chat-page bridge="[[bridge]]" database="[[database]]" game="[[game]]" user-id="[[userId]]"
           player="[[player]]" path="[[path]]" is-mobile="[[isMobile]]" is-admin="[[isAdmin]]">
         </ghvz-admin-chat-page>
+      </ghvz-card>
+    </template>
+
+    <template is="dom-if" if="[[computeShowPage_(showPage.adminEditQuiz, mostRecentPage)]]">
+      <ghvz-card admin id$="admin-edit-quiz-[[player.name]]"
+        class$="expand [[computePageClass_(showPage.adminEditQuiz, mostRecentPage)]]" name="edit-quiz-card"
+        spaced$="[[!isMobile]]" with-back="[[isMobile]]" with-menu="[[isMobile]]">
+        <ghvz-edit-quiz-page bridge="[[bridge]]" database="[[database]]" game="[[game]]" user-id="[[userId]]"
+          player="[[player]]" path="[[path]]" is-mobile="[[isMobile]]" is-admin="[[isAdmin]]">
+        </ghvz-edit-quiz-page>
       </ghvz-card>
     </template>
   </template>

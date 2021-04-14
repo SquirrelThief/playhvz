@@ -149,8 +149,8 @@
               return;
             }
             // The admin chat doesn't exist, create it and open it when ready
-            this.bridge.createOrGetChatWithAdmin(this.game.id, this.player.id).then(result => {
-              this.adminChatRoomId = result.data;
+            this.bridge.createOrGetChatWithAdmin(this.game.id, this.player.id).then(serverAdminChatId => {
+              this.adminChatRoomId = serverAdminChatId;
               this.waitingToOpenChatRoomId = this.adminChatRoomId;
               loadingSpinner.hidden = true;
             });

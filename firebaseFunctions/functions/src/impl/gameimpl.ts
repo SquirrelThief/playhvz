@@ -130,7 +130,7 @@ export async function joinGame(
   uid: string,
   gameName: string,
   playerName: string
-): Promise<string> {
+): Promise<{ [key: string]: any; }> {
   const gameId = await checkGameExists(db, gameName)
   const userPlayerQuerySnapshot = await PlayerUtils.getUsersPlayersQuery(db, uid, gameId).get();
   if (!userPlayerQuerySnapshot.empty) {
@@ -149,7 +149,7 @@ export async function joinGame(
     .add(playerData));
 
   await GroupUtils.addPlayerToManagedGroups(db, gameId, playerDocRef, /* ignoreAllegiance= */ false)
-  return gameId
+  return { gameId: gameId, playerId: playerDocRef.id };
 }
 
 /**

@@ -130,6 +130,10 @@ class FakeBridge {
       .catch(error => console.log("Warning: " + error.message + ", doing nothing."));
   }
 
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   async getAllChatsInGame(gameId) {
     return this.devFirestoreOperations.getAllChatsInGame(gameId).then(querySnapshot => {
       let chatDocSnapshotPromises = [];

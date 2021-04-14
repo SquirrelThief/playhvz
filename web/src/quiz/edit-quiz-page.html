@@ -1,0 +1,89 @@
+<!--
+  Copyright 2021 Google Inc.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<dom-module id="ghvz-edit-quiz-page">
+  <script>
+    // Not sure why this HTMLImports.whenReady is really needed.
+    // Something about polymer initialization order.
+    // I think we're not supposed to need this.
+    HTMLImports.whenReady(() => {
+      Polymer({
+        is: 'ghvz-edit-quiz-page',
+
+        properties: {
+          bridge: Object,
+          game: Object,
+          display: String,
+          editHandler: Object,
+
+          isAdmin: {
+            type: Boolean,
+            value: false,
+          },
+          questionList: {
+            type: Array,
+            notify: true,
+          },
+        },
+
+        observers: [
+          'init_(bridge, game)',
+        ],
+
+        attached() {
+          let self = this;
+          this.fire('ghvz-set-card-header-text', { headerText: "Quiz Questions" });
+          this.fire('ghvz-add-toolbar-button', { button: this.$.add });
+          this.editHandler = {
+            fn: function (question, index, totalQuestions) {
+              self.$.editDialog.openForEdit(question, index, totalQuestions);
+            }
+          }
+        },
+
+        init_() {
+          let self = this;
+          let callback = function (serverQuizQuestionArray) {
+            self.set('questionList', serverQuizQuestionArray);
+          };
+          this.bridge.listenToQuizQuestions(this.game.id, callback);
+        },
+
+        add_() {
+          self.$.editDialog.openForAdd(totalQuestions);
+        },
+      });
+    });
+  </script>
+  <style>
+    :host {
+      display: flex;
+      font-size: 16px;
+      flex-direction: column;
+    }
+  </style>
+  <template>
+    <button slot="headerButton" name="add" id="add" on-click="add_"
+      class="mdc-icon-button material-icons-outlined">add</button>
+    <template is="dom-repeat" items="{{questionList}}" as="item">
+      <ghvz-edit-quiz-item question={{item}} index=[[index]] total-questions="[[questionList.length]]"
+        edit-handler="[[editHandler]]" style="padding-top: 8px; padding-bottom: 24px;">
+      </ghvz-edit-quiz-item>
+    </template>
+    <ghvz-edit-quiz-question-dialog id="editDialog" total-questions="[[questionList.length]]">
+    </ghvz-edit-quiz-question-dialog>
+  </template>
+</dom-module>

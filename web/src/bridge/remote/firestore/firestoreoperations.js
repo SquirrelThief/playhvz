@@ -68,6 +68,13 @@ class FirestoreOperations {
     return PlayerPath.PLAYER_DOC_REF(this.db, gameId, playerId);
   }
 
+  getAllPlayersOnce(gameId) {
+    return PlayerPath.PLAYERS_COLLECTION(this.db, gameId)
+      .orderBy(PlayerPath.FIELD__POINTS, "desc")
+      .limit(this.PAGINATION_LIMIT)
+      .get();
+  }
+
   getGroupOnce(gameId, groupId) {
     return CacheUtils.optimizedGet(this.getListenableGroup(gameId, groupId));
   }
@@ -89,7 +96,7 @@ class FirestoreOperations {
   }
 
   getListenableChatRoomMessages(gameId, chatRoomId) {
-    return ChatPath.MESSAGES_COLLECTION(this.db, gameId, chatRoomId).orderBy("timestamp");
+    return ChatPath.MESSAGES_COLLECTION(this.db, gameId, chatRoomId).orderBy(ChatPath.FIELD__MESSAGE_TIMESTAMP);
   }
 
   sendChatMessage(gameId, messageId, chatRoomId, playerId, message) {
@@ -110,7 +117,7 @@ class FirestoreOperations {
   }
 
   getAllGroupsPlayerIsMemberOf(gameId, playerId) {
-    return GroupPath.GROUPS_COLLECTION(this.db, gameId).where("members", "array-contains", playerId).get();
+    return GroupPath.GROUPS_COLLECTION(this.db, gameId).where(GroupPath.FIELD__MEMBERS, "array-contains", playerId).get();
   }
 
   /** 
@@ -173,6 +180,38 @@ class FirestoreOperations {
           onErrorCallback();
         }
       });
+  }
+
+  addQuizQuestion(gameId, quizQuestion, successCallback, onErrorCallback) {
+    return QuizPath.QUIZ_QUESTION_COLLECTION(this.db, gameId).add(quizQuestion).then(() => {
+      if (successCallback) {
+        successCallback();
+      }
+    })
+      .catch((error) => {
+        Log.e(TAG, "Failed to add quiz question: " + error.message);
+        if (onErrorCallback) {
+          onErrorCallback();
+        }
+      });
+  }
+
+  updateQuizQuestion(gameId, draftQuizQuestion, successCallback, onErrorCallback) {
+    return QuizPath.QUIZ_QUESTION_DOC_REF(this.db, gameId, draftQuizQuestion.id).set(quizQuestion).then(() => {
+      if (successCallback) {
+        successCallback();
+      }
+    })
+      .catch((error) => {
+        Log.e(TAG, "Failed to update quiz question: " + error.message);
+        if (onErrorCallback) {
+          onErrorCallback();
+        }
+      });;
+  }
+
+  getListenableQuizQuestions(gameId) {
+    return QuizPath.QUIZ_QUESTION_COLLECTION(this.db, gameId).orderBy(QuizPath.FIELD__INDEX);
   }
 
   updatePlayerChatSettings(gameId, playerId, chatRoomId, fieldAndValue, successCallback, onErrorCallback) {
