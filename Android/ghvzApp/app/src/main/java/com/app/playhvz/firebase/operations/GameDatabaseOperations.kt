@@ -90,7 +90,7 @@ class GameDatabaseOperations {
                         return@continueWith
                     }
                     // gameId is returned.
-                    val result = task.result?.data as String
+                    val result = (task.result!!.data as Map<*, *>)["gameId"] as String
                     successListener.invoke(result)
                 }
         }
