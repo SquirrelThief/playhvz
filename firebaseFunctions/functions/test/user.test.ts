@@ -17,7 +17,7 @@
 const chai = require('chai');
 const assert = chai.assert;
 import * as GeneralUtils from '../src/utils/generalutils';
-import * as TestEnv from './testsetup';
+import * as TestEnv from './testenv';
 
 const db = TestEnv.db;
 const playHvzFunctions = TestEnv.playHvzFunctions;

@@ -16,24 +16,24 @@
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-import * as TestEnv from './testsetup';
+import * as TestEnv from './testenv';
+import * as TestSetup from './testsetup';
 chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 const db = TestEnv.db;
 const playHvzFunctions = TestEnv.playHvzFunctions;
-const FAKE_GAME_NAME = "gameName"
-const FAKE_PLAYER_NAME = "readyPlayer1"
 
-describe('Player Collection Tests', () => {
+describe('Player Firebase Function Tests', () => {
 
     after(async () => {
         TestEnv.after();
     });
 
     it('changePlayerAllegiance changes allegiance to zombie', async () => {
-        const gameId = await TestEnv.createGame(FAKE_GAME_NAME);
-        const playerId = await TestEnv.createPlayer(gameId, FAKE_GAME_NAME, FAKE_PLAYER_NAME);
+        await TestSetup.initializeDatabase();
+        const gameId = TestSetup.FAKE_GAME_ID;
+        const playerId = TestSetup.FAKE_HUMAN_PLAYER_ID;
         const playerRef = db.collection("games").doc(gameId).collection("players").doc(playerId);
         const wrappedChangeToHorde = TestEnv.wrap(playHvzFunctions.changePlayerAllegiance);
         const data = { gameId: gameId, playerId: playerId, allegiance: "horde" };
@@ -43,13 +43,14 @@ describe('Player Collection Tests', () => {
         const playerSnapshot = await playerRef.get()
         const playerData = playerSnapshot.data()
         assert.equal(playerData!["allegiance"], "horde")
-        await TestEnv.deleteGame(gameId);
+        await TestSetup.destroyDatabase();
     });
 
 
     it('changePlayerAllegiance changes allegiance to human', async () => {
-        const gameId = await TestEnv.createGame(FAKE_GAME_NAME);
-        const playerId = await TestEnv.createPlayer(gameId, FAKE_GAME_NAME, FAKE_PLAYER_NAME);
+        await TestSetup.initializeDatabase();
+        const gameId = TestSetup.FAKE_GAME_ID;
+        const playerId = TestSetup.FAKE_ZOMBIE_PLAYER_ID;
         const playerRef = db.collection("games").doc(gameId).collection("players").doc(playerId);
         const wrappedChangeToHuman = TestEnv.wrap(playHvzFunctions.changePlayerAllegiance);
         const data = { gameId: gameId, playerId: playerId, allegiance: "resistance" };
@@ -60,25 +61,41 @@ describe('Player Collection Tests', () => {
         const playerData = playerSnapshot.data()
         assert.equal(playerData!["allegiance"], "resistance")
         assert.equal(Object.keys(playerData!["lives"]!).length, 1)
-        await TestEnv.deleteGame(gameId);
+        await TestSetup.destroyDatabase();
     });
 
-    /* // Doesn't work for some reason, not sure... 
     it('changePlayerAllegiance adds additional life to already human player', async () => {
-        const gameId = await TestEnv.createGame(FAKE_GAME_NAME);
-        const playerId = await TestEnv.createHumanPlayer(gameId, FAKE_GAME_NAME, FAKE_PLAYER_NAME);
+        await TestSetup.initializeDatabase();
+        const gameId = TestSetup.FAKE_GAME_ID;
+        const playerId = TestSetup.FAKE_HUMAN_PLAYER_ID;
         const playerRef = db.collection("games").doc(gameId).collection("players").doc(playerId);
-        const initialPlayerData = (await playerRef.get()).data()
-        assert.equal(Object.keys(initialPlayerData!["lives"]!).length, 1)
+        const wrappedChangeToHuman = TestEnv.wrap(playHvzFunctions.changePlayerAllegiance);
+        const data = { gameId: gameId, playerId: playerId, allegiance: "resistance" };
 
-        const wrappedChangeToHumanAgain = TestEnv.wrap(playHvzFunctions.changePlayerAllegiance)
-        const data = { gameId: gameId, playerId: playerId, allegiance: "resistence" };
-        await wrappedChangeToHumanAgain(data, TestEnv.context)
+        await wrappedChangeToHuman(data, TestEnv.context)
 
         const playerSnapshot = await playerRef.get()
         const playerData = playerSnapshot.data()
-        assert.equal(playerData!["allegiance"], "resistence")
+        assert.equal(playerData!["allegiance"], "resistance")
         assert.equal(Object.keys(playerData!["lives"]!).length, 2)
-        await TestEnv.deleteGame(gameId);
-    });*/
+        await TestSetup.destroyDatabase();
+    });
+
+    it('infectPlayerByLifeCode infects player', async () => {
+        await TestSetup.initializeDatabase();
+        const gameId = TestSetup.FAKE_GAME_ID;
+        const zombiePlayerId = TestSetup.FAKE_ZOMBIE_PLAYER_ID;
+        const humanPlayerId = TestSetup.FAKE_HUMAN_PLAYER_ID;
+        const wrappedInfect = TestEnv.wrap(playHvzFunctions.infectPlayerByLifeCode);
+        const data = { gameId: gameId, infectorPlayerId: zombiePlayerId, lifeCode: TestSetup.FAKE_HUMAN_PLAYER_LIFE_CODE };
+
+        await wrappedInfect(data, TestEnv.context)
+
+        const humanPlayerRef = db.collection("games").doc(gameId).collection("players").doc(humanPlayerId);
+        const playerSnapshot = await humanPlayerRef.get()
+        const playerData = playerSnapshot.data()
+        assert.equal(playerData!["allegiance"], "horde")
+        await TestSetup.destroyDatabase();
+    });
+
 });

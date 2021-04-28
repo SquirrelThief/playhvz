@@ -1,0 +1,463 @@
+{
+    "games": {
+        "fakeGameId": {
+            "adminGroupId": "fakeGroupIdAdmins",
+            "adminOnCallPlayerId": "fakePlayerIdOwner",
+            "creatorUserId": "fakePlayerIdOwner",
+            "endTime": 5,
+            "figureheadAdminPlayerAccount": "fakePlayerIdFigurehead",
+            "infectRewardId": "fakeRewardIdInfect",
+            "name": "Fake Test Game",
+            "startTime": 0,
+            "statId": "fakeStatId",
+            "faq": [
+                {
+                    "order": 0,
+                    "sectionTitle": "Is this game fun?",
+                    "sectionContent": "Of course silly"
+                }
+            ],
+            "rules": [
+                {
+                    "order": 0,
+                    "sectionTitle": "Can I borrow some nerf darts?",
+                    "sectionContent": "Of course silly"
+                }
+            ],
+            "chatRooms": {
+                "fakeChatIdGlobal": {
+                    "associatedGroupId": "fakeGroupIdGlobal",
+                    "name": "Global Chat",
+                    "withAdmins": false
+                },
+                "fakeChatIdHorde": {
+                    "associatedGroupId": "fakeGroupIdHorde",
+                    "name": "Horde Chat",
+                    "withAdmins": false
+                },
+                "fakeChatIdHuman": {
+                    "associatedGroupId": "fakeGroupIdHuman",
+                    "name": "Resistance Chat",
+                    "withAdmins": false
+                },
+                "fakeChatIdAdmins": {
+                    "associatedGroupId": "fakeGroupIdAdmins",
+                    "name": "Admins",
+                    "withAdmins": false
+                },
+                "fakeChatIdMyChat": {
+                    "associatedGroupId": "fakeGroupIdMyChat",
+                    "name": "My chat with all my friends",
+                    "withAdmins": false
+                },
+                "fakeChatIdChatWithAdmins": {
+                    "associatedGroupId": "fakeGroupIdChatWithAdmins",
+                    "name": "Zella & HvZ CDC",
+                    "withAdmins": true
+                }
+            },
+            "groups": {
+                "fakeGroupIdGlobal": {
+                    "managed": true,
+                    "members": [
+                        "fakePlayerIdOwner",
+                        "fakePlayerIdHorde",
+                        "fakePlayerIdHuman"
+                    ],
+                    "name": "Global Chat",
+                    "owners": [],
+                    "settings": {
+                        "allegianceFilter": "none",
+                        "autoAdd": true,
+                        "autoRemove": true,
+                        "canAddOthers": false,
+                        "canAddSelf": false,
+                        "canRemoveOthers": false,
+                        "canRemoveSelf": false
+                    }
+                },
+                "fakeGroupIdHorde": {
+                    "managed": true,
+                    "members": [
+                        "fakePlayerIdHorde"
+                    ],
+                    "name": "Horde Chat",
+                    "owners": [],
+                    "settings": {
+                        "allegianceFilter": "horde",
+                        "autoAdd": true,
+                        "autoRemove": true,
+                        "canAddOthers": false,
+                        "canAddSelf": false,
+                        "canRemoveOthers": false,
+                        "canRemoveSelf": false
+                    }
+                },
+                "fakeGroupIdHuman": {
+                    "managed": true,
+                    "members": [
+                        "fakePlayerIdHuman"
+                    ],
+                    "name": "Resistance Chat",
+                    "owners": [],
+                    "settings": {
+                        "allegianceFilter": "resistance",
+                        "autoAdd": true,
+                        "autoRemove": true,
+                        "canAddOthers": false,
+                        "canAddSelf": false,
+                        "canRemoveOthers": false,
+                        "canRemoveSelf": false
+                    }
+                },
+                "fakeGroupIdAdmins": {
+                    "managed": true,
+                    "members": [
+                        "fakePlayerIdOwner"
+                    ],
+                    "name": "Admins",
+                    "owners": [
+                        "fakePlayerIdOwner"
+                    ],
+                    "settings": {
+                        "allegianceFilter": "none",
+                        "autoAdd": false,
+                        "autoRemove": false,
+                        "canAddOthers": false,
+                        "canAddSelf": false,
+                        "canRemoveOthers": true,
+                        "canRemoveSelf": true
+                    }
+                },
+                "fakeGroupIdMyChat": {
+                    "managed": false,
+                    "members": [
+                        "fakePlayerIdOwner"
+                    ],
+                    "name": "My chat with all my friends",
+                    "owners": [
+                        "fakePlayerIdOwner"
+                    ],
+                    "settings": {
+                        "allegianceFilter": "none",
+                        "autoAdd": false,
+                        "autoRemove": false,
+                        "canAddOthers": true,
+                        "canAddSelf": true,
+                        "canRemoveOthers": true,
+                        "canRemoveSelf": true
+                    }
+                },
+                "fakeGroupIdChatWithAdmins": {
+                    "managed": false,
+                    "members": [
+                        "fakePlayerIdHorde",
+                        "fakePlayerIdFigurehead"
+                    ],
+                    "name": "Zella & HvZ CDC",
+                    "owners": [
+                        "fakePlayerIdHorde"
+                    ],
+                    "settings": {
+                        "allegianceFilter": "none",
+                        "autoAdd": false,
+                        "autoRemove": false,
+                        "canAddOthers": false,
+                        "canAddSelf": true,
+                        "canRemoveOthers": false,
+                        "canRemoveSelf": true
+                    }
+                },
+                "fakeGroupIdMissionEveryone": {
+                    "managed": true,
+                    "members": [
+                        "fakePlayerIdOwner",
+                        "fakePlayerIdHuman",
+                        "fakePlayerIdHorde"
+                    ],
+                    "name": "Mission 1 - Visible to everyone!",
+                    "owners": [],
+                    "settings": {
+                        "allegianceFilter": "none",
+                        "autoAdd": true,
+                        "autoRemove": true,
+                        "canAddOthers": false,
+                        "canAddSelf": false,
+                        "canRemoveOthers": false,
+                        "canRemoveSelf": false
+                    }
+                },
+                "fakeGroupIdMissionHorde": {
+                    "managed": true,
+                    "members": [
+                        "fakePlayerIdHorde"
+                    ],
+                    "name": "Mission 1 - Visible to horde!",
+                    "owners": [],
+                    "settings": {
+                        "allegianceFilter": "horde",
+                        "autoAdd": true,
+                        "autoRemove": true,
+                        "canAddOthers": false,
+                        "canAddSelf": false,
+                        "canRemoveOthers": false,
+                        "canRemoveSelf": false
+                    }
+                }
+            },
+            "players": {
+                "fakePlayerIdFigurehead": {
+                    "allegiance": "undeclared",
+                    "avatarUrl": "https://bit.ly/2PD9JzD",
+                    "chatRoomMemberships": {
+                        "fakeChatIdGlobal": {
+                            "allowNotifications": true,
+                            "isVisible": true
+                        }
+                    },
+                    "lives": {},
+                    "name": "HvZ CDC",
+                    "points": 0,
+                    "userId": ""
+                },
+                "fakePlayerIdOwner": {
+                    "allegiance": "undeclared",
+                    "avatarUrl": "https://bit.ly/2PD9JzD",
+                    "chatRoomMemberships": {
+                        "fakeChatIdAdmins": {
+                            "allowNotifications": true,
+                            "isVisible": true
+                        },
+                        "fakeChatIdGlobal": {
+                            "allowNotifications": true,
+                            "isVisible": true
+                        },
+                        "fakeChatIdMyChat": {
+                            "allowNotifications": true,
+                            "isVisible": true
+                        }
+                    },
+                    "lives": {},
+                    "name": "Adamite",
+                    "points": 0,
+                    "userId": ""
+                },
+                "fakePlayerIdHorde": {
+                    "allegiance": "horde",
+                    "avatarUrl": "https://bit.ly/2PD9JzD",
+                    "chatRoomMemberships": {
+                        "fakeChatIdHorde": {
+                            "allowNotifications": true,
+                            "isVisible": true
+                        },
+                        "fakeChatIdGlobal": {
+                            "allowNotifications": true,
+                            "isVisible": true
+                        },
+                        "fakeChatIdChatWithAdmins": {
+                            "allowNotifications": true,
+                            "isVisible": true
+                        }
+                    },
+                    "lives": {},
+                    "name": "Zella",
+                    "points": 0,
+                    "userId": "",
+                    "rewards": {
+                        "fakeRewardIdDeclare": 1
+                    }
+                },
+                "fakePlayerIdHuman": {
+                    "allegiance": "resistance",
+                    "avatarUrl": "https://bit.ly/2PD9JzD",
+                    "chatRoomMemberships": {
+                        "fakeChatIdHuman": {
+                            "allowNotifications": true,
+                            "isVisible": true
+                        },
+                        "fakeChatIdGlobal": {
+                            "allowNotifications": true,
+                            "isVisible": true
+                        }
+                    },
+                    "lives": {
+                        "life-code-1": {
+                            "created": 0,
+                            "isActive": true,
+                            "lifeCode": "life-code-1"
+                        }
+                    },
+                    "name": "Humfrey",
+                    "points": 0,
+                    "userId": "",
+                    "rewards": {
+                        "fakeRewardIdDeclare": 1
+                    }
+                }
+            },
+            "missions": {
+                "fakeMissionIdEveryone": {
+                    "allegianceFilter": "none",
+                    "associatedGroupId": "fakeGroupIdMissionEveryone",
+                    "details": "Details for the mission, visible to everyone!",
+                    "endTime": 3,
+                    "name": "Mission 1 - Visible to all",
+                    "startTime": 1
+                },
+                "fakeMissionIdHorde": {
+                    "allegianceFilter": "horde",
+                    "associatedGroupId": "fakeGroupIdMissionHorde",
+                    "details": "Details for the mission, visible only to zombies!",
+                    "endTime": 3,
+                    "name": "Mission 1 - Visible to zeds",
+                    "startTime": 1
+                }
+            },
+            "quizQuestions": {
+                "fakeQuestionIdBoolean": {
+                    "index": 0,
+                    "text": "True or false, cats are cute?",
+                    "type": "boolean",
+                    "answers": [
+                        {
+                            "correct": true,
+                            "order": -1,
+                            "text": "True"
+                        },
+                        {
+                            "correct": false,
+                            "order": -1,
+                            "text": "False"
+                        }
+                    ]
+                },
+                "fakeQuestionIdInfo": {
+                    "index": 1,
+                    "text": "No question, just telling you you're cute",
+                    "type": "info",
+                    "answers": []
+                },
+                "fakeQuestionIdMultipleChoice": {
+                    "index": 2,
+                    "text": "Choose all the right answers.",
+                    "type": "multipleChoice",
+                    "answers": [
+                        {
+                            "correct": true,
+                            "order": -1,
+                            "text": "Right"
+                        },
+                        {
+                            "correct": true,
+                            "order": -1,
+                            "text": "90 degrees"
+                        },
+                        {
+                            "correct": false,
+                            "order": -1,
+                            "text": "Left"
+                        }
+                    ]
+                },
+                "fakeQuestionIdOrder": {
+                    "index": 3,
+                    "text": "Order the items from first to last",
+                    "type": "order",
+                    "answers": [
+                        {
+                            "correct": true,
+                            "order": 0,
+                            "text": "First"
+                        },
+                        {
+                            "correct": true,
+                            "order": 1,
+                            "text": "Second"
+                        },
+                        {
+                            "correct": true,
+                            "order": 2,
+                            "text": "Third"
+                        },
+                        {
+                            "correct": false,
+                            "order": -1,
+                            "text": "Birds"
+                        }
+                    ]
+                }
+            },
+            "rewards": {
+                "fakeRewardIdDeclare": {
+                    "description": "I'm a great player, I play by the rules",
+                    "imageUrl": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/google/274/scroll_1f4dc.png",
+                    "longName": "By jolly, I declare",
+                    "managed": true,
+                    "points": 10,
+                    "shortName": "declare",
+                    "claimCodes": {
+                        "declare-code-1": {
+                            "code": "declare-code-1",
+                            "redeemer": "fakePlayerIdHorde",
+                            "timestamp": 2
+                        },
+                        "declare-code-2": {
+                            "code": "declare-code-2",
+                            "redeemer": "fakePlayerIdHuman",
+                            "timestamp": 2
+                        }
+                    }
+                },
+                "fakeRewardIdInfect": {
+                    "description": "Spread the zombie ideals and welcomed a new member to the Horde!",
+                    "imageUrl": "https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/240/google/274/scroll_1f4dc.png",
+                    "longName": "BraaAAaAAAAaains!",
+                    "managed": true,
+                    "points": 50,
+                    "shortName": "infect",
+                    "claimCodes": {
+                        "infect-code-1": {
+                            "code": "infect-code-1",
+                            "redeemer": "",
+                            "timestamp": 2
+                        }
+                    }
+                }
+            },
+            "stats": {
+                "fakeStatId": {
+                    "currentHumanCount": 1,
+                    "currentZombieCount": 1,
+                    "isOutOfDate": true,
+                    "starterZombieCount": 1,
+                    "statsOverTime": [
+                        {
+                            "infectionCount": 0,
+                            "timestamp": 0
+                        },
+                        {
+                            "infectionCount": 0,
+                            "timestamp": 1
+                        },
+                        {
+                            "infectionCount": 0,
+                            "timestamp": 2
+                        },
+                        {
+                            "infectionCount": 0,
+                            "timestamp": 3
+                        },
+                        {
+                            "infectionCount": 0,
+                            "timestamp": 4
+                        },
+                        {
+                            "infectionCount": 0,
+                            "timestamp": 5
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}

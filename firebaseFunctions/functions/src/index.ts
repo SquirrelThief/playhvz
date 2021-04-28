@@ -18,20 +18,21 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
 import * as Chat from './data/chat';
-import * as ChatUtils from './utils/chatutils';
+import * as ChatImpl from './impl/chatimpl';
 import * as Defaults from './data/defaults';
 import * as Game from './data/game';
 import * as GameImpl from './impl/gameimpl';
 import * as GeneralUtils from './utils/generalutils';
 import * as Group from './data/group';
+import * as GroupImpl from './impl/groupimpl';
 import * as GroupUtils from './utils/grouputils';
 import * as Player from './data/player';
+import * as PlayerImpl from './impl/playerimpl';
 import * as PlayerUtils from './utils/playerutils';
 import * as Message from './data/message';
 import * as Mission from './data/mission';
 import * as QuizQuestion from './data/quizquestion';
 import * as RewardImpl from './impl/rewardimpl';
-import * as RewardUtils from './utils/rewardutils';
 import * as User from './data/user';
 import * as UserImpl from './impl/userimpl';
 
@@ -130,53 +131,7 @@ exports.infectPlayerByLifeCode = functions.https.onCall(async (data, context) =>
   const infectorPlayerId = data.infectorPlayerId
   const lifeCode = GeneralUtils.normalizeLifeCode(data.lifeCode);
   GeneralUtils.verifyStringArgs([gameId, infectorPlayerId, lifeCode])
-
-  // Check if life code is associated with valid human player.
-  const lifeCodeStatusField = Player.FIELD__LIVES + "." + lifeCode + "." + Player.FIELD__LIFE_CODE_STATUS
-  const infectedPlayerQuerySnapshot = await db.collection(Game.COLLECTION_PATH)
-    .doc(gameId)
-    .collection(Player.COLLECTION_PATH)
-    .where(lifeCodeStatusField, "==", /* isActive= */ true)
-    .get()
-
-  if (infectedPlayerQuerySnapshot.empty || infectedPlayerQuerySnapshot.docs.length > 1) {
-    throw new functions.https.HttpsError('failed-precondition', 'No valid player with given life code exists.');
-  }
-  const infectedPlayerSnapshot = infectedPlayerQuerySnapshot.docs[0];
-  const infectedPlayerData = await infectedPlayerSnapshot.data()
-  if (infectedPlayerData === undefined) {
-    return
-  }
-
-  // TODO: handle player infecting themselves.
-
-  // Use up the life code and infect the player if they are out of lives
-  if (infectedPlayerData[Player.FIELD__ALLEGIANCE] === Defaults.HUMAN_ALLEGIANCE_FILTER) {
-    // TODO: make this a transaction.
-    await RewardUtils.giveRewardForInfecting(db, gameId, infectorPlayerId)
-    // Mark life code as used, aka deactivated
-    await infectedPlayerSnapshot.ref.update({
-      [lifeCodeStatusField]: false
-    })
-
-    const lives = infectedPlayerData[Player.FIELD__LIVES]
-    if (lives === undefined) {
-      return
-    }
-    for (const key of Object.keys(lives)) {
-      const metadata = lives[key]
-      if (metadata === undefined) {
-        continue
-      }
-      if (metadata[Player.FIELD__LIFE_CODE_STATUS] === true
-        && metadata[Player.FIELD__LIFE_CODE] !== lifeCode) {
-        // Player still has some lives left, don't turn them into a zombie.
-        console.log("Not turning player to zombie, they still have life codes active.")
-        return
-      }
-    }
-    await PlayerUtils.internallyChangePlayerAllegiance(db, gameId, infectedPlayerSnapshot.id, Defaults.ZOMBIE_ALLEGIANCE_FILTER)
-  }
+  await PlayerImpl.infectPlayerByLifeCode(db, gameId, infectorPlayerId, lifeCode);
 });
 
 /*******************************************************
@@ -189,17 +144,8 @@ exports.addPlayersToGroup = functions.https.onCall(async (data, context) => {
   const groupId = data.groupId;
   const playerIdList = data.playerIdList
   GeneralUtils.verifyStringArgs([gameId, groupId])
-  // TODO: verify player id list
-
-  const groupSnapshot = await db.collection(Game.COLLECTION_PATH)
-    .doc(gameId)
-    .collection(Group.COLLECTION_PATH)
-    .doc(groupId)
-    .get();
-
-  for (const playerId of playerIdList) {
-    await GroupUtils.addPlayerToGroup(db, gameId, groupSnapshot, playerId)
-  }
+  GeneralUtils.verifyStringArgs(playerIdList) // TODO: should this be done... better?
+  await GroupImpl.addPlayersToGroup(db, gameId, groupId, playerIdList);
 });
 
 exports.removePlayerFromGroup = functions.https.onCall(async (data, context) => {
@@ -208,19 +154,7 @@ exports.removePlayerFromGroup = functions.https.onCall(async (data, context) => 
   const playerId = data.playerId;
   const groupId = data.groupId;
   GeneralUtils.verifyStringArgs([gameId, playerId, groupId])
-
-  const playerSnapshot = await db.collection(Game.COLLECTION_PATH)
-    .doc(gameId)
-    .collection(Player.COLLECTION_PATH)
-    .doc(playerId)
-    .get()
-
-  const groupSnapshot = await db.collection(Game.COLLECTION_PATH)
-    .doc(gameId)
-    .collection(Group.COLLECTION_PATH)
-    .doc(groupId)
-    .get()
-  await GroupUtils.removePlayerFromGroup(db, gameId, groupSnapshot, playerSnapshot)
+  await GroupImpl.removePlayerFromGroup(db, gameId, playerId, groupId);
 });
 
 
@@ -235,17 +169,8 @@ exports.addPlayersToChat = functions.https.onCall(async (data, context) => {
   const chatRoomId = data.chatRoomId;
   const playerIdList = data.playerIdList
   GeneralUtils.verifyStringArgs([gameId, groupId, chatRoomId])
-  // TODO: verify player id list
-
-  const groupDocSnapshot = await db.collection(Game.COLLECTION_PATH)
-    .doc(gameId)
-    .collection(Group.COLLECTION_PATH)
-    .doc(groupId)
-    .get();
-
-  for (const playerId of playerIdList) {
-    await ChatUtils.addPlayerToChat(db, gameId, playerId, groupDocSnapshot, chatRoomId, /* isDocRef= */ false)
-  }
+  GeneralUtils.verifyStringArgs(playerIdList) // TODO: should this be done... better?
+  await ChatImpl.addPlayersToChat(db, gameId, groupId, chatRoomId, playerIdList)
 });
 
 exports.removePlayerFromChat = functions.https.onCall(async (data, context) => {
@@ -254,39 +179,7 @@ exports.removePlayerFromChat = functions.https.onCall(async (data, context) => {
   const playerId = data.playerId;
   const chatRoomId = data.chatRoomId;
   GeneralUtils.verifyStringArgs([gameId, playerId, chatRoomId])
-
-  const playerSnapshot = await db.collection(Game.COLLECTION_PATH)
-    .doc(gameId)
-    .collection(Player.COLLECTION_PATH)
-    .doc(playerId)
-    .get()
-
-  const chatRoomData = (await db.collection(Game.COLLECTION_PATH)
-    .doc(gameId)
-    .collection(Chat.COLLECTION_PATH)
-    .doc(chatRoomId)
-    .get())
-    .data();
-  if (chatRoomData === undefined) {
-    console.log("Chat room was undefined, not removing player.")
-    return
-  }
-
-  const group = await db.collection(Game.COLLECTION_PATH)
-    .doc(gameId)
-    .collection(Group.COLLECTION_PATH)
-    .doc(chatRoomData[Chat.FIELD__GROUP_ID])
-    .get()
-
-  if (chatRoomData[Chat.FIELD__WITH_ADMINS]) {
-    const visibilityField = Player.FIELD__CHAT_MEMBERSHIPS + "." + chatRoomId + "." + Player.FIELD__CHAT_VISIBILITY
-    await playerSnapshot.ref.update({
-      [visibilityField]: false
-    })
-    return
-  }
-
-  await ChatUtils.removePlayerFromChat(db, gameId, playerSnapshot, group, chatRoomId)
+  await ChatImpl.removePlayerFromChat(db, gameId, playerId, chatRoomId);
 });
 
 // Creates a chat room
@@ -318,84 +211,7 @@ exports.createOrGetChatWithAdmin = functions.https.onCall(async (data, context) 
   const gameId = data.gameId;
   const playerId = data.playerId;
   GeneralUtils.verifyStringArgs([gameId, playerId])
-
-  const playerSnapshot = await db.collection(Game.COLLECTION_PATH)
-    .doc(gameId)
-    .collection(Player.COLLECTION_PATH)
-    .doc(playerId)
-    .get()
-
-  const playerData = playerSnapshot.data()
-  const gameData = await (await db.collection(Game.COLLECTION_PATH).doc(gameId).get()).data()
-  if (playerData === undefined || gameData === undefined) {
-    return
-  }
-  const playerChatRoomIds = Object.keys(playerData[Player.FIELD__CHAT_MEMBERSHIPS])
-  const adminPlayerId = gameData[Game.FIELD__FIGUREHEAD_ADMIN_PLAYER_ACCOUNT]
-
-  const adminQuerySnapshot = await db.collection(Game.COLLECTION_PATH)
-    .doc(gameId)
-    .collection(Chat.COLLECTION_PATH)
-    .where(admin.firestore.FieldPath.documentId(), "in", Array.from(playerChatRoomIds))
-    .where(Chat.FIELD__WITH_ADMINS, "==", true)
-    .get()
-
-  if (!adminQuerySnapshot.empty) {
-    // Admin chat already exists, reusing the existing chat.
-    const adminChatSnapshot = adminQuerySnapshot.docs[0]
-    const visibilityField = Player.FIELD__CHAT_MEMBERSHIPS + "." + adminChatSnapshot.id + "." + Player.FIELD__CHAT_VISIBILITY
-    await playerSnapshot.ref.update({
-      [visibilityField]: true
-    })
-
-    // "Add" the admin to the chat. Even if they are already in it, this resets their notification
-    // and visibility settings so the chat reappears for them.
-    const adminChatData = await adminChatSnapshot.data()
-    if (adminChatData === undefined) {
-      return adminChatSnapshot.id
-    }
-    await ChatUtils.addPlayerToChat(db,
-      gameId,
-      adminPlayerId,
-      db.collection(Game.COLLECTION_PATH).doc(gameId).collection(Group.COLLECTION_PATH).doc(adminChatData[Chat.FIELD__GROUP_ID]),
-      adminChatSnapshot.id,
-                /* isDocRef= */ true)
-    return adminChatSnapshot.id
-  }
-
-  // Create admin chat since it doesn't exist.
-  const chatName = playerData[Player.FIELD__NAME] + " & " + Defaults.FIGUREHEAD_ADMIN_NAME
-
-  const settings = Group.createSettings(
-    /* addSelf= */ true,
-    /* addOthers= */ false,
-    /* removeSelf= */ true,
-    /* removeOthers= */ false,
-    /* autoAdd= */ false,
-    /* autoRemove= */ false,
-    Defaults.EMPTY_ALLEGIANCE_FILTER);
-
-  const createdChatId = await GroupUtils.createGroupAndChat(db, context.auth!.uid, gameId, playerId, chatName, settings);
-  const chatSnapshot = await db.collection(Game.COLLECTION_PATH)
-    .doc(gameId)
-    .collection(Chat.COLLECTION_PATH)
-    .doc(createdChatId)
-    .get()
-  await chatSnapshot.ref.update({
-    [Chat.FIELD__WITH_ADMINS]: true
-  })
-
-  const createdChatData = await chatSnapshot.data()
-  if (createdChatData === undefined) {
-    return createdChatId
-  }
-  await ChatUtils.addPlayerToChat(db,
-    gameId,
-    adminPlayerId,
-    db.collection(Game.COLLECTION_PATH).doc(gameId).collection(Group.COLLECTION_PATH).doc(createdChatData[Chat.FIELD__GROUP_ID]),
-    createdChatId,
-    /* isDocRef= */ true)
-  return createdChatId
+  return await ChatImpl.createOrGetChatWithAdmin(db, context.auth!.uid, gameId, playerId)
 })
 
 /**

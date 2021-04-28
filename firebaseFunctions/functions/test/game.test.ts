@@ -16,7 +16,7 @@
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-import * as TestEnv from './testsetup';
+import * as TestEnv from './testenv';
 import * as GeneralUtils from '../src/utils/generalutils';
 chai.use(chaiAsPromised);
 const assert = chai.assert;
@@ -34,7 +34,6 @@ describe('Game Collection Tests', () => {
     after(async () => {
         TestEnv.after();
     });
-
 
     it('createGame creates game object', async () => {
         // Verify current state

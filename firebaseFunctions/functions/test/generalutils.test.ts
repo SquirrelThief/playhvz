@@ -15,7 +15,7 @@
  */
 
 const chai = require('chai');
-import * as TestEnv from './testsetup';
+import * as TestEnv from './testenv';
 import * as GeneralUtils from '../src/utils/generalutils';
 const assert = chai.assert
 const expect = chai.expect

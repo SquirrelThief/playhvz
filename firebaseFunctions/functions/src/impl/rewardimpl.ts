@@ -75,15 +75,15 @@ export async function updateReward(
   }
   const oldPointValue = rewardData.points
   await rewardDocSnapshot.ref.update({
-      [Reward.FIELD__LONG_NAME]: longName,
-      [Reward.FIELD__DESCRIPTION]: description,
-      [Reward.FIELD__IMAGE_URL]: imageUrl,
-      [Reward.FIELD__POINTS]: points
-    })
+    [Reward.FIELD__LONG_NAME]: longName,
+    [Reward.FIELD__DESCRIPTION]: description,
+    [Reward.FIELD__IMAGE_URL]: imageUrl,
+    [Reward.FIELD__POINTS]: points
+  })
 
   // If point value was updated, recalculate player points
   if (oldPointValue === points) {
-      return
+    return
   }
   const pointDiff = points - oldPointValue
   const usedCodesQuerySnapshot = await db.collection(Game.COLLECTION_PATH)
@@ -168,7 +168,7 @@ export async function generateClaimCodes(
  *
  * @returns A JSON with unused count and used count
  */
-export async function getRewardClaimedStats(db: any, gameId: string, rewardId: string): Promise<{"unusedCount": string, "usedCount": string}> {
+export async function getRewardClaimedStats(db: any, gameId: string, rewardId: string): Promise<{ "unusedCount": string, "usedCount": string }> {
   // Get unused claim codes
   const unusedCodesQuerySnapshot = await db.collection(Game.COLLECTION_PATH)
     .doc(gameId)
@@ -201,7 +201,7 @@ export async function getRewardClaimedStats(db: any, gameId: string, rewardId: s
  *
  * @returns A JSON list of claim codes
  */
-export async function getAvailableClaimCodes(db: any, gameId: string, rewardId: string): Promise<{"claimCodes": string}> {
+export async function getAvailableClaimCodes(db: any, gameId: string, rewardId: string): Promise<{ "claimCodes": string }> {
   // Get unused claim codes
   const unusedCodesQuerySnapshot = await db.collection(Game.COLLECTION_PATH)
     .doc(gameId)
@@ -213,8 +213,8 @@ export async function getAvailableClaimCodes(db: any, gameId: string, rewardId: 
 
   if (unusedCodesQuerySnapshot.empty) {
     return {
-        "claimCodes": JSON.stringify([])
-      }
+      "claimCodes": JSON.stringify([])
+    }
   }
 
   const codeArray = new Array();
@@ -235,7 +235,7 @@ export async function getAvailableClaimCodes(db: any, gameId: string, rewardId: 
 /**
  * Function to claim a reward code.
  */
-export async function redeemRewardCode (
+export async function redeemRewardCode(
   db: any,
   gameId: string,
   playerId: string,
@@ -249,7 +249,7 @@ export async function redeemRewardCode (
     .where(Reward.FIELD__SHORT_NAME, "==", shortName)
     .get()
   if (rewardQuerySnapshot.empty || rewardQuerySnapshot.docs.length > 1) {
-     throw new functions.https.HttpsError('failed-precondition', 'No valid reward exists.');
+    throw new functions.https.HttpsError('failed-precondition', 'No valid reward exists.');
   }
   const rewardDocSnapshot = rewardQuerySnapshot.docs[0];
 
@@ -257,22 +257,22 @@ export async function redeemRewardCode (
   const secondCode = RewardUtils.extractPlayerIdFromCode(claimCode)
   if (secondCode === playerId.toLowerCase()) {
     await db.collection(Game.COLLECTION_PATH)
-          .doc(gameId)
-          .collection(Reward.COLLECTION_PATH)
-          .doc(rewardDocSnapshot.id)
-          .collection(ClaimCode.COLLECTION_PATH)
-          .add(ClaimCode.create(claimCode))
-  }
-
-  // Check if reward code is valid.
-  const claimCodeQuerySnapshot = await db.collection(Game.COLLECTION_PATH)
       .doc(gameId)
       .collection(Reward.COLLECTION_PATH)
       .doc(rewardDocSnapshot.id)
       .collection(ClaimCode.COLLECTION_PATH)
-      .where(ClaimCode.FIELD__CODE, "==", claimCode)
-      .where(ClaimCode.FIELD__REDEEMER, "==", Defaults.EMPTY_REWARD_REDEEMER)
-      .get()
+      .add(ClaimCode.create(claimCode))
+  }
+
+  // Check if reward code is valid.
+  const claimCodeQuerySnapshot = await db.collection(Game.COLLECTION_PATH)
+    .doc(gameId)
+    .collection(Reward.COLLECTION_PATH)
+    .doc(rewardDocSnapshot.id)
+    .collection(ClaimCode.COLLECTION_PATH)
+    .where(ClaimCode.FIELD__CODE, "==", claimCode)
+    .where(ClaimCode.FIELD__REDEEMER, "==", Defaults.EMPTY_REWARD_REDEEMER)
+    .get()
   if (claimCodeQuerySnapshot.empty || claimCodeQuerySnapshot.docs.length > 1) {
     throw new functions.https.HttpsError('failed-precondition', 'No valid claim code exists.');
   }
@@ -284,7 +284,7 @@ export async function redeemRewardCode (
     .doc(playerId)
   const rewardData = rewardDocSnapshot.data()
   if (rewardData === undefined) {
-        return
+    return
   }
   const rewardInfoPath = Player.FIELD__REWARDS + "." + rewardDocSnapshot.id
 
@@ -305,7 +305,7 @@ export async function redeemRewardCode (
  *
  * @returns A JSON list of *reward short names*
  */
-export async function getRewardsByName (db: any, gameId: string): Promise<{"rewards": string}> {
+export async function getRewardsByName(db: any, gameId: string): Promise<{ "rewards": string }> {
   const allRewardsQuerySnapshot = await db.collection(Game.COLLECTION_PATH)
     .doc(gameId)
     .collection(Reward.COLLECTION_PATH)
